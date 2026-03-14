@@ -1,0 +1,16 @@
+{
+  "name": "L&M Enterprises",
+  "short_name": "L&M",
+  "description": "Gas station and convenience store in Deseronto, Ontario",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
