@@ -16,11 +16,16 @@ const categories = [
       "Visit L&M Enterprises for fuel in Deseronto with full-service convenience, easy access, and a reliable stop for local drivers and travelers.",
     intro:
       "L&M Enterprises is a local stop for drivers looking for fuel, fast service, and a convenient location near Tyendinaga and Deseronto.",
+    localAngle:
+      "This page is designed for people searching for a gas station in Deseronto or a nearby fuel stop before heading through Tyendinaga, Napanee, or Belleville routes.",
     details: [
       "Convenient fuel stop for local traffic and through-travelers",
       "Full-service convenience inside the store",
       "Easy location for quick stops before work, school, or road trips",
     ],
+    extraHeading: "Useful for local drivers and passing traffic",
+    extraCopy:
+      "A lot of local searches are not looking for a national chain. They are looking for the nearest practical stop. This page helps L&M Enterprises show up for that kind of nearby fuel and convenience intent.",
     keywords: [
       "gas station Deseronto",
       "gas station near Tyendinaga",
@@ -37,11 +42,16 @@ const categories = [
       "L&M Enterprises is a convenience store in Deseronto offering snacks, drinks, everyday essentials, and a quick in-and-out local stop.",
     intro:
       "Our store is designed for everyday convenience, whether you are grabbing a drink, a snack, or essentials while passing through town.",
+    localAngle:
+      "This page supports searches from people looking for a convenience store in Deseronto, near Tyendinaga, or along their normal local route.",
     details: [
       "Everyday convenience items for local customers",
       "Quick-stop shopping with easy access",
       "A practical stop for snacks, drinks, and essentials",
     ],
+    extraHeading: "Built around quick local stops",
+    extraCopy:
+      "Customers searching for a convenience store nearby are usually looking for speed and simplicity. This page helps surface L&M Enterprises for those everyday local searches.",
     keywords: [
       "convenience store Deseronto",
       "store near Tyendinaga",
@@ -58,11 +68,16 @@ const categories = [
       "Learn about the tobacco categories available at L&M Enterprises in Deseronto, including cigarettes, cigars, rolling tobacco, and related in-store options.",
     intro:
       "We help local customers find the tobacco categories they are looking for in-store, with a focus on convenience and availability.",
+    localAngle:
+      "This page is aimed at local adult customers searching for tobacco-related categories in Deseronto and nearby communities without listing individual product inventory online.",
     details: [
       "Cigarette, cigar, and rolling tobacco categories",
       "In-store availability information for adult customers",
       "A local stop for tobacco-related convenience shopping",
     ],
+    extraHeading: "Category-focused instead of product-by-product",
+    extraCopy:
+      "Because the site is not operating as ecommerce, this page focuses on category discovery and store intent instead of individual product listings or online checkout.",
     keywords: [
       "tobacco Deseronto",
       "tobacco shop near Tyendinaga",
@@ -79,11 +94,16 @@ const categories = [
       "L&M Enterprises offers vape-related product categories in Deseronto for adult customers looking for a local in-store option.",
     intro:
       "If you are looking for vape categories from a local convenience-focused shop, L&M Enterprises serves customers in Deseronto and nearby communities.",
+    localAngle:
+      "This page is tailored to adult local-intent searches around vape categories in Deseronto and nearby areas where customers want an in-person option.",
     details: [
       "Vape category availability for adult customers",
       "Convenient local stop instead of a longer drive",
       "In-store guidance on what categories are currently stocked",
     ],
+    extraHeading: "Local visibility without ecommerce",
+    extraCopy:
+      "The purpose of this page is to let nearby customers discover that the store carries this category without turning the site into an online product catalog.",
     keywords: [
       "vapes Deseronto",
       "vape shop near Tyendinaga",
@@ -100,11 +120,16 @@ const categories = [
       "Explore cigar categories available in-store at L&M Enterprises in Deseronto, serving local adult customers and nearby communities.",
     intro:
       "Our store includes cigar-related categories for customers who want a nearby in-person option in the Deseronto area.",
+    localAngle:
+      "This page supports local searches from adult customers trying to find cigar-related categories in Deseronto or near Tyendinaga.",
     details: [
       "Local cigar category availability",
       "Convenient access for nearby customers",
       "In-store category guidance for adult shoppers",
     ],
+    extraHeading: "A nearby in-person option",
+    extraCopy:
+      "Many local searches are simply trying to confirm whether a nearby store is worth visiting. This page helps answer that intent with place-based, category-based content.",
     keywords: [
       "cigars Deseronto",
       "cigar categories Deseronto",
@@ -121,11 +146,16 @@ const categories = [
       "L&M Enterprises carries rolling tobacco categories in Deseronto for adult customers looking for a nearby in-store option.",
     intro:
       "Customers in Deseronto and the surrounding area can visit us for rolling tobacco categories and other convenience-store needs.",
+    localAngle:
+      "This page is meant to capture local searches for rolling tobacco in Deseronto and nearby communities while keeping the site informational rather than transactional.",
     details: [
       "Rolling tobacco category availability",
       "Easy local access for repeat customers",
       "Convenience-store stop with multiple adult product categories",
     ],
+    extraHeading: "Store-visit intent matters here",
+    extraCopy:
+      "This page is built for people who are searching locally and want a nearby place to visit, not a mail-order or ecommerce experience.",
     keywords: [
       "rolling tobacco Deseronto",
       "tobacco near Tyendinaga",
@@ -181,11 +211,11 @@ function pageTemplate({
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${canonical}" />
     <meta property="og:site_name" content="L&amp;M Enterprises" />
-    <meta property="og:image" content="${siteUrl}/favicon.png" />
+    <meta property="og:image" content="${siteUrl}/og-image.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
-    <meta name="twitter:image" content="${siteUrl}/favicon.png" />
+    <meta name="twitter:image" content="${siteUrl}/og-image.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -209,7 +239,7 @@ function siteJsonLd() {
       "Local gas station and convenience store in Deseronto, Ontario with tobacco, vape, cigar, and rolling tobacco categories available in-store.",
     url: siteUrl,
     telephone: "+1-613-396-2224",
-    image: `${siteUrl}/favicon.png`,
+    image: `${siteUrl}/og-image.svg`,
     address: {
       "@type": "PostalAddress",
       streetAddress: "43 Dundas Street",
@@ -238,6 +268,21 @@ function siteJsonLd() {
       closes: "22:00",
     },
     sameAs: ["https://www.facebook.com/LandMEnterprises"],
+  };
+}
+
+function faqJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
   };
 }
 
@@ -387,7 +432,7 @@ function homePage() {
       "vape categories Deseronto",
       "rolling tobacco Deseronto",
     ],
-    jsonLd: siteJsonLd(),
+    jsonLd: [siteJsonLd(), faqJsonLd()],
     content: layout(hero, body),
   });
 }
@@ -440,10 +485,30 @@ function categoryPage(category) {
             <p>
               Customers often search by category rather than by specific product. This page helps people in Deseronto, Tyendinaga, and nearby areas understand what kinds of in-store options L&amp;M Enterprises is known for.
             </p>
+            <p>${escapeHtml(category.localAngle)}</p>
           </div>
           <div>
             <h2>Related category pages</h2>
             <ul class="bullet-list">${relatedLinks}</ul>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="wrap two-col">
+          <div>
+            <p class="eyebrow">Local Search Focus</p>
+            <h2>${escapeHtml(category.extraHeading)}</h2>
+            <p>${escapeHtml(category.extraCopy)}</p>
+          </div>
+          <div class="feature-list">
+            <div>
+              <strong>Deseronto intent</strong>
+              <p>Written for customers searching locally rather than browsing a national marketplace.</p>
+            </div>
+            <div>
+              <strong>Adult in-store focus</strong>
+              <p>These pages describe categories and store intent without functioning as ecommerce listings.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -454,13 +519,13 @@ function categoryPage(category) {
     description: category.description,
     canonicalPath: `/${category.slug}`,
     keywords: category.keywords,
-    jsonLd: {
+    jsonLd: [{
       ...siteJsonLd(),
       "@type": "Store",
       name: `L&M Enterprises - ${category.title}`,
       description: category.description,
       url: `${siteUrl}/${category.slug}`,
-    },
+    }],
     content: layout(hero, body),
   });
 }

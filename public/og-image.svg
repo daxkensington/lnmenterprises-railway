@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="L and M Enterprises">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f4f38"/>
+      <stop offset="55%" stop-color="#24362a"/>
+      <stop offset="100%" stop-color="#8d5f18"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="120" r="180" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="180" cy="520" r="220" fill="rgba(255,255,255,0.06)"/>
+  <text x="84" y="170" fill="#f7f1e7" font-family="Manrope, Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="5">DESERONTO, ONTARIO</text>
+  <text x="84" y="300" fill="#ffffff" font-family="Manrope, Arial, sans-serif" font-size="88" font-weight="800">L&amp;M Enterprises</text>
+  <text x="84" y="382" fill="#f5dfb8" font-family="Manrope, Arial, sans-serif" font-size="42" font-weight="600">Fuel, Convenience, and Local Product Categories</text>
+  <text x="84" y="490" fill="#f7f1e7" font-family="Manrope, Arial, sans-serif" font-size="30">Gas Station  •  Convenience Store  •  Tobacco  •  Vape Categories</text>
+</svg>
