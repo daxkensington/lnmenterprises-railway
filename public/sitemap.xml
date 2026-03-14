@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lnmenterprises.ca/</loc>
+    <loc>https://www.lnmenterprises.ca/</loc>
   </url>
   <url>
-    <loc>https://lnmenterprises.ca/blog</loc>
+    <loc>https://www.lnmenterprises.ca/blog</loc>
+  </url>
+  <url>
+    <loc>https://www.lnmenterprises.ca/gas-station-deseronto</loc>
+  </url>
+  <url>
+    <loc>https://www.lnmenterprises.ca/convenience-store-deseronto</loc>
+  </url>
+  <url>
+    <loc>https://www.lnmenterprises.ca/tobacco-deseronto</loc>
+  </url>
+  <url>
+    <loc>https://www.lnmenterprises.ca/vape-categories-deseronto</loc>
+  </url>
+  <url>
+    <loc>https://www.lnmenterprises.ca/cigar-categories-deseronto</loc>
+  </url>
+  <url>
+    <loc>https://www.lnmenterprises.ca/rolling-tobacco-deseronto</loc>
   </url>
 </urlset>
