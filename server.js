@@ -319,7 +319,7 @@ function layout(hero, body) {
     <header class="site-header">
       <div class="wrap header-row">
         <a class="brand" href="/">L&amp;M Enterprises</a>
-        <nav class="nav">${navLinks}</nav>
+        <nav class="nav">${navLinks}<a href="/deseronto-convenience-store-gas-station">Deseronto</a><a href="/contact-directions">Contact</a></nav>
       </div>
     </header>
     ${hero}
@@ -343,11 +343,165 @@ function layout(hero, body) {
                   )}</a></li>`,
               )
               .join("")}
+            <li><a href="/deseronto-convenience-store-gas-station">Deseronto Page</a></li>
+            <li><a href="/contact-directions">Contact &amp; Directions</a></li>
           </ul>
         </div>
       </div>
     </footer>
   `;
+}
+
+function locationPage() {
+  const hero = `
+    <section class="hero hero-small">
+      <div class="wrap">
+        <p class="eyebrow">Deseronto Location</p>
+        <h1>Convenience store and gas station in Deseronto, serving Tyendinaga and nearby communities.</h1>
+        <p class="lede">
+          This page is built for customers searching for a convenience store, local fuel stop, or adult-only product categories in Deseronto without needing an online store.
+        </p>
+      </div>
+    </section>`;
+
+  const body = `
+    <main>
+      <section class="section">
+        <div class="wrap two-col">
+          <div>
+            <h2>Why this location page matters</h2>
+            <p>
+              Many customers search for a place first and a category second. This page helps L&amp;M Enterprises show up for people looking for a gas station in Deseronto, a convenience store near Tyendinaga, or a nearby in-person stop for adult-only categories.
+            </p>
+            <p>
+              Instead of acting like ecommerce, the page is designed to help nearby customers understand where the store is, what kinds of categories it is known for, and why it is a practical stop in the area.
+            </p>
+          </div>
+          <aside class="sidebar-card">
+            <h3>Store Snapshot</h3>
+            <p>43 Dundas Street</p>
+            <p>Deseronto, ON K0K 1X0</p>
+            <p>Open daily 6:00 AM to 10:00 PM</p>
+            <p><a href="tel:+16133962224">613-396-2224</a></p>
+          </aside>
+        </div>
+      </section>
+      <section class="section section-alt">
+        <div class="wrap card-grid">
+          <article class="card">
+            <p class="card-kicker">Local Search</p>
+            <h2>Deseronto convenience store</h2>
+            <p>Built to support searches from customers who want a nearby everyday stop for convenience-store essentials.</p>
+          </article>
+          <article class="card">
+            <p class="card-kicker">Fuel Stop</p>
+            <h2>Gas station near Tyendinaga</h2>
+            <p>Helps drivers looking for a nearby practical stop instead of a broad regional search result.</p>
+          </article>
+          <article class="card">
+            <p class="card-kicker">Adult Categories</p>
+            <h2>In-store category discovery</h2>
+            <p>Supports searches around tobacco, vape, cigar, and rolling tobacco categories without listing product-by-product inventory.</p>
+          </article>
+        </div>
+      </section>
+    </main>`;
+
+  return pageTemplate({
+    title: "L&M Enterprises | Deseronto Convenience Store and Gas Station",
+    description:
+      "L&M Enterprises is a convenience store and gas station in Deseronto serving Tyendinaga and nearby communities with fuel, convenience-store essentials, and in-store adult-only product categories.",
+    canonicalPath: "/deseronto-convenience-store-gas-station",
+    keywords: [
+      "Deseronto convenience store",
+      "gas station Deseronto",
+      "gas station near Tyendinaga",
+      "convenience store near Tyendinaga",
+    ],
+    jsonLd: [
+      {
+        ...siteJsonLd(),
+        "@type": "ConvenienceStore",
+        name: "L&M Enterprises Deseronto",
+        url: `${siteUrl}/deseronto-convenience-store-gas-station`,
+      },
+    ],
+    content: layout(hero, body),
+  });
+}
+
+function contactPage() {
+  const hero = `
+    <section class="hero hero-small">
+      <div class="wrap">
+        <p class="eyebrow">Contact & Directions</p>
+        <h1>Visit, call, or get directions to L&amp;M Enterprises in Deseronto.</h1>
+        <p class="lede">
+          Use this page if you are looking for store details, local directions, or a quick way to call before visiting.
+        </p>
+      </div>
+    </section>`;
+
+  const body = `
+    <main>
+      <section class="section">
+        <div class="wrap detail-grid">
+          <div>
+            <h2>Store information</h2>
+            <ul class="bullet-list">
+              <li>Address: 43 Dundas Street, Deseronto, ON K0K 1X0</li>
+              <li>Phone: <a href="tel:+16133962224">613-396-2224</a></li>
+              <li>Hours: Open daily from 6:00 AM to 10:00 PM</li>
+            </ul>
+            <p>
+              Customers from Deseronto, Tyendinaga, and nearby communities can use this page for a quick contact point before stopping in.
+            </p>
+          </div>
+          <aside class="sidebar-card">
+            <h3>Quick Actions</h3>
+            <p><a class="button" href="tel:+16133962224">Call The Store</a></p>
+            <p><a class="button button-secondary" href="https://maps.google.com/?q=43+Dundas+Street+Deseronto+ON+K0K+1X0" rel="noreferrer">Open In Maps</a></p>
+          </aside>
+        </div>
+      </section>
+      <section class="section section-alt">
+        <div class="wrap two-col">
+          <div>
+            <h2>Nearby communities</h2>
+            <p>
+              The store is positioned to serve Deseronto directly while also being a practical stop for Tyendinaga and surrounding area traffic.
+            </p>
+          </div>
+          <div>
+            <h2>What to ask about</h2>
+            <p>
+              If you are calling ahead, ask about store hours, category availability, or general visit information. The website is informational and does not process ecommerce orders.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>`;
+
+  return pageTemplate({
+    title: "L&M Enterprises | Contact and Directions",
+    description:
+      "Get store contact details, hours, and directions for L&M Enterprises in Deseronto, Ontario.",
+    canonicalPath: "/contact-directions",
+    keywords: [
+      "L&M Enterprises contact",
+      "Deseronto directions",
+      "Deseronto store phone number",
+      "Tyendinaga convenience store directions",
+    ],
+    jsonLd: [
+      {
+        ...siteJsonLd(),
+        "@type": "ContactPage",
+        url: `${siteUrl}/contact-directions`,
+      },
+    ],
+    content: layout(hero, body),
+  });
 }
 
 function homePage() {
@@ -639,6 +793,14 @@ app.get("/", (_req, res) => {
 
 app.get("/blog", (_req, res) => {
   res.send(blogPage());
+});
+
+app.get("/deseronto-convenience-store-gas-station", (_req, res) => {
+  res.send(locationPage());
+});
+
+app.get("/contact-directions", (_req, res) => {
+  res.send(contactPage());
 });
 
 for (const category of categories) {
