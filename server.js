@@ -214,9 +214,12 @@ function pageTemplate({
   content,
   jsonLd,
   keywords = [],
+  noindex = false,
 }) {
   const canonical = `${siteUrl}${canonicalPath}`;
   const keywordsContent = keywords.join(", ");
+  const robotsContent = noindex ? "noindex, nofollow" : "index, follow";
+  const canonicalTag = canonicalPath ? `<link rel="canonical" href="${canonical}" />` : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -226,8 +229,8 @@ function pageTemplate({
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}" />
     <meta name="keywords" content="${escapeHtml(keywordsContent)}" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="${canonical}" />
+    <meta name="robots" content="${robotsContent}" />
+    ${canonicalTag}
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
@@ -241,7 +244,7 @@ function pageTemplate({
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
   </head>
@@ -309,10 +312,10 @@ function faqJsonLd() {
 }
 
 function layout(hero, body) {
-  const navLinks = categories
+  const categoryLinks = categories
     .map(
       (category) =>
-        `<a href="/${category.slug}">${escapeHtml(category.nav)}</a>`,
+        `<li><a href="/${category.slug}">${escapeHtml(category.nav)}</a></li>`,
     )
     .join("");
 
@@ -322,11 +325,17 @@ function layout(hero, body) {
         <a class="brand" href="/">
           <span class="brand-mark">L&amp;M</span>
           <span class="brand-copy">
-            <strong>L&amp;M Enterprises</strong>
-            <span>Deseronto, Ontario</span>
+            <strong>L&amp;M ENTERPRISES</strong>
+            <span>Gas &amp; Convenience</span>
           </span>
         </a>
-        <nav class="nav">${navLinks}<a href="/deseronto-convenience-store-gas-station">Deseronto</a><a href="/contact-directions">Contact</a></nav>
+        <nav class="nav">
+          <a href="/">Home</a>
+          <a href="/deseronto-convenience-store-gas-station">Location</a>
+          <a href="/blog">Blog</a>
+          <a href="/contact-directions">Contact</a>
+          <a class="nav-cta" href="tel:+16133962224">&#9742; Call Now</a>
+        </nav>
       </div>
     </header>
     ${hero}
@@ -336,24 +345,25 @@ function layout(hero, body) {
         <div>
           <h3>L&amp;M Enterprises</h3>
           <p>43 Dundas Street, Deseronto, ON K0K 1X0</p>
-          <p>Open daily 6:00 AM to 10:00 PM</p>
+          <p>Open daily 6:00 AM &ndash; 10:00 PM</p>
           <p><a href="tel:+16133962224">613-396-2224</a></p>
         </div>
         <div>
-          <h3>Popular Pages</h3>
+          <h3>Categories</h3>
+          <ul>${categoryLinks}</ul>
+        </div>
+        <div>
+          <h3>Quick Links</h3>
           <ul>
-            ${categories
-              .map(
-                (category) =>
-                  `<li><a href="/${category.slug}">${escapeHtml(
-                    category.nav,
-                  )}</a></li>`,
-              )
-              .join("")}
-            <li><a href="/deseronto-convenience-store-gas-station">Deseronto Page</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/deseronto-convenience-store-gas-station">Location</a></li>
             <li><a href="/contact-directions">Contact &amp; Directions</a></li>
+            <li><a href="/blog">Updates</a></li>
           </ul>
         </div>
+      </div>
+      <div class="wrap footer-bottom">
+        &copy; ${new Date().getFullYear()} L&amp;M Enterprises. All rights reserved.
       </div>
     </footer>
   `;
@@ -541,116 +551,6 @@ function contactPage() {
   });
 }
 
-function homePage() {
-  const hero = `
-    <section class="hero">
-      <div class="wrap hero-grid">
-        <div>
-          <p class="eyebrow">Deseronto, Ontario</p>
-          <h1>Local convenience, fuel, and in-store product categories that customers search for nearby.</h1>
-          <p class="lede">
-            L&amp;M Enterprises serves Deseronto, Tyendinaga, and the surrounding area with fuel, convenience-store essentials, and adult-only in-store categories like tobacco, vape, cigar, and rolling tobacco options.
-          </p>
-          <div class="cta-row">
-            <a class="button" href="tel:+16133962224">Call The Store</a>
-            <a class="button button-secondary" href="#categories">Explore Categories</a>
-          </div>
-        </div>
-        <aside class="info-card">
-          <h2>Visit Us</h2>
-          <p>43 Dundas Street</p>
-          <p>Deseronto, ON K0K 1X0</p>
-          <p>Open daily from 6:00 AM to 10:00 PM</p>
-          <p>Serving Deseronto, Tyendinaga, and nearby communities.</p>
-        </aside>
-      </div>
-    </section>`;
-
-  const categoryCards = categories
-    .map(
-      (category) => `
-        <article class="card">
-          <p class="card-kicker">${escapeHtml(category.nav)}</p>
-          <h2><a href="/${category.slug}">${escapeHtml(category.searchTitle)}</a></h2>
-          <p>${escapeHtml(category.description)}</p>
-          <a class="text-link" href="/${category.slug}">Read more</a>
-        </article>`,
-    )
-    .join("");
-
-  const faqItems = faqs
-    .map(
-      (faq) => `
-        <article class="faq-item">
-          <h3>${escapeHtml(faq.question)}</h3>
-          <p>${escapeHtml(faq.answer)}</p>
-        </article>`,
-    )
-    .join("");
-
-  const body = `
-    <main>
-      <section class="section">
-        <div class="wrap two-col">
-          <div>
-            <p class="eyebrow">What This Site Does</p>
-            <h2>A local SEO site, not an online store.</h2>
-            <p>
-              This website is built to help nearby customers discover what kinds of products and services L&amp;M Enterprises offers before they visit the store. It is designed for local search visibility in Deseronto, Tyendinaga, and nearby communities, with the goal of store visits and phone calls rather than ecommerce checkout.
-            </p>
-          </div>
-          <div class="feature-list">
-            <div>
-              <strong>Fuel and convenience</strong>
-              <p>Quick-stop access for drivers and local shoppers.</p>
-            </div>
-            <div>
-              <strong>Category visibility</strong>
-              <p>Pages focused on the groups of products customers search for locally in Deseronto and around Tyendinaga.</p>
-            </div>
-            <div>
-              <strong>In-store action</strong>
-              <p>Built to encourage visits, calls, and local discovery.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="section section-alt" id="categories">
-        <div class="wrap">
-          <p class="eyebrow">Category Pages</p>
-          <h2>Browse the main categories customers ask about.</h2>
-          <p class="lede">
-            These pages are built around nearby search intent such as convenience store Deseronto, gas station near Tyendinaga, tobacco categories in Deseronto, and similar local terms.
-          </p>
-          <div class="card-grid">${categoryCards}</div>
-        </div>
-      </section>
-      <section class="section">
-        <div class="wrap">
-          <p class="eyebrow">Frequently Asked Questions</p>
-          <h2>Store-focused answers for local customers.</h2>
-          <div class="faq-grid">${faqItems}</div>
-        </div>
-      </section>
-    </main>`;
-
-  return pageTemplate({
-    title: "L&M Enterprises | Convenience Store, Fuel, and Local Product Categories",
-    description:
-      "L&M Enterprises is a local convenience store and fuel stop in Deseronto, Ontario with in-store tobacco, vape, cigar, and rolling tobacco categories for adult customers.",
-    canonicalPath: "/",
-    keywords: [
-      "L&M Enterprises",
-      "Deseronto convenience store",
-      "gas station Deseronto",
-      "tobacco categories Deseronto",
-      "vape categories Deseronto",
-      "rolling tobacco Deseronto",
-    ],
-    jsonLd: [siteJsonLd(), faqJsonLd()],
-    content: layout(hero, body),
-  });
-}
 
 function categoryPage(category) {
   const hero = `
@@ -811,7 +711,8 @@ function notFoundPage() {
   return pageTemplate({
     title: "Page Not Found | L&M Enterprises",
     description: "The page you requested could not be found.",
-    canonicalPath: "/404",
+    canonicalPath: "",
+    noindex: true,
     jsonLd: siteJsonLd(),
     content: layout(
       `
@@ -839,7 +740,8 @@ function escapeHtml(value) {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 app.get(/^\/(admin|api)(\/|$)/, (_req, res) => {
@@ -876,6 +778,11 @@ app.use(express.static(publicDir, { maxAge: "7d" }));
 
 app.use((_req, res) => {
   res.status(404).send(notFoundPage());
+});
+
+app.use((err, _req, res, _next) => {
+  console.error(err.stack);
+  res.status(500).send("Internal server error");
 });
 
 app.listen(port, () => {
