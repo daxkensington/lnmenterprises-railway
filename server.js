@@ -181,9 +181,30 @@ const faqs = [
     answer:
       "These pages help local customers find the store when they search for categories in Deseronto, Tyendinaga, and nearby areas.",
   },
+  {
+    question: "Do customers from Tyendinaga and nearby communities visit the store?",
+    answer:
+      "Yes. The site is written to help customers from Deseronto, Tyendinaga, and surrounding areas find a nearby in-store option for fuel, convenience, and adult-only product categories.",
+  },
 ];
 
 app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+  );
+
+  if (req.hostname === "lnmenterprises.ca") {
+    res.redirect(301, `${siteUrl}${req.originalUrl}`);
+    return;
+  }
+
+  next();
+});
 
 function pageTemplate({
   title,
@@ -337,7 +358,7 @@ function homePage() {
           <p class="eyebrow">Deseronto, Ontario</p>
           <h1>Local convenience, fuel, and in-store product categories that customers search for nearby.</h1>
           <p class="lede">
-            L&amp;M Enterprises serves Deseronto and the surrounding area with fuel, convenience-store essentials, and adult-only in-store categories like tobacco, vape, cigar, and rolling tobacco options.
+            L&amp;M Enterprises serves Deseronto, Tyendinaga, and the surrounding area with fuel, convenience-store essentials, and adult-only in-store categories like tobacco, vape, cigar, and rolling tobacco options.
           </p>
           <div class="cta-row">
             <a class="button" href="tel:+16133962224">Call The Store</a>
@@ -384,7 +405,7 @@ function homePage() {
             <p class="eyebrow">What This Site Does</p>
             <h2>A local SEO site, not an online store.</h2>
             <p>
-              This website is built to help nearby customers discover what kinds of products and services L&amp;M Enterprises offers before they visit the store. It is designed for local search visibility, store visits, and phone calls rather than ecommerce checkout.
+              This website is built to help nearby customers discover what kinds of products and services L&amp;M Enterprises offers before they visit the store. It is designed for local search visibility in Deseronto, Tyendinaga, and nearby communities, with the goal of store visits and phone calls rather than ecommerce checkout.
             </p>
           </div>
           <div class="feature-list">
@@ -394,7 +415,7 @@ function homePage() {
             </div>
             <div>
               <strong>Category visibility</strong>
-              <p>Pages focused on the groups of products customers search for locally.</p>
+              <p>Pages focused on the groups of products customers search for locally in Deseronto and around Tyendinaga.</p>
             </div>
             <div>
               <strong>In-store action</strong>
@@ -407,6 +428,9 @@ function homePage() {
         <div class="wrap">
           <p class="eyebrow">Category Pages</p>
           <h2>Browse the main categories customers ask about.</h2>
+          <p class="lede">
+            These pages are built around nearby search intent such as convenience store Deseronto, gas station near Tyendinaga, tobacco categories in Deseronto, and similar local terms.
+          </p>
           <div class="card-grid">${categoryCards}</div>
         </div>
       </section>
