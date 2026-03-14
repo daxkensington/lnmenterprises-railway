@@ -1,5 +1,8 @@
 const express = require("express");
 const path = require("path");
+const crypto = require("crypto");
+const { readJSON, writeJSON } = require("./admin/data");
+const { seedCredentials } = require("./admin/auth");
 
 const app = express();
 const publicDir = path.join(__dirname, "public");
@@ -7,7 +10,8 @@ const indexFile = path.join(publicDir, "index.html");
 const port = process.env.PORT || 3000;
 const siteUrl = "https://www.lnmenterprises.ca";
 
-const categories = [
+/* ── Seed data on first boot ── */
+const defaultCategories = [
   {
     slug: "gas-station-deseronto",
     title: "Gas Station in Deseronto",
@@ -166,7 +170,7 @@ const categories = [
   },
 ];
 
-const faqs = [
+const defaultFaqs = [
   {
     question: "What kinds of products does L&M Enterprises focus on?",
     answer:
@@ -188,6 +192,36 @@ const faqs = [
       "Yes. The site is written to help customers from Deseronto, Tyendinaga, and surrounding areas find a nearby in-store option for fuel, convenience, and adult-only product categories.",
   },
 ];
+
+/* ── Seed defaults + load from JSON ── */
+seedCredentials();
+if (!readJSON("categories.json")) writeJSON("categories.json", defaultCategories);
+if (!readJSON("faqs.json")) writeJSON("faqs.json", defaultFaqs);
+if (!readJSON("site-content.json")) {
+  writeJSON("site-content.json", {
+    businessName: "L&M Enterprises",
+    phone: "+1-613-396-2224",
+    address: "43 Dundas Street, Deseronto, ON K0K 1X0",
+    hours: "6:00 AM - 10:00 PM",
+    hoursNote: "Open Daily",
+    promoBanner: "Win $1000 in FREE GAS! Monthly contest with SAGO Gas Bar",
+    facebookUrl: "https://www.facebook.com/LandMEnterprises",
+  });
+}
+if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
+if (!readJSON("contact-messages.json")) writeJSON("contact-messages.json", []);
+
+function loadCategories() { return readJSON("categories.json", defaultCategories); }
+function loadFaqs() { return readJSON("faqs.json", defaultFaqs); }
+function loadSiteContent() {
+  return readJSON("site-content.json", {
+    businessName: "L&M Enterprises", phone: "+1-613-396-2224",
+    address: "43 Dundas Street, Deseronto, ON K0K 1X0",
+    hours: "6:00 AM - 10:00 PM", hoursNote: "Open Daily",
+    promoBanner: "Win $1000 in FREE GAS! Monthly contest with SAGO Gas Bar",
+    facebookUrl: "https://www.facebook.com/LandMEnterprises",
+  });
+}
 
 app.disable("x-powered-by");
 app.use(require("compression")());
@@ -304,7 +338,7 @@ function faqJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
+    mainEntity: loadFaqs().map((faq) => ({
       "@type": "Question",
       name: faq.question,
       acceptedAnswer: {
@@ -332,10 +366,11 @@ const icons = {
 };
 
 function layout(body) {
+  const sc = loadSiteContent();
   return `
     <div class="promo-banner">
       <div class="container">
-        ${icons.gift} 🎉 Win $1000 in FREE GAS! Monthly contest with SAGO Gas Bar
+        ${icons.gift} 🎉 ${escapeHtml(sc.promoBanner)}
       </div>
     </div>
     <header class="site-header">
@@ -343,7 +378,7 @@ function layout(body) {
         <a class="brand" href="/">
           <span class="brand-mark">${icons.store}</span>
           <span class="brand-text">
-            <strong>L&amp;M ENTERPRISES</strong>
+            <strong>${escapeHtml(sc.businessName).toUpperCase()}</strong>
             <span>Gas &amp; Convenience</span>
           </span>
         </a>
@@ -352,29 +387,29 @@ function layout(body) {
           <a href="/#prices">Prices</a>
           <a href="/deseronto-convenience-store-gas-station">Location</a>
           <a href="/blog">Blog</a>
-          <a class="nav-cta" href="tel:+16133962224">${icons.phone} Call Now</a>
+          <a class="nav-cta" href="tel:${escapeHtml(sc.phone)}">${icons.phone} Call Now</a>
         </nav>
       </div>
     </header>
     ${body}
     <footer class="site-footer">
       <div class="container">
-        <h3 class="footer-title">L&amp;M ENTERPRISES</h3>
+        <h3 class="footer-title">${escapeHtml(sc.businessName).toUpperCase()}</h3>
         <div class="footer-divider"></div>
         <p class="footer-tagline">SAGO Gas Bar Partner &bull; Full-Service Gas &amp; Convenience Store</p>
         <div class="footer-contact">
-          <a href="tel:+16133962224">+1 (613) 396-2224</a>
+          <a href="tel:${escapeHtml(sc.phone)}">${escapeHtml(sc.phone)}</a>
           <span class="sep">&bull;</span>
-          <span>43 Dundas St, Deseronto, ON K0K 1X0</span>
+          <span>${escapeHtml(sc.address)}</span>
           <span class="sep">&bull;</span>
-          <span>Open 6am-10pm Daily</span>
+          <span>${escapeHtml(sc.hoursNote)} ${escapeHtml(sc.hours)}</span>
         </div>
         <p class="footer-subtext">Proudly serving Tyendinaga Mohawk Territory and surrounding communities</p>
-        <a class="footer-social" href="https://www.facebook.com/LandMEnterprises" target="_blank" rel="noopener noreferrer">
+        <a class="footer-social" href="${escapeHtml(sc.facebookUrl)}" target="_blank" rel="noopener noreferrer">
           ${icons.facebook} <span>Follow Us on Facebook</span>
         </a>
         <div class="footer-bottom">
-          &copy; ${new Date().getFullYear()} L&amp;M Enterprises. All rights reserved.
+          &copy; ${new Date().getFullYear()} ${escapeHtml(sc.businessName)}. All rights reserved.
         </div>
       </div>
     </footer>
@@ -540,6 +575,38 @@ function contactPage() {
           </div>
         </div>
       </section>
+      <section class="section">
+        <div class="container" style="max-width:600px;">
+          <div class="section-header">
+            <h2>Send Us a Message</h2>
+            <div class="section-divider"></div>
+            <p>Have a question? Fill out the form below and we will get back to you.</p>
+          </div>
+          <form method="POST" action="/contact" style="text-align:left;">
+            <div style="margin-bottom:1rem;">
+              <label for="name" style="display:block;font-weight:600;margin-bottom:0.25rem;">Name *</label>
+              <input type="text" id="name" name="name" required style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
+            </div>
+            <div style="margin-bottom:1rem;">
+              <label for="email" style="display:block;font-weight:600;margin-bottom:0.25rem;">Email *</label>
+              <input type="email" id="email" name="email" required style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
+            </div>
+            <div style="margin-bottom:1rem;">
+              <label for="phone" style="display:block;font-weight:600;margin-bottom:0.25rem;">Phone</label>
+              <input type="tel" id="phone" name="phone" style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
+            </div>
+            <div style="margin-bottom:1rem;">
+              <label for="subject" style="display:block;font-weight:600;margin-bottom:0.25rem;">Subject</label>
+              <input type="text" id="subject" name="subject" style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
+            </div>
+            <div style="margin-bottom:1.5rem;">
+              <label for="message" style="display:block;font-weight:600;margin-bottom:0.25rem;">Message *</label>
+              <textarea id="message" name="message" rows="5" required style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;resize:vertical;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;padding:0.75rem;font-size:1rem;">Send Message</button>
+          </form>
+        </div>
+      </section>
     </main>`;
 
   return pageTemplate({
@@ -566,7 +633,7 @@ function contactPage() {
 
 
 function categoryPage(category) {
-  const relatedLinks = categories
+  const relatedLinks = loadCategories()
     .filter((entry) => entry.slug !== category.slug)
     .slice(0, 4)
     .map(
@@ -652,6 +719,25 @@ function categoryPage(category) {
 }
 
 function blogPage() {
+  const posts = readJSON("blog-posts.json", []).filter((p) => p.published);
+  const postCards = posts.length
+    ? posts
+        .map(
+          (p) => `
+          <article class="blog-card">
+            <span class="kicker">${escapeHtml(p.date)}</span>
+            <h2><a href="/blog/${escapeHtml(p.slug)}" style="color:inherit;text-decoration:none;">${escapeHtml(p.title)}</a></h2>
+            <p>${escapeHtml((p.content || "").slice(0, 200))}${p.content && p.content.length > 200 ? "..." : ""}</p>
+            <a class="btn btn-outline" href="/blog/${escapeHtml(p.slug)}" style="margin-top:0.5rem;">Read More</a>
+          </article>`,
+        )
+        .join("")
+    : `<article class="blog-card">
+        <span class="kicker">Now Live</span>
+        <h2>Our category pages are focused on local search.</h2>
+        <p>The current website highlights the categories customers search for most often around Deseronto and nearby communities, while keeping the site informational rather than transactional.</p>
+      </article>`;
+
   const content = `
     <section class="hero">
       <div class="hero-content">
@@ -662,14 +748,7 @@ function blogPage() {
     </section>
     <main>
       <section class="section">
-        <div class="container">
-          <article class="blog-card">
-            <span class="kicker">Now Live</span>
-            <h2>Our category pages are focused on local search.</h2>
-            <p>The current website highlights the categories customers search for most often around Deseronto and nearby communities, while keeping the site informational rather than transactional.</p>
-            <p>Each category page is built to help nearby customers discover what L&amp;M Enterprises carries in-store, without acting as an online shop.</p>
-          </article>
-        </div>
+        <div class="container">${postCards}</div>
       </section>
       <section class="section section-alt">
         <div class="container">
@@ -712,6 +791,37 @@ function blogPage() {
   });
 }
 
+function blogPostPage(post) {
+  const content = `
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">${escapeHtml(post.date)}</div>
+        <h1>${escapeHtml(post.title)}</h1>
+      </div>
+    </section>
+    <main>
+      <section class="section">
+        <div class="container">
+          <article class="blog-card">
+            <div style="white-space:pre-wrap;line-height:1.8;">${escapeHtml(post.content).replace(/\n/g, "<br>")}</div>
+          </article>
+          <div style="margin-top:2rem;text-align:center;">
+            <a class="btn btn-primary" href="/blog">${icons.arrowRight} Back to Blog</a>
+          </div>
+        </div>
+      </section>
+    </main>`;
+
+  return pageTemplate({
+    title: `${post.title} | L&M Enterprises`,
+    description: (post.content || "").slice(0, 160),
+    canonicalPath: `/blog/${post.slug}`,
+    keywords: ["L&M Enterprises blog", "Deseronto store updates"],
+    jsonLd: siteJsonLd(),
+    content: layout(content),
+  });
+}
+
 function notFoundPage() {
   return pageTemplate({
     title: "Page Not Found | L&M Enterprises",
@@ -742,7 +852,49 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-app.get(/^\/(admin|api)(\/|$)/, (_req, res) => {
+/* ── Admin routes ── */
+app.use("/admin", require("./admin/routes"));
+
+/* ── Contact form handler ── */
+const contactRateLimit = new Map();
+app.use("/contact", express.urlencoded({ extended: false, limit: "100kb" }));
+
+app.post("/contact", (req, res) => {
+  const ip = req.ip;
+  const now = Date.now();
+  const entry = contactRateLimit.get(ip) || { count: 0, resetTime: now + 3600000 };
+  if (now > entry.resetTime) { entry.count = 0; entry.resetTime = now + 3600000; }
+  entry.count++;
+  contactRateLimit.set(ip, entry);
+  if (entry.count > 5) {
+    res.status(429).send(pageTemplate({
+      title: "Too Many Requests", description: "Rate limited.",
+      noindex: true, jsonLd: siteJsonLd(),
+      content: layout(`<main><div class="not-found"><div class="container"><h1>Too Many Requests</h1><p>Please wait before submitting another message.</p><a class="btn btn-primary" href="/contact-directions">Go Back</a></div></div></main>`),
+    }));
+    return;
+  }
+  const { name, email, phone, subject, message } = req.body;
+  if (!name || !email || !message) {
+    res.status(400).send("Name, email, and message are required.");
+    return;
+  }
+  const messages = readJSON("contact-messages.json", []);
+  messages.unshift({
+    id: crypto.randomBytes(8).toString("hex"),
+    name, email, phone: phone || "", subject: subject || "",
+    message, date: new Date().toISOString(), read: false,
+  });
+  writeJSON("contact-messages.json", messages);
+  res.send(pageTemplate({
+    title: "Message Sent | L&M Enterprises",
+    description: "Thank you for your message.",
+    noindex: true, jsonLd: siteJsonLd(),
+    content: layout(`<main><div class="not-found"><div class="container"><p class="eyebrow">Thank You</p><h1>Message Sent</h1><p>We received your message and will get back to you soon.</p><a class="btn btn-primary" href="/">Back to Homepage</a></div></div></main>`),
+  }));
+});
+
+app.get(/^\/(api)(\/|$)/, (_req, res) => {
   res.status(404).send("Not found");
 });
 
@@ -758,6 +910,13 @@ app.get("/blog", (_req, res) => {
   res.send(blogPage());
 });
 
+app.get("/blog/:slug", (req, res, next) => {
+  const posts = readJSON("blog-posts.json", []);
+  const post = posts.find((p) => p.slug === req.params.slug && p.published);
+  if (!post) return next();
+  res.send(blogPostPage(post));
+});
+
 app.get("/deseronto-convenience-store-gas-station", (_req, res) => {
   res.send(locationPage());
 });
@@ -766,8 +925,12 @@ app.get("/contact-directions", (_req, res) => {
   res.send(contactPage());
 });
 
-for (const category of categories) {
-  app.get(`/${category.slug}`, (_req, res) => {
+const categorySlugs = new Set(defaultCategories.map((c) => c.slug));
+for (const slug of categorySlugs) {
+  app.get(`/${slug}`, (_req, res) => {
+    const cats = loadCategories();
+    const category = cats.find((c) => c.slug === slug);
+    if (!category) return res.status(404).send(notFoundPage());
     res.send(categoryPage(category));
   });
 }
