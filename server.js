@@ -319,7 +319,13 @@ function layout(hero, body) {
   return `
     <header class="site-header">
       <div class="wrap header-row">
-        <a class="brand" href="/">L&amp;M Enterprises</a>
+        <a class="brand" href="/">
+          <span class="brand-mark">L&amp;M</span>
+          <span class="brand-copy">
+            <strong>L&amp;M Enterprises</strong>
+            <span>Deseronto, Ontario</span>
+          </span>
+        </a>
         <nav class="nav">${navLinks}<a href="/deseronto-convenience-store-gas-station">Deseronto</a><a href="/contact-directions">Contact</a></nav>
       </div>
     </header>
@@ -356,19 +362,34 @@ function layout(hero, body) {
 function locationPage() {
   const hero = `
     <section class="hero hero-small">
-      <div class="wrap">
-        <p class="eyebrow">Deseronto Location</p>
-        <h1>Convenience store and gas station in Deseronto, serving Tyendinaga and nearby communities.</h1>
-        <p class="lede">
-          This page is built for customers searching for a convenience store, local fuel stop, or adult-only product categories in Deseronto without needing an online store.
-        </p>
+      <div class="wrap hero-grid hero-grid-tight">
+        <div class="hero-copy">
+          <p class="eyebrow">Deseronto Location</p>
+          <h1>Convenience store and gas station in Deseronto, serving Tyendinaga and nearby communities.</h1>
+          <p class="lede">
+            This page is built for customers searching for a convenience store, local fuel stop, or adult-only product categories in Deseronto without needing an online store.
+          </p>
+          <div class="cta-row">
+            <a class="button" href="/contact-directions">Get Directions</a>
+            <a class="button button-secondary" href="tel:+16133962224">Call 613-396-2224</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <p class="panel-kicker">Why People Find This Page</p>
+          <ul class="panel-list">
+            <li>Gas station in Deseronto</li>
+            <li>Convenience store near Tyendinaga</li>
+            <li>Nearby in-store adult product categories</li>
+          </ul>
+          <img class="panel-image" src="/og-image.svg" alt="L and M Enterprises brand card" />
+        </aside>
       </div>
     </section>`;
 
   const body = `
     <main>
       <section class="section">
-        <div class="wrap two-col">
+        <div class="wrap section-shell two-col">
           <div>
             <h2>Why this location page matters</h2>
             <p>
@@ -434,19 +455,34 @@ function locationPage() {
 function contactPage() {
   const hero = `
     <section class="hero hero-small">
-      <div class="wrap">
-        <p class="eyebrow">Contact & Directions</p>
-        <h1>Visit, call, or get directions to L&amp;M Enterprises in Deseronto.</h1>
-        <p class="lede">
-          Use this page if you are looking for store details, local directions, or a quick way to call before visiting.
-        </p>
+      <div class="wrap hero-grid hero-grid-tight">
+        <div class="hero-copy">
+          <p class="eyebrow">Contact & Directions</p>
+          <h1>Visit, call, or get directions to L&amp;M Enterprises in Deseronto.</h1>
+          <p class="lede">
+            Use this page if you are looking for store details, local directions, or a quick way to call before visiting.
+          </p>
+          <div class="cta-row">
+            <a class="button" href="tel:+16133962224">Call The Store</a>
+            <a class="button button-secondary" href="https://maps.google.com/?q=43+Dundas+Street+Deseronto+ON+K0K+1X0" rel="noreferrer">Open In Maps</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <p class="panel-kicker">Store Snapshot</p>
+          <ul class="panel-list">
+            <li>43 Dundas Street, Deseronto</li>
+            <li>Open daily from 6:00 AM to 10:00 PM</li>
+            <li>Quick stop for fuel, convenience, and local categories</li>
+          </ul>
+          <img class="panel-image" src="/og-image.svg" alt="L and M Enterprises brand card" />
+        </aside>
       </div>
     </section>`;
 
   const body = `
     <main>
       <section class="section">
-        <div class="wrap detail-grid">
+        <div class="wrap section-shell detail-grid">
           <div>
             <h2>Store information</h2>
             <ul class="bullet-list">
@@ -466,7 +502,7 @@ function contactPage() {
         </div>
       </section>
       <section class="section section-alt">
-        <div class="wrap two-col">
+        <div class="wrap section-shell two-col">
           <div>
             <h2>Nearby communities</h2>
             <p>
@@ -619,10 +655,26 @@ function homePage() {
 function categoryPage(category) {
   const hero = `
     <section class="hero hero-small">
-      <div class="wrap">
-        <p class="eyebrow">${escapeHtml(category.nav)}</p>
-        <h1>${escapeHtml(category.searchTitle)}</h1>
-        <p class="lede">${escapeHtml(category.intro)}</p>
+      <div class="wrap hero-grid hero-grid-tight">
+        <div class="hero-copy">
+          <p class="eyebrow">${escapeHtml(category.nav)}</p>
+          <h1>${escapeHtml(category.searchTitle)}</h1>
+          <p class="lede">${escapeHtml(category.intro)}</p>
+          <div class="cta-row">
+            <a class="button" href="/contact-directions">Visit The Store</a>
+            <a class="button button-secondary" href="/deseronto-convenience-store-gas-station">Why Deseronto Locals Search This</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <p class="panel-kicker">Nearby Search Themes</p>
+          <ul class="panel-list">
+            ${category.keywords
+              .slice(0, 3)
+              .map((keyword) => `<li>${escapeHtml(keyword)}</li>`)
+              .join("")}
+          </ul>
+          <img class="panel-image" src="/og-image.svg" alt="L and M Enterprises brand card" />
+        </aside>
       </div>
     </section>`;
 
@@ -642,7 +694,7 @@ function categoryPage(category) {
   const body = `
     <main>
       <section class="section">
-        <div class="wrap detail-grid">
+        <div class="wrap section-shell detail-grid">
           <div>
             <h2>About this category</h2>
             <p>${escapeHtml(category.description)}</p>
@@ -658,7 +710,7 @@ function categoryPage(category) {
         </div>
       </section>
       <section class="section section-alt">
-        <div class="wrap two-col">
+        <div class="wrap section-shell two-col">
           <div>
             <h2>Why this page exists</h2>
             <p>
@@ -673,7 +725,7 @@ function categoryPage(category) {
         </div>
       </section>
       <section class="section">
-        <div class="wrap two-col">
+        <div class="wrap section-shell two-col">
           <div>
             <p class="eyebrow">Local Search Focus</p>
             <h2>${escapeHtml(category.extraHeading)}</h2>
@@ -712,10 +764,20 @@ function categoryPage(category) {
 function blogPage() {
   const hero = `
     <section class="hero hero-small">
-      <div class="wrap">
-        <p class="eyebrow">Updates</p>
-        <h1>Store updates and local information</h1>
-        <p class="lede">A simple updates page for local announcements, category highlights, and store information.</p>
+      <div class="wrap hero-grid hero-grid-tight">
+        <div class="hero-copy">
+          <p class="eyebrow">Updates</p>
+          <h1>Store updates and local information</h1>
+          <p class="lede">A simple updates page for local announcements, category highlights, and store information.</p>
+        </div>
+        <aside class="hero-panel">
+          <p class="panel-kicker">Also Explore</p>
+          <ul class="panel-list">
+            <li><a href="/gas-station-deseronto">Gas Station</a></li>
+            <li><a href="/convenience-store-deseronto">Convenience Store</a></li>
+            <li><a href="/contact-directions">Contact &amp; Directions</a></li>
+          </ul>
+        </aside>
       </div>
     </section>`;
 
