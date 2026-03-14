@@ -3,6 +3,7 @@ const path = require("path");
 
 const app = express();
 const publicDir = path.join(__dirname, "public");
+const indexFile = path.join(publicDir, "index.html");
 const port = process.env.PORT || 3000;
 const siteUrl = "https://www.lnmenterprises.ca";
 
@@ -788,7 +789,7 @@ app.get("/files", (_req, res) => {
 });
 
 app.get("/", (_req, res) => {
-  res.send(homePage());
+  res.sendFile(indexFile);
 });
 
 app.get("/blog", (_req, res) => {
