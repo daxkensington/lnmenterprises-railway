@@ -1,0 +1,15 @@
+{
+  "name": "lnmenterprises-railway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Railway-ready public site for lnmenterprises.ca migrated from Manus",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
