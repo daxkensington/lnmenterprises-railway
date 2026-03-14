@@ -245,7 +245,7 @@ function pageTemplate({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=2" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
   </head>
   <body>
@@ -311,130 +311,153 @@ function faqJsonLd() {
   };
 }
 
-function layout(hero, body) {
-  const categoryLinks = categories
-    .map(
-      (category) =>
-        `<li><a href="/${category.slug}">${escapeHtml(category.nav)}</a></li>`,
-    )
-    .join("");
+/* ── Lucide-style SVG icons (matching the SPA) ── */
+const icons = {
+  store: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>',
+  fuel: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 22H3"/><path d="M15 10h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/><path d="M7 10h4"/></svg>',
+  mapPin: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>',
+  phone: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  clock: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  gift: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>',
+  facebook: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>',
+  search: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+  arrowRight: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>',
+  leaf: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+  tag: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>',
+  shoppingBag: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+};
 
+function layout(body) {
   return `
+    <div class="promo-banner">
+      <div class="container">
+        ${icons.gift} 🎉 Win $1000 in FREE GAS! Monthly contest with SAGO Gas Bar
+      </div>
+    </div>
     <header class="site-header">
-      <div class="wrap header-row">
+      <div class="container header-inner">
         <a class="brand" href="/">
-          <span class="brand-mark">L&amp;M</span>
-          <span class="brand-copy">
+          <span class="brand-mark">${icons.store}</span>
+          <span class="brand-text">
             <strong>L&amp;M ENTERPRISES</strong>
             <span>Gas &amp; Convenience</span>
           </span>
         </a>
         <nav class="nav">
           <a href="/">Home</a>
+          <a href="/#prices">Prices</a>
           <a href="/deseronto-convenience-store-gas-station">Location</a>
           <a href="/blog">Blog</a>
-          <a href="/contact-directions">Contact</a>
-          <a class="nav-cta" href="tel:+16133962224">&#9742; Call Now</a>
+          <a class="nav-cta" href="tel:+16133962224">${icons.phone} Call Now</a>
         </nav>
       </div>
     </header>
-    ${hero}
     ${body}
     <footer class="site-footer">
-      <div class="wrap footer-grid">
-        <div>
-          <h3>L&amp;M Enterprises</h3>
-          <p>43 Dundas Street, Deseronto, ON K0K 1X0</p>
-          <p>Open daily 6:00 AM &ndash; 10:00 PM</p>
-          <p><a href="tel:+16133962224">613-396-2224</a></p>
+      <div class="container">
+        <h3 class="footer-title">L&amp;M ENTERPRISES</h3>
+        <div class="footer-divider"></div>
+        <p class="footer-tagline">SAGO Gas Bar Partner &bull; Full-Service Gas &amp; Convenience Store</p>
+        <div class="footer-contact">
+          <a href="tel:+16133962224">+1 (613) 396-2224</a>
+          <span class="sep">&bull;</span>
+          <span>43 Dundas St, Deseronto, ON K0K 1X0</span>
+          <span class="sep">&bull;</span>
+          <span>Open 6am-10pm Daily</span>
         </div>
-        <div>
-          <h3>Categories</h3>
-          <ul>${categoryLinks}</ul>
+        <p class="footer-subtext">Proudly serving Tyendinaga Mohawk Territory and surrounding communities</p>
+        <a class="footer-social" href="https://www.facebook.com/LandMEnterprises" target="_blank" rel="noopener noreferrer">
+          ${icons.facebook} <span>Follow Us on Facebook</span>
+        </a>
+        <div class="footer-bottom">
+          &copy; ${new Date().getFullYear()} L&amp;M Enterprises. All rights reserved.
         </div>
-        <div>
-          <h3>Quick Links</h3>
-          <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/deseronto-convenience-store-gas-station">Location</a></li>
-            <li><a href="/contact-directions">Contact &amp; Directions</a></li>
-            <li><a href="/blog">Updates</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="wrap footer-bottom">
-        &copy; ${new Date().getFullYear()} L&amp;M Enterprises. All rights reserved.
       </div>
     </footer>
   `;
 }
 
 function locationPage() {
-  const hero = `
-    <section class="hero hero-small">
-      <div class="wrap hero-grid hero-grid-tight">
-        <div class="hero-copy">
-          <p class="eyebrow">Deseronto Location</p>
-          <h1>Convenience store and gas station in Deseronto, serving Tyendinaga and nearby communities.</h1>
-          <p class="lede">
-            This page is built for customers searching for a convenience store, local fuel stop, or adult-only product categories in Deseronto without needing an online store.
-          </p>
-          <div class="cta-row">
-            <a class="button" href="/contact-directions">Get Directions</a>
-            <a class="button button-secondary" href="tel:+16133962224">Call 613-396-2224</a>
-          </div>
+  const content = `
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">Deseronto Location</div>
+        <h1>Your Local Gas Station &amp; Convenience Store</h1>
+        <p class="lead">Serving Deseronto, Tyendinaga Mohawk Territory, and nearby communities with fuel, everyday essentials, and in-store product categories.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="/contact-directions">${icons.mapPin} Get Directions</a>
+          <a class="btn btn-secondary" href="tel:+16133962224">${icons.phone} Call 613-396-2224</a>
         </div>
-        <aside class="hero-panel">
-          <p class="panel-kicker">Why People Find This Page</p>
-          <ul class="panel-list">
-            <li>Gas station in Deseronto</li>
-            <li>Convenience store near Tyendinaga</li>
-            <li>Nearby in-store adult product categories</li>
-          </ul>
-          <img class="panel-image" src="/og-image.svg" alt="L and M Enterprises brand card" />
-        </aside>
       </div>
-    </section>`;
-
-  const body = `
+    </section>
     <main>
       <section class="section">
-        <div class="wrap section-shell two-col">
-          <div>
-            <h2>Why this location page matters</h2>
-            <p>
-              Many customers search for a place first and a category second. This page helps L&amp;M Enterprises show up for people looking for a gas station in Deseronto, a convenience store near Tyendinaga, or a nearby in-person stop for adult-only categories.
-            </p>
-            <p>
-              Instead of acting like ecommerce, the page is designed to help nearby customers understand where the store is, what kinds of categories it is known for, and why it is a practical stop in the area.
-            </p>
+        <div class="container">
+          <div class="section-header">
+            <h2>Store Information</h2>
+            <div class="section-divider"></div>
+            <p>Everything you need to plan your visit to L&amp;M Enterprises.</p>
           </div>
-          <aside class="sidebar-card">
-            <h3>Store Snapshot</h3>
-            <p>43 Dundas Street</p>
-            <p>Deseronto, ON K0K 1X0</p>
-            <p>Open daily 6:00 AM to 10:00 PM</p>
-            <p><a href="tel:+16133962224">613-396-2224</a></p>
-          </aside>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="icon-circle">${icons.mapPin}</div>
+              <h3>Address</h3>
+              <p>43 Dundas Street<br>Deseronto, ON K0K 1X0</p>
+            </div>
+            <div class="info-card">
+              <div class="icon-circle">${icons.clock}</div>
+              <h3>Hours</h3>
+              <p>Open Daily<br>6:00 AM &ndash; 10:00 PM</p>
+            </div>
+            <div class="info-card">
+              <div class="icon-circle">${icons.phone}</div>
+              <h3>Phone</h3>
+              <p><a href="tel:+16133962224">613-396-2224</a><br>Call for store info</p>
+            </div>
+          </div>
         </div>
       </section>
       <section class="section section-alt">
-        <div class="wrap card-grid">
-          <article class="card">
-            <p class="card-kicker">Local Search</p>
-            <h2>Deseronto convenience store</h2>
-            <p>Built to support searches from customers who want a nearby everyday stop for convenience-store essentials.</p>
-          </article>
-          <article class="card">
-            <p class="card-kicker">Fuel Stop</p>
-            <h2>Gas station near Tyendinaga</h2>
-            <p>Helps drivers looking for a nearby practical stop instead of a broad regional search result.</p>
-          </article>
-          <article class="card">
-            <p class="card-kicker">Adult Categories</p>
-            <h2>In-store category discovery</h2>
-            <p>Supports searches around tobacco, vape, cigar, and rolling tobacco categories without listing product-by-product inventory.</p>
-          </article>
+        <div class="container">
+          <div class="section-header">
+            <h2>What We Offer</h2>
+            <div class="section-divider"></div>
+          </div>
+          <div class="card-grid">
+            <article class="card">
+              <div class="icon-circle">${icons.fuel}</div>
+              <h3>Full-Service Gas</h3>
+              <p>Partner with SAGO Gas Bar next door for guaranteed lower prices on regular, premium, and diesel fuel.</p>
+            </article>
+            <article class="card">
+              <div class="icon-circle">${icons.shoppingBag}</div>
+              <h3>Convenience Store</h3>
+              <p>Snacks, beverages, and everyday essentials for your journey. Friendly staff ready to help.</p>
+            </article>
+            <article class="card">
+              <div class="icon-circle">${icons.tag}</div>
+              <h3>Product Categories</h3>
+              <p>Tobacco, vape, cigar, and rolling tobacco categories available in-store for adult customers.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="container two-col">
+          <div>
+            <h2>Why Customers Choose L&amp;M</h2>
+            <p>Many customers search for a place first and a category second. L&amp;M Enterprises serves people looking for a gas station in Deseronto, a convenience store near Tyendinaga, or a nearby in-person stop.</p>
+            <p>Instead of acting like ecommerce, we focus on helping nearby customers understand where the store is, what we carry, and why we are a practical stop in the area.</p>
+            <div class="feature-pills">
+              <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> Full-Service Gas</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> Convenience Store</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.leaf}</span> Tobacco &amp; Vapes</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.clock}</span> Open 6am-10pm</div>
+            </div>
+          </div>
+          <div>
+            <img src="/og-image.svg" alt="L&amp;M Enterprises" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
+          </div>
         </div>
       </section>
     </main>`;
@@ -458,72 +481,58 @@ function locationPage() {
         url: `${siteUrl}/deseronto-convenience-store-gas-station`,
       },
     ],
-    content: layout(hero, body),
+    content: layout(content),
   });
 }
 
 function contactPage() {
-  const hero = `
-    <section class="hero hero-small">
-      <div class="wrap hero-grid hero-grid-tight">
-        <div class="hero-copy">
-          <p class="eyebrow">Contact & Directions</p>
-          <h1>Visit, call, or get directions to L&amp;M Enterprises in Deseronto.</h1>
-          <p class="lede">
-            Use this page if you are looking for store details, local directions, or a quick way to call before visiting.
-          </p>
-          <div class="cta-row">
-            <a class="button" href="tel:+16133962224">Call The Store</a>
-            <a class="button button-secondary" href="https://maps.google.com/?q=43+Dundas+Street+Deseronto+ON+K0K+1X0" rel="noreferrer">Open In Maps</a>
-          </div>
+  const content = `
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">Contact &amp; Directions</div>
+        <h1>Visit, Call, or Get Directions</h1>
+        <p class="lead">Find L&amp;M Enterprises at 43 Dundas Street in Deseronto. We are open daily from 6am to 10pm.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="tel:+16133962224">${icons.phone} Call The Store</a>
+          <a class="btn btn-secondary" href="https://maps.google.com/?q=43+Dundas+Street+Deseronto+ON+K0K+1X0" rel="noreferrer">${icons.mapPin} Open In Maps</a>
         </div>
-        <aside class="hero-panel">
-          <p class="panel-kicker">Store Snapshot</p>
-          <ul class="panel-list">
-            <li>43 Dundas Street, Deseronto</li>
-            <li>Open daily from 6:00 AM to 10:00 PM</li>
-            <li>Quick stop for fuel, convenience, and local categories</li>
-          </ul>
-          <img class="panel-image" src="/og-image.svg" alt="L and M Enterprises brand card" />
-        </aside>
       </div>
-    </section>`;
-
-  const body = `
+    </section>
     <main>
       <section class="section">
-        <div class="wrap section-shell detail-grid">
-          <div>
-            <h2>Store information</h2>
-            <ul class="bullet-list">
-              <li>Address: 43 Dundas Street, Deseronto, ON K0K 1X0</li>
-              <li>Phone: <a href="tel:+16133962224">613-396-2224</a></li>
-              <li>Hours: Open daily from 6:00 AM to 10:00 PM</li>
-            </ul>
-            <p>
-              Customers from Deseronto, Tyendinaga, and nearby communities can use this page for a quick contact point before stopping in.
-            </p>
+        <div class="container">
+          <div class="section-header">
+            <h2>How to Reach Us</h2>
+            <div class="section-divider"></div>
           </div>
-          <aside class="sidebar-card">
-            <h3>Quick Actions</h3>
-            <p><a class="button" href="tel:+16133962224">Call The Store</a></p>
-            <p><a class="button button-secondary" href="https://maps.google.com/?q=43+Dundas+Street+Deseronto+ON+K0K+1X0" rel="noreferrer">Open In Maps</a></p>
-          </aside>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="icon-circle">${icons.mapPin}</div>
+              <h3>Address</h3>
+              <p>43 Dundas Street<br>Deseronto, ON K0K 1X0</p>
+            </div>
+            <div class="info-card">
+              <div class="icon-circle">${icons.phone}</div>
+              <h3>Phone</h3>
+              <p><a href="tel:+16133962224">613-396-2224</a><br>Call anytime during hours</p>
+            </div>
+            <div class="info-card">
+              <div class="icon-circle">${icons.clock}</div>
+              <h3>Hours</h3>
+              <p>Open Daily<br>6:00 AM &ndash; 10:00 PM</p>
+            </div>
+          </div>
         </div>
       </section>
       <section class="section section-alt">
-        <div class="wrap section-shell two-col">
+        <div class="container two-col">
           <div>
-            <h2>Nearby communities</h2>
-            <p>
-              The store is positioned to serve Deseronto directly while also being a practical stop for Tyendinaga and surrounding area traffic.
-            </p>
+            <h2>Serving Nearby Communities</h2>
+            <p>L&amp;M Enterprises is positioned to serve Deseronto directly while also being a practical stop for Tyendinaga and surrounding area traffic. Whether you are driving through or live nearby, we are a convenient stop for fuel and essentials.</p>
           </div>
           <div>
-            <h2>What to ask about</h2>
-            <p>
-              If you are calling ahead, ask about store hours, category availability, or general visit information. The website is informational and does not process ecommerce orders.
-            </p>
+            <h2>Before You Visit</h2>
+            <p>If you are calling ahead, ask about store hours, category availability, or general visit information. The website is informational and does not process online orders.</p>
           </div>
         </div>
       </section>
@@ -547,99 +556,76 @@ function contactPage() {
         url: `${siteUrl}/contact-directions`,
       },
     ],
-    content: layout(hero, body),
+    content: layout(content),
   });
 }
 
 
 function categoryPage(category) {
-  const hero = `
-    <section class="hero hero-small">
-      <div class="wrap hero-grid hero-grid-tight">
-        <div class="hero-copy">
-          <p class="eyebrow">${escapeHtml(category.nav)}</p>
-          <h1>${escapeHtml(category.searchTitle)}</h1>
-          <p class="lede">${escapeHtml(category.intro)}</p>
-          <div class="cta-row">
-            <a class="button" href="/contact-directions">Visit The Store</a>
-            <a class="button button-secondary" href="/deseronto-convenience-store-gas-station">Why Deseronto Locals Search This</a>
-          </div>
-        </div>
-        <aside class="hero-panel">
-          <p class="panel-kicker">Nearby Search Themes</p>
-          <ul class="panel-list">
-            ${category.keywords
-              .slice(0, 3)
-              .map((keyword) => `<li>${escapeHtml(keyword)}</li>`)
-              .join("")}
-          </ul>
-          <img class="panel-image" src="/og-image.svg" alt="L and M Enterprises brand card" />
-        </aside>
-      </div>
-    </section>`;
-
-  const detailItems = category.details
-    .map((item) => `<li>${escapeHtml(item)}</li>`)
-    .join("");
-
   const relatedLinks = categories
     .filter((entry) => entry.slug !== category.slug)
-    .slice(0, 3)
+    .slice(0, 4)
     .map(
       (entry) =>
-        `<li><a href="/${entry.slug}">${escapeHtml(entry.searchTitle)}</a></li>`,
+        `<li><a href="/${entry.slug}">${icons.arrowRight} ${escapeHtml(entry.nav)}</a></li>`,
     )
     .join("");
 
-  const body = `
+  const detailCards = category.details
+    .map(
+      (item, i) => `
+      <article class="card">
+        <div class="icon-circle">${[icons.search, icons.mapPin, icons.tag][i % 3]}</div>
+        <h3>${escapeHtml(item)}</h3>
+      </article>`,
+    )
+    .join("");
+
+  const content = `
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">${escapeHtml(category.nav)}</div>
+        <h1>${escapeHtml(category.searchTitle)}</h1>
+        <p class="lead">${escapeHtml(category.intro)}</p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="/contact-directions">${icons.mapPin} Visit The Store</a>
+          <a class="btn btn-secondary" href="tel:+16133962224">${icons.phone} Call Now</a>
+        </div>
+      </div>
+    </section>
     <main>
       <section class="section">
-        <div class="wrap section-shell detail-grid">
-          <div>
-            <h2>About this category</h2>
+        <div class="container">
+          <div class="section-header">
+            <h2>About This Category</h2>
+            <div class="section-divider"></div>
             <p>${escapeHtml(category.description)}</p>
-            <ul class="bullet-list">${detailItems}</ul>
           </div>
-          <aside class="sidebar-card">
-            <h3>Store Details</h3>
-            <p>43 Dundas Street</p>
-            <p>Deseronto, ON K0K 1X0</p>
-            <p>Open daily 6:00 AM to 10:00 PM</p>
-            <p><a href="tel:+16133962224">Call for store information</a></p>
-          </aside>
+          <div class="card-grid">${detailCards}</div>
         </div>
       </section>
       <section class="section section-alt">
-        <div class="wrap section-shell two-col">
+        <div class="container two-col">
           <div>
-            <h2>Why this page exists</h2>
-            <p>
-              Customers often search by category rather than by specific product. This page helps people in Deseronto, Tyendinaga, and nearby areas understand what kinds of in-store options L&amp;M Enterprises is known for.
-            </p>
+            <h2>${escapeHtml(category.extraHeading)}</h2>
+            <p>${escapeHtml(category.extraCopy)}</p>
             <p>${escapeHtml(category.localAngle)}</p>
           </div>
           <div>
-            <h2>Related category pages</h2>
-            <ul class="bullet-list">${relatedLinks}</ul>
+            <h2>Related Categories</h2>
+            <ul class="related-list">${relatedLinks}</ul>
           </div>
         </div>
       </section>
-      <section class="section">
-        <div class="wrap section-shell two-col">
-          <div>
-            <p class="eyebrow">Local Search Focus</p>
-            <h2>${escapeHtml(category.extraHeading)}</h2>
-            <p>${escapeHtml(category.extraCopy)}</p>
+      <section class="section section-dark">
+        <div class="container">
+          <div class="section-header">
+            <h2>Visit Us In Store</h2>
+            <div class="section-divider"></div>
+            <p>L&amp;M Enterprises is located at 43 Dundas Street in Deseronto. Open daily 6am&ndash;10pm.</p>
           </div>
-          <div class="feature-list">
-            <div>
-              <strong>Deseronto intent</strong>
-              <p>Written for customers searching locally rather than browsing a national marketplace.</p>
-            </div>
-            <div>
-              <strong>Adult in-store focus</strong>
-              <p>These pages describe categories and store intent without functioning as ecommerce listings.</p>
-            </div>
+          <div style="text-align:center;">
+            <a class="btn btn-primary" href="/contact-directions">${icons.mapPin} Get Directions</a>
           </div>
         </div>
       </section>
@@ -657,41 +643,56 @@ function categoryPage(category) {
       description: category.description,
       url: `${siteUrl}/${category.slug}`,
     }],
-    content: layout(hero, body),
+    content: layout(content),
   });
 }
 
 function blogPage() {
-  const hero = `
-    <section class="hero hero-small">
-      <div class="wrap hero-grid hero-grid-tight">
-        <div class="hero-copy">
-          <p class="eyebrow">Updates</p>
-          <h1>Store updates and local information</h1>
-          <p class="lede">A simple updates page for local announcements, category highlights, and store information.</p>
-        </div>
-        <aside class="hero-panel">
-          <p class="panel-kicker">Also Explore</p>
-          <ul class="panel-list">
-            <li><a href="/gas-station-deseronto">Gas Station</a></li>
-            <li><a href="/convenience-store-deseronto">Convenience Store</a></li>
-            <li><a href="/contact-directions">Contact &amp; Directions</a></li>
-          </ul>
-        </aside>
+  const content = `
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">Updates</div>
+        <h1>Store Updates &amp; Local Info</h1>
+        <p class="lead">Local announcements, category highlights, and store information from L&amp;M Enterprises.</p>
       </div>
-    </section>`;
-
-  const body = `
+    </section>
     <main>
       <section class="section">
-        <div class="wrap">
-          <article class="card single-card">
-            <p class="card-kicker">Now Live</p>
+        <div class="container">
+          <article class="blog-card">
+            <span class="kicker">Now Live</span>
             <h2>Our category pages are focused on local search.</h2>
-            <p>
-              The current website highlights the categories customers search for most often around Deseronto and nearby communities, while keeping the site informational rather than transactional.
-            </p>
+            <p>The current website highlights the categories customers search for most often around Deseronto and nearby communities, while keeping the site informational rather than transactional.</p>
+            <p>Each category page is built to help nearby customers discover what L&amp;M Enterprises carries in-store, without acting as an online shop.</p>
           </article>
+        </div>
+      </section>
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>Also Explore</h2>
+            <div class="section-divider"></div>
+          </div>
+          <div class="card-grid">
+            <article class="card">
+              <div class="icon-circle">${icons.fuel}</div>
+              <h3>Gas Station</h3>
+              <p>Fuel prices, full-service pumping, and SAGO Gas Bar partnership details.</p>
+              <a class="btn btn-outline" href="/gas-station-deseronto" style="margin-top:1rem;">Learn More</a>
+            </article>
+            <article class="card">
+              <div class="icon-circle">${icons.shoppingBag}</div>
+              <h3>Convenience Store</h3>
+              <p>Snacks, drinks, and everyday essentials at your local stop.</p>
+              <a class="btn btn-outline" href="/convenience-store-deseronto" style="margin-top:1rem;">Learn More</a>
+            </article>
+            <article class="card">
+              <div class="icon-circle">${icons.mapPin}</div>
+              <h3>Contact &amp; Directions</h3>
+              <p>Find the store, get directions, or call ahead before visiting.</p>
+              <a class="btn btn-outline" href="/contact-directions" style="margin-top:1rem;">Learn More</a>
+            </article>
+          </div>
         </div>
       </section>
     </main>`;
@@ -703,7 +704,7 @@ function blogPage() {
     canonicalPath: "/blog",
     keywords: ["L&M Enterprises blog", "Deseronto store updates"],
     jsonLd: siteJsonLd(),
-    content: layout(hero, body),
+    content: layout(content),
   });
 }
 
@@ -714,24 +715,17 @@ function notFoundPage() {
     canonicalPath: "",
     noindex: true,
     jsonLd: siteJsonLd(),
-    content: layout(
-      `
-      <section class="hero hero-small">
-        <div class="wrap">
-          <p class="eyebrow">404</p>
-          <h1>Page not found</h1>
-          <p class="lede">The page you are looking for is not here, but the main category pages are still available.</p>
-        </div>
-      </section>`,
-      `
+    content: layout(`
       <main>
-        <section class="section">
-          <div class="wrap">
-            <a class="button" href="/">Back to homepage</a>
+        <div class="not-found">
+          <div class="container">
+            <p class="eyebrow">404</p>
+            <h1>Page Not Found</h1>
+            <p>The page you are looking for does not exist, but you can head back to the homepage or explore our store pages.</p>
+            <a class="btn btn-primary" href="/">Back to Homepage</a>
           </div>
-        </section>
-      </main>`,
-    ),
+        </div>
+      </main>`),
   });
 }
 
