@@ -3,18 +3,19 @@
 }
 
 :root {
-  --accent: #dc2626;
-  --accent-dark: #b91c1c;
-  --primary: #0f172a;
-  --primary-light: #1e293b;
+  --accent: #c90019;
+  --accent-dark: #a50015;
+  --primary: #1a1a19;
+  --primary-light: #262f38;
   --bg: #ffffff;
   --bg-alt: #f8f8f7;
-  --text: #0f172a;
-  --text-muted: #475569;
-  --text-light: #f1f5f9;
-  --border: rgba(15, 23, 42, 0.08);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --bg-card: #fdfbfa;
+  --text: #13161a;
+  --text-muted: #5f6469;
+  --text-light: #f4f1ee;
+  --border: #d5d8db;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 }
 
 html {
@@ -101,7 +102,7 @@ img {
   background: var(--accent);
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 12px rgba(201, 0, 25, 0.3);
 }
 
 .brand-mark svg {
@@ -173,7 +174,7 @@ img {
   text-align: center;
   color: #fff;
   padding: 5rem 1rem 4rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #1a1a2e 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #1a1a19 100%);
   overflow: hidden;
 }
 
@@ -182,8 +183,8 @@ img {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 20% 80%, rgba(220, 38, 38, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, rgba(201, 0, 25, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(201, 0, 25, 0.1) 0%, transparent 50%);
 }
 
 .hero-content {
@@ -313,7 +314,7 @@ img {
 
 .section-dark p,
 .section-dark li {
-  color: rgba(241, 245, 249, 0.85);
+  color: rgba(244, 241, 238, 0.85);
 }
 
 .section-header {
@@ -350,7 +351,7 @@ img {
 }
 
 .section-dark .section-header p {
-  color: rgba(241, 245, 249, 0.75);
+  color: rgba(244, 241, 238, 0.75);
 }
 
 /* ─── Card Grid ─── */
@@ -382,7 +383,7 @@ img {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: rgba(220, 38, 38, 0.1);
+  background: rgba(201, 0, 25, 0.1);
   color: var(--accent);
   margin-bottom: 1rem;
 }
@@ -459,7 +460,7 @@ img {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: rgba(220, 38, 38, 0.1);
+  background: rgba(201, 0, 25, 0.1);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -711,7 +712,7 @@ img {
 }
 
 .btn:focus-visible {
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 0 0 3px rgba(201, 0, 25, 0.3);
 }
 
 /* ─── Responsive ─── */
