@@ -24,4 +24,13 @@ function writeJSON(filename, data) {
   fs.renameSync(tmp, filePath);
 }
 
-module.exports = { readJSON, writeJSON, dataDir };
+const BLOG_CATEGORIES = [
+  "Store News",
+  "Gas & Fuel",
+  "Product Spotlight",
+  "Community",
+  "Tips & Savings",
+  "Vape & Tobacco",
+];
+
+module.exports = { readJSON, writeJSON, dataDir, BLOG_CATEGORIES };

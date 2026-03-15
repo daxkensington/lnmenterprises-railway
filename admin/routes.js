@@ -1,7 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const { readJSON, writeJSON } = require("./data");
+const { readJSON, writeJSON, BLOG_CATEGORIES } = require("./data");
 const {
   verifyLogin,
   createSession,
@@ -264,6 +264,7 @@ router.get("/blog", (req, res) => {
 });
 
 router.get("/blog/new", (req, res) => {
+  const catOptions = BLOG_CATEGORIES.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
   res.send(
     adminLayout({
       title: "New Blog Post",
@@ -272,6 +273,11 @@ router.get("/blog/new", (req, res) => {
         <form method="POST" action="/admin/blog">
           ${csrfField(req.session.csrf)}
           <div class="form-group"><label for="title">Title</label><input type="text" id="title" name="title" required /></div>
+          <div class="form-group"><label for="excerpt">Excerpt</label><textarea id="excerpt" name="excerpt" rows="2" placeholder="Short summary for post cards and SEO"></textarea></div>
+          <div class="form-group"><label for="category">Category</label><select id="category" name="category"><option value="">— Select —</option>${catOptions}</select></div>
+          <div class="form-group"><label for="featuredImage">Featured Image URL</label><input type="url" id="featuredImage" name="featuredImage" placeholder="https://..." /></div>
+          <div class="form-group"><label for="featuredImageAlt">Image Alt Text</label><input type="text" id="featuredImageAlt" name="featuredImageAlt" /></div>
+          <div class="form-group"><label for="author">Author</label><input type="text" id="author" name="author" value="L&amp;M Enterprises" /></div>
           <div class="form-group"><label for="content">Content</label><textarea id="content" name="content" rows="12"></textarea></div>
           <div class="form-group"><label><input type="checkbox" name="published" value="1" checked /> Published</label></div>
           <button type="submit">Create Post</button>
@@ -290,6 +296,11 @@ router.post("/blog", verifyCsrf, (req, res) => {
     title,
     slug,
     content: req.body.content || "",
+    excerpt: req.body.excerpt || "",
+    category: req.body.category || "",
+    featuredImage: req.body.featuredImage || "",
+    featuredImageAlt: req.body.featuredImageAlt || "",
+    author: req.body.author || "L&M Enterprises",
     date: new Date().toISOString().slice(0, 10),
     published: req.body.published === "1",
   });
@@ -301,6 +312,7 @@ router.get("/blog/:id", (req, res) => {
   const posts = readJSON("blog-posts.json", []);
   const post = posts.find((p) => p.id === req.params.id);
   if (!post) return res.status(404).send("Post not found");
+  const catOptions = BLOG_CATEGORIES.map((c) => `<option value="${escapeHtml(c)}" ${post.category === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
   res.send(
     adminLayout({
       title: `Edit: ${post.title}`,
@@ -310,6 +322,11 @@ router.get("/blog/:id", (req, res) => {
           ${csrfField(req.session.csrf)}
           <div class="form-group"><label for="title">Title</label><input type="text" id="title" name="title" value="${escapeHtml(post.title)}" required /></div>
           <div class="form-group"><label for="slug">Slug</label><input type="text" id="slug" name="slug" value="${escapeHtml(post.slug)}" /></div>
+          <div class="form-group"><label for="excerpt">Excerpt</label><textarea id="excerpt" name="excerpt" rows="2" placeholder="Short summary for post cards and SEO">${escapeHtml(post.excerpt || "")}</textarea></div>
+          <div class="form-group"><label for="category">Category</label><select id="category" name="category"><option value="">— Select —</option>${catOptions}</select></div>
+          <div class="form-group"><label for="featuredImage">Featured Image URL</label><input type="url" id="featuredImage" name="featuredImage" value="${escapeHtml(post.featuredImage || "")}" placeholder="https://..." /></div>
+          <div class="form-group"><label for="featuredImageAlt">Image Alt Text</label><input type="text" id="featuredImageAlt" name="featuredImageAlt" value="${escapeHtml(post.featuredImageAlt || "")}" /></div>
+          <div class="form-group"><label for="author">Author</label><input type="text" id="author" name="author" value="${escapeHtml(post.author || "L&M Enterprises")}" /></div>
           <div class="form-group"><label for="content">Content</label><textarea id="content" name="content" rows="12">${escapeHtml(post.content)}</textarea></div>
           <div class="form-group"><label><input type="checkbox" name="published" value="1" ${post.published ? "checked" : ""} /> Published</label></div>
           <button type="submit">Save Post</button>
@@ -332,6 +349,11 @@ router.post("/blog/:id", verifyCsrf, (req, res) => {
     title: req.body.title || posts[idx].title,
     slug: req.body.slug || posts[idx].slug,
     content: req.body.content || "",
+    excerpt: req.body.excerpt || "",
+    category: req.body.category || "",
+    featuredImage: req.body.featuredImage || "",
+    featuredImageAlt: req.body.featuredImageAlt || "",
+    author: req.body.author || "L&M Enterprises",
     published: req.body.published === "1",
   };
   writeJSON("blog-posts.json", posts);

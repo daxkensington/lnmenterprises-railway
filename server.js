@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
-const { readJSON, writeJSON } = require("./admin/data");
+const { readJSON, writeJSON, BLOG_CATEGORIES } = require("./admin/data");
 const { seedCredentials } = require("./admin/auth");
 
 const app = express();
@@ -209,6 +209,60 @@ if (!readJSON("site-content.json")) {
   });
 }
 if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
+
+// Seed SEO blog posts if they don't already exist
+(function seedSeoPosts() {
+  const posts = readJSON("blog-posts.json", []);
+  const seoPosts = [
+    {
+      id: "seo001",
+      title: "The Complete Guide to Gas Prices in Deseronto and Tyendinaga: Why We Have the Cheapest Fill-Up Near the 401",
+      slug: "cheapest-gas-prices-deseronto-tyendinaga-near-401",
+      excerpt: "Deseronto and the Tyendinaga Mohawk Territory consistently offer some of the lowest gas prices in Ontario. Here\u2019s why drivers from Belleville, Napanee, and the 401 corridor save big by filling up at L&M Enterprises on Highway 49.",
+      content: "If you have driven through the Deseronto and Tyendinaga Mohawk Territory area on Highway 49, you have probably noticed something that catches every driver\u2019s attention: the gas prices here are consistently among the lowest in all of Ontario.\n\nThis is not a fluke. There is a reason the stretch of Highway 49 between the 401 and Deseronto has become one of the most popular fuel stops in Eastern Ontario. Let us break down why gas is cheaper here, how much you can save, and why L&M Enterprises should be your go-to stop.\n\nWhy Gas Prices Are Lower in Deseronto and Tyendinaga\n\nThe Deseronto and Tyendinaga area has one of the highest concentrations of gas stations in Ontario. Within just a few kilometres along Highway 49, there are over a dozen fuel stations competing for your business. That kind of competition keeps prices sharp.\n\nThe result is that gas prices along Highway 49 regularly come in well below what you would pay at stations in Belleville, Napanee, Kingston, or at any of the highway rest stops along the 401. GasBuddy data consistently shows Deseronto area stations among the lowest-priced in the province.\n\nHow Much Can You Actually Save?\n\nThe savings add up fast. On a typical fill-up of 50 litres, the price difference between Deseronto area stations and a Belleville or Napanee station can easily save you five to ten dollars or more. For commuters who fill up weekly, that is hundreds of dollars a year staying in your pocket.\n\nFor drivers passing through on the 401, the five-minute detour down Highway 49 to L&M Enterprises pays for itself on a single tank. Whether you are driving between Toronto and Montreal, heading to Ottawa, or commuting between Kingston and Belleville, stopping in Deseronto is the smart move.\n\nWhat Fuels Does L&M Enterprises Offer?\n\nAt L&M Enterprises, we offer regular unleaded gasoline at competitive prices every day. Our pumps are well-maintained, our lot is clean, and we are open from 6 AM to 10 PM daily so you can fill up early in the morning or on your way home in the evening.\n\nWhile you are filling up, step inside our fully stocked convenience store for snacks, drinks, tobacco products, vapes, cigars, and everyday essentials. One stop covers everything you need.\n\nHow to Find L&M Enterprises from the 401\n\nGetting here from the 401 is simple. Take the Highway 49 South exit near Marysville. Head south on Highway 49 toward Deseronto. L&M Enterprises is located at 43 Dundas Street, just a five-minute drive from the highway.\n\nThe route is straightforward with no complicated turns. You will pass several other gas stations along the way, but keep driving to L&M for the best combination of price, service, and convenience store selection.\n\nDirections from Belleville: Head east on Highway 2 or take the 401 east to Highway 49 South. About 20 minutes total.\n\nDirections from Napanee: Head west on Highway 2 or take the 401 west to Highway 49 South. About 15 minutes total.\n\nDirections from Kingston: Take the 401 west to Highway 49 South. About 45 minutes.\n\nSeasonal Price Trends\n\nGas prices in Ontario tend to rise in the summer months as demand increases with road trip season. The good news is that the competitive Deseronto market means prices here stay lower than average even during peak season.\n\nSpring and fall tend to offer the best prices. Winter can see slight increases due to supply factors, but the Deseronto area still comes out ahead compared to most Eastern Ontario communities.\n\nCheck Before You Drive\n\nWant to see current prices before you make the trip? Check GasBuddy for real-time Deseronto gas prices. You can also follow L&M Enterprises on social media for updates on pricing and promotions.\n\nThe Bottom Line\n\nWhether you live in Deseronto, commute through the Bay of Quinte area, or are passing through on the 401, filling up at L&M Enterprises on Highway 49 is one of the easiest ways to save money on fuel in Ontario. Our prices are competitive, our store is stocked, and our staff are friendly.\n\nStop by L&M Enterprises at 43 Dundas Street, Deseronto. We are open 6 AM to 10 PM daily. Your wallet will thank you.",
+      category: "Gas & Fuel",
+      featuredImage: "https://picsum.photos/seed/lnm-cheapgas/800/450",
+      featuredImageAlt: "Gas pumps at L&M Enterprises in Deseronto offering competitive fuel prices near Highway 401",
+      author: "L&M Enterprises",
+      date: "2026-03-14",
+      published: true
+    },
+    {
+      id: "seo002",
+      title: "Gas Station Near the 401: Why Deseronto Is the Best Exit for Cheap Fuel Between Kingston and Belleville",
+      slug: "gas-station-near-401-deseronto-cheapest-fuel-kingston-belleville",
+      excerpt: "Driving the 401 between Kingston and Belleville? The Highway 49 exit to Deseronto puts you five minutes from some of the cheapest gas in Ontario at L&M Enterprises.",
+      content: "If you are driving the Highway 401 anywhere between Kingston and Belleville, here is a tip that experienced Ontario drivers already know: take the Highway 49 exit south toward Deseronto. In about five minutes, you will find gas prices that are significantly cheaper than anything along the 401 itself.\n\nL&M Enterprises at 43 Dundas Street in Deseronto is right on Highway 49, making it one of the easiest and most rewarding fuel stops for 401 travellers.\n\nThe Five-Minute Detour That Pays for Itself\n\nThe Highway 49 exit off the 401 is clearly marked. Head south and you will reach L&M Enterprises within five minutes. The road is straight, well-maintained, and easy to navigate even for larger vehicles.\n\nThe savings are real. Gas prices in the Deseronto and Tyendinaga area regularly come in significantly lower than what you will find at highway rest stops, truck stops, or gas stations in Belleville, Napanee, or along the 401 corridor. On a full tank, you can easily save enough to cover a coffee and a snack from our convenience store.\n\nAfter you fill up, getting back on the 401 is just as easy. Head north on Highway 49 and you are back on the highway in minutes, continuing your journey with a full tank and more money in your pocket.\n\nPerfect for Long-Distance Drivers\n\nThe 401 is the busiest highway in North America, carrying hundreds of thousands of vehicles every day. Whether you are making the Toronto to Montreal drive, heading from Toronto to Ottawa via the 416, driving between Kingston and Belleville for work, or on a road trip through Eastern Ontario, the Deseronto exit is your smart fuel stop.\n\nMany experienced drivers and truckers already know about the Deseronto gas price advantage. RV forums, travel groups, and GasBuddy communities regularly mention the Highway 49 corridor as one of the best fuel stops in the province.\n\nMore Than Just Gas\n\nWhen you pull into L&M Enterprises, you get more than cheap fuel. Our convenience store is fully stocked with everything you need for the road ahead.\n\nSnacks and drinks for the drive, including chips, chocolate bars, jerky, cold pop, water, juice, and energy drinks. Coffee and hot beverages to keep you alert on long drives. Tobacco products including cigarettes, rolling tobacco, and accessories. A full vape selection with disposable vapes, pod systems, and e-liquid. Cigars for every budget and occasion. Everyday essentials if you need anything on the go.\n\nOur staff are friendly and knowledgeable. If you need directions, a product recommendation, or just a quick chat to break up a long drive, we are happy to help.\n\nOpen When You Need Us\n\nL&M Enterprises is open from 6 AM to 10 PM daily. That means we are here for early-morning commuters leaving Kingston for Belleville, afternoon travellers heading to Ottawa or Montreal, and evening drivers making their way home.\n\nHow to Find Us from the 401\n\nTake the Highway 49 South exit from the 401 near Marysville. Drive south on Highway 49 for approximately five minutes. L&M Enterprises is located at 43 Dundas Street in Deseronto, right on the main road. You cannot miss us.\n\nComing from the west, this is the exit after Shannonville. Coming from the east, it is the exit before Napanee. The interchange is well-signed and easy to navigate.\n\nWhy This Stop Makes Sense\n\nLet us do the math. A typical sedan has a 50-litre tank. If Deseronto gas prices are even a few cents per litre cheaper than 401 highway stations, which they usually are by a noticeable margin, you save several dollars per fill-up.\n\nIf you drive the 401 regularly, those savings compound quickly. Weekly commuters could save hundreds of dollars a year just by making L&M Enterprises their regular fuel stop.\n\nAnd the detour costs you less than ten minutes. That is a hard deal to beat.\n\nJoin the Drivers Who Already Know\n\nThousands of drivers already take the Highway 49 exit to fill up in Deseronto. Now you know why. Cheaper gas, a great convenience store, and a quick easy detour that gets you back on the 401 in minutes.\n\nNext time you are driving between Kingston and Belleville, take the Highway 49 exit and stop at L&M Enterprises. Your tank and your wallet will both be fuller for it.\n\nL&M Enterprises is located at 43 Dundas Street, Deseronto, Ontario. Open 6 AM to 10 PM daily.",
+      category: "Gas & Fuel",
+      featuredImage: "https://picsum.photos/seed/lnm-401highway/800/450",
+      featuredImageAlt: "Highway 401 exit to Deseronto for cheap gas at L&M Enterprises",
+      author: "L&M Enterprises",
+      date: "2026-03-14",
+      published: true
+    },
+    {
+      id: "seo003",
+      title: "Driving to Prince Edward County? Stop at L&M Enterprises on Highway 49 for Gas, Snacks, and More",
+      slug: "prince-edward-county-stop-lm-enterprises-highway-49-gas-snacks",
+      excerpt: "Heading to Prince Edward County via the Skyway Bridge? L&M Enterprises on Highway 49 in Deseronto is your perfect last stop for cheap gas, snacks, and supplies before crossing into the County.",
+      content: "If you are heading to Prince Edward County from the east on Highway 49, you are about to drive right past one of the best fuel and supply stops in the region. L&M Enterprises sits on Highway 49 in Deseronto, just minutes before you reach the Bay of Quinte Skyway Bridge that takes you into the County.\n\nWhether you are planning a weekend of wine tasting, a beach day at Sandbanks Provincial Park, or a leisurely drive through the County\u2019s rolling farmland, stopping at L&M first is a smart move. Here is why.\n\nFuel Up Before the County\n\nPrince Edward County is a beautiful destination, but gas options inside the County can be limited and prices tend to be higher in tourist areas like Picton and Wellington. By filling up at L&M Enterprises in Deseronto, you take advantage of some of the lowest gas prices in Ontario.\n\nThe Deseronto and Tyendinaga area is well known for its competitive fuel pricing. You will pay noticeably less per litre here than at stations inside Prince Edward County or along the 401. On a full tank, the savings are enough to put toward a bottle of County wine or a nice lunch.\n\nStock Up on Road Trip Essentials\n\nOur convenience store has everything you need for a day in the County. Cold drinks including pop, water, juice, and iced tea to keep you refreshed during winery visits and beach days. Snacks like chips, chocolate bars, jerky, trail mix, and candy. Ice for your cooler, because nothing ruins a beach day like warm drinks. Sunscreen and bug spray for outdoor adventures. And all the everyday essentials you might have forgotten to pack.\n\nHeading to a campground near Sandbanks or a rental cottage? We have got your last-minute supply needs covered.\n\nTobacco, Vapes, and Cigars\n\nPlanning to enjoy a cigar at sunset overlooking the County? L&M carries a selection of cigars for every occasion and budget. We also stock a full range of cigarettes, rolling tobacco, disposable vapes, pod systems, and vape accessories. Prices on tobacco and vape products in Deseronto are competitive, so stock up before you cross the bridge.\n\nYour Gateway to Prince Edward County\n\nHighway 49 is the eastern gateway to Prince Edward County. The road runs south from the 401 through Deseronto, crosses the Bay of Quinte Skyway Bridge, and enters the County near Ameliasburgh. From there, it is a scenic drive to Picton, the County\u2019s main town, and onward to Sandbanks, Wellington, Bloomfield, and all the other charming County destinations.\n\nL&M Enterprises is perfectly positioned on this route. You will pass right by us on your way to the bridge. Pull in, fill up, grab your supplies, and continue on your way. The whole stop takes just a few minutes.\n\nWhat to Do in Prince Edward County\n\nOnce you cross the Skyway Bridge, Prince Edward County offers some of the best experiences in Ontario. Over forty wineries and cideries dot the countryside, with world-class Pinot Noir and Chardonnay leading the way. Sandbanks Provincial Park features some of the best beaches in Ontario. The town of Picton has charming shops, restaurants, and the Regent Theatre. Bloomfield and Wellington offer farm-to-table dining, craft breweries, and artisan shops. The County\u2019s quiet back roads are perfect for cycling, with gentle hills and stunning lake views.\n\nWhether you are visiting for the day or spending a long weekend, having a full tank and a car stocked with snacks makes the experience that much better.\n\nHow to Find L&M Enterprises\n\nFrom the 401: Take the Highway 49 South exit near Marysville. Drive south for about five minutes. L&M Enterprises is at 43 Dundas Street in Deseronto.\n\nFrom Belleville: Take Highway 2 east or the 401 east to Highway 49 South. About 20 minutes.\n\nFrom Napanee: Take Highway 2 west or the 401 west to Highway 49 South. About 15 minutes.\n\nFrom Kingston: Take the 401 west to Highway 49 South. About 45 minutes.\n\nOnce you leave L&M, continue south on Highway 49. You will cross the Skyway Bridge in about ten minutes and arrive in Prince Edward County.\n\nMake L&M Your County Trip Tradition\n\nMany of our regular customers have made L&M Enterprises their standard stop before heading into the County. They fill up, grab a cold drink and some snacks, and cross the bridge with everything they need for the day.\n\nIt is a simple habit that saves money and time. No need to hunt for a gas station once you are in the County. No paying tourist-area prices. Just a quick, easy stop at a friendly local store with great prices and a well-stocked shop.\n\nNext time you are heading to Prince Edward County, make L&M Enterprises your first stop. We are open 6 AM to 10 PM daily at 43 Dundas Street, Deseronto, Ontario, right on Highway 49 before the Skyway Bridge. See you on your way to the County.",
+      category: "Tips & Savings",
+      featuredImage: "https://picsum.photos/seed/lnm-pec-skyway/800/450",
+      featuredImageAlt: "Bay of Quinte Skyway Bridge on Highway 49 near L&M Enterprises in Deseronto",
+      author: "L&M Enterprises",
+      date: "2026-03-14",
+      published: true
+    }
+  ];
+  let updated = false;
+  for (const seoPost of seoPosts) {
+    if (!posts.find(p => p.id === seoPost.id)) {
+      posts.push(seoPost);
+      updated = true;
+    }
+  }
+  if (updated) writeJSON("blog-posts.json", posts);
+})();
 if (!readJSON("contact-messages.json")) writeJSON("contact-messages.json", []);
 
 function loadCategories() { return readJSON("categories.json", defaultCategories); }
@@ -251,6 +305,7 @@ function pageTemplate({
   jsonLd,
   keywords = [],
   noindex = false,
+  ogImage = null,
 }) {
   const canonical = `${siteUrl}${canonicalPath}`;
   const keywordsContent = keywords.join(", ");
@@ -272,18 +327,18 @@ function pageTemplate({
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${canonical}" />
     <meta property="og:site_name" content="L&amp;M Enterprises" />
-    <meta property="og:image" content="${siteUrl}/og-image.svg" />
+    <meta property="og:image" content="${ogImage || `${siteUrl}/og-image.svg`}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
-    <meta name="twitter:image" content="${siteUrl}/og-image.svg" />
+    <meta name="twitter:image" content="${ogImage || `${siteUrl}/og-image.svg`}" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#dc2626" />
+    <meta name="theme-color" content="#c90019" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=3" />
+    <link rel="stylesheet" href="/styles.css?v=5" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
   </head>
   <body>
@@ -363,7 +418,63 @@ const icons = {
   leaf: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
   tag: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>',
   shoppingBag: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+  user: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  calendar: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>',
 };
+
+/* ── Blog helpers ── */
+function readingTime(content) {
+  const words = (content || "").split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
+function contentToHtml(text) {
+  if (!text) return "";
+  return text
+    .split(/\n\n+/)
+    .map((block) => `<p>${escapeHtml(block.trim()).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+}
+
+function formatDate(dateStr) {
+  try {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  } catch { return dateStr; }
+}
+
+function blogPostJsonLd(post) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || (post.content || "").slice(0, 160),
+    datePublished: post.date,
+    dateModified: post.date,
+    author: { "@type": "Organization", name: post.author || "L&M Enterprises", url: siteUrl },
+    publisher: { "@type": "Organization", name: "L&M Enterprises", url: siteUrl, logo: { "@type": "ImageObject", url: `${siteUrl}/og-image.svg` } },
+    image: post.featuredImage || `${siteUrl}/og-image.svg`,
+    url: `${siteUrl}/blog/${post.slug}`,
+    mainEntityOfPage: `${siteUrl}/blog/${post.slug}`,
+    wordCount: (post.content || "").split(/\s+/).filter(Boolean).length,
+  };
+}
+
+function blogListJsonLd(posts) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "L&M Enterprises Blog",
+    url: `${siteUrl}/blog`,
+    publisher: { "@type": "Organization", name: "L&M Enterprises" },
+    blogPost: posts.slice(0, 10).map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      url: `${siteUrl}/blog/${p.slug}`,
+      datePublished: p.date,
+    })),
+  };
+}
 
 function layout(body) {
   const sc = loadSiteContent();
@@ -718,37 +829,57 @@ function categoryPage(category) {
   });
 }
 
-function blogPage() {
-  const posts = readJSON("blog-posts.json", []).filter((p) => p.published);
+function blogPage(activeCategory = null) {
+  let posts = readJSON("blog-posts.json", []).filter((p) => p.published);
+  if (activeCategory) posts = posts.filter((p) => p.category === activeCategory);
+
+  const allPosts = readJSON("blog-posts.json", []).filter((p) => p.published);
+  const usedCategories = [...new Set(allPosts.map((p) => p.category).filter(Boolean))];
+
+  const filterPills = `
+    <div class="blog-filters">
+      <a class="blog-filter-pill${!activeCategory ? " active" : ""}" href="/blog">All</a>
+      ${usedCategories.map((c) => `<a class="blog-filter-pill${activeCategory === c ? " active" : ""}" href="/blog?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join("")}
+    </div>`;
+
   const postCards = posts.length
-    ? posts
-        .map(
-          (p) => `
-          <article class="blog-card">
-            <span class="kicker">${escapeHtml(p.date)}</span>
-            <h2><a href="/blog/${escapeHtml(p.slug)}" style="color:inherit;text-decoration:none;">${escapeHtml(p.title)}</a></h2>
-            <p>${escapeHtml((p.content || "").slice(0, 200))}${p.content && p.content.length > 200 ? "..." : ""}</p>
-            <a class="btn btn-outline" href="/blog/${escapeHtml(p.slug)}" style="margin-top:0.5rem;">Read More</a>
-          </article>`,
-        )
-        .join("")
-    : `<article class="blog-card">
-        <span class="kicker">Now Live</span>
-        <h2>Our category pages are focused on local search.</h2>
-        <p>The current website highlights the categories customers search for most often around Deseronto and nearby communities, while keeping the site informational rather than transactional.</p>
-      </article>`;
+    ? posts.map((p) => {
+        const excerpt = p.excerpt || (p.content || "").slice(0, 150) + ((p.content || "").length > 150 ? "..." : "");
+        const imgHtml = p.featuredImage
+          ? `<img class="blog-post-card__img" src="${escapeHtml(p.featuredImage)}" alt="${escapeHtml(p.featuredImageAlt || p.title)}" loading="lazy" />`
+          : `<div class="blog-post-card__img blog-post-card__img--fallback"></div>`;
+        return `
+          <a href="/blog/${escapeHtml(p.slug)}" class="blog-post-card">
+            ${imgHtml}
+            <div class="blog-post-card__body">
+              ${p.category ? `<span class="blog-post-card__cat">${escapeHtml(p.category)}</span>` : ""}
+              <h3 class="blog-post-card__title">${escapeHtml(p.title)}</h3>
+              <p class="blog-post-card__excerpt">${escapeHtml(excerpt)}</p>
+            </div>
+            <div class="blog-post-card__meta">
+              <span>${formatDate(p.date)}</span>
+              <span>${readingTime(p.content)} min read</span>
+            </div>
+          </a>`;
+      }).join("")
+    : `<div style="text-align:center;padding:3rem 0;color:var(--text-muted);">
+        <p>No posts found${activeCategory ? ` in "${escapeHtml(activeCategory)}"` : ""}. Check back soon!</p>
+      </div>`;
 
   const content = `
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-badge">Updates</div>
+        <div class="hero-badge">Blog</div>
         <h1>Store Updates &amp; Local Info</h1>
-        <p class="lead">Local announcements, category highlights, and store information from L&amp;M Enterprises.</p>
+        <p class="lead">News, tips, and product highlights from L&amp;M Enterprises in Deseronto.</p>
       </div>
     </section>
     <main>
       <section class="section">
-        <div class="container">${postCards}</div>
+        <div class="container">
+          ${filterPills}
+          <div class="blog-grid">${postCards}</div>
+        </div>
       </section>
       <section class="section section-alt">
         <div class="container">
@@ -781,43 +912,99 @@ function blogPage() {
     </main>`;
 
   return pageTemplate({
-    title: "L&M Enterprises | Store Updates",
-    description:
-      "Read local store updates and category-focused information from L&M Enterprises in Deseronto, Ontario.",
+    title: activeCategory ? `${activeCategory} | L&M Enterprises Blog` : "L&M Enterprises | Blog",
+    description: "News, tips, and product highlights from L&M Enterprises — your gas station, convenience store, and tobacco & vape shop in Deseronto, Ontario.",
     canonicalPath: "/blog",
-    keywords: ["L&M Enterprises blog", "Deseronto store updates"],
-    jsonLd: siteJsonLd(),
+    keywords: ["L&M Enterprises blog", "Deseronto store updates", "gas station blog", "convenience store news"],
+    jsonLd: blogListJsonLd(allPosts),
     content: layout(content),
   });
 }
 
 function blogPostPage(post) {
+  const allPosts = readJSON("blog-posts.json", []).filter((p) => p.published);
+  const related = allPosts
+    .filter((p) => p.id !== post.id && post.category && p.category === post.category)
+    .slice(0, 3);
+  const mins = readingTime(post.content);
+  const date = formatDate(post.date);
+  const author = post.author || "L&M Enterprises";
+  const category = post.category || "";
+  const excerpt = post.excerpt || (post.content || "").slice(0, 160);
+  const heroStyle = post.featuredImage
+    ? `background-image:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('${escapeHtml(post.featuredImage)}');background-size:cover;background-position:center;`
+    : "";
+  const heroClass = post.featuredImage ? "hero hero--blog-post" : "hero";
+
+  const relatedHtml = related.length
+    ? `<section class="section" style="background:var(--bg-alt);">
+        <div class="container">
+          <h2 style="text-align:center;margin-bottom:2rem;">Related Posts</h2>
+          <div class="blog-grid">
+            ${related.map((r) => {
+              const rMins = readingTime(r.content);
+              const rDate = formatDate(r.date);
+              const imgHtml = r.featuredImage
+                ? `<img class="blog-post-card__img" src="${escapeHtml(r.featuredImage)}" alt="${escapeHtml(r.featuredImageAlt || r.title)}" loading="lazy" />`
+                : `<div class="blog-post-card__img blog-post-card__img--fallback"></div>`;
+              return `<a href="/blog/${escapeHtml(r.slug)}" class="blog-post-card">
+                ${imgHtml}
+                <div class="blog-post-card__body">
+                  ${r.category ? `<span class="blog-post-card__cat">${escapeHtml(r.category)}</span>` : ""}
+                  <h3 class="blog-post-card__title">${escapeHtml(r.title)}</h3>
+                  <p class="blog-post-card__excerpt">${escapeHtml(r.excerpt || (r.content || "").slice(0, 120))}</p>
+                </div>
+                <div class="blog-post-card__meta">
+                  <span>${rDate}</span>
+                  <span>${rMins} min read</span>
+                </div>
+              </a>`;
+            }).join("")}
+          </div>
+        </div>
+      </section>`
+    : "";
+
   const content = `
-    <section class="hero">
+    <section class="${heroClass}" ${heroStyle ? `style="${heroStyle}"` : ""}>
       <div class="hero-content">
-        <div class="hero-badge">${escapeHtml(post.date)}</div>
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span aria-hidden="true">/</span>
+          <a href="/blog">Blog</a>
+          <span aria-hidden="true">/</span>
+          <span>${escapeHtml(post.title)}</span>
+        </nav>
         <h1>${escapeHtml(post.title)}</h1>
       </div>
     </section>
     <main>
       <section class="section">
         <div class="container">
-          <article class="blog-card">
-            <div style="white-space:pre-wrap;line-height:1.8;">${escapeHtml(post.content).replace(/\n/g, "<br>")}</div>
+          <div class="blog-post-meta">
+            <span>${icons.user} ${escapeHtml(author)}</span>
+            <span>${icons.calendar} ${date}</span>
+            ${category ? `<span><a href="/blog?category=${encodeURIComponent(category)}">${escapeHtml(category)}</a></span>` : ""}
+            <span>${mins} min read</span>
+          </div>
+          <article class="blog-post-body">
+            ${contentToHtml(post.content)}
           </article>
-          <div style="margin-top:2rem;text-align:center;">
+          <div style="margin-top:3rem;text-align:center;">
             <a class="btn btn-primary" href="/blog">${icons.arrowRight} Back to Blog</a>
           </div>
         </div>
       </section>
+      ${relatedHtml}
     </main>`;
 
   return pageTemplate({
     title: `${post.title} | L&M Enterprises`,
-    description: (post.content || "").slice(0, 160),
+    description: excerpt,
     canonicalPath: `/blog/${post.slug}`,
-    keywords: ["L&M Enterprises blog", "Deseronto store updates"],
-    jsonLd: siteJsonLd(),
+    keywords: ["L&M Enterprises blog", "Deseronto store updates", ...(category ? [category.toLowerCase()] : [])],
+    jsonLd: blogPostJsonLd(post),
+    ogImage: post.featuredImage || null,
     content: layout(content),
   });
 }
@@ -906,8 +1093,8 @@ app.get("/", (_req, res) => {
   res.sendFile(indexFile);
 });
 
-app.get("/blog", (_req, res) => {
-  res.send(blogPage());
+app.get("/blog", (req, res) => {
+  res.send(blogPage(req.query.category || null));
 });
 
 app.get("/blog/:slug", (req, res, next) => {
