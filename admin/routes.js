@@ -10,9 +10,32 @@ const {
   setSessionCookie,
   clearSessionCookie,
   requireAuth,
+  requireRole,
   verifyCsrf,
+  getAllUsers,
+  findUserById,
+  createUser,
+  updateUser,
+  deactivateUser,
+  reactivateUser,
+  changeUserPassword,
 } = require("./auth");
-const { adminLayout, loginPage, csrfField, escapeHtml } = require("./templates");
+const {
+  adminLayout,
+  loginPage,
+  csrfField,
+  escapeHtml,
+  staffListPage,
+  staffFormPage,
+  gasPricesPage,
+  promotionsListPage,
+  promotionFormPage,
+  winnersListPage,
+  auditLogPage,
+  reviewsPage,
+} = require("./templates");
+const { appendAuditLog } = require("./audit");
+const { syncGoogleReviews } = require("./reviews");
 
 const router = express.Router();
 
@@ -26,10 +49,11 @@ router.get("/login", (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const valid = await verifyLogin(username, password);
-  if (!valid) return res.send(loginPage("Invalid username or password."));
-  const sessionId = createSession(username);
+  const user = await verifyLogin(username, password);
+  if (!user) return res.send(loginPage("Invalid username or password."));
+  const sessionId = createSession(user);
   setSessionCookie(res, sessionId);
+  appendAuditLog({ req: { session: { username: user.username, userId: user.id }, ip: req.ip, connection: req.connection }, actionType: "login", entityType: "staff", entityId: user.id });
   res.redirect("/admin");
 });
 
@@ -48,11 +72,16 @@ router.get("/", (req, res) => {
   const posts = readJSON("blog-posts.json", []);
   const messages = readJSON("contact-messages.json", []);
   const unread = messages.filter((m) => !m.read).length;
+  const gasPrices = readJSON("gas-prices.json", {});
+  const promotions = readJSON("promotions.json", []);
+  const activePromos = promotions.filter((p) => p.isActive).length;
+  const winners = readJSON("winners.json", []);
 
   res.send(
     adminLayout({
       title: "Dashboard",
       activeNav: "dashboard",
+      role: req.session.role,
       content: `
         <div class="stats-grid">
           <div class="stat-card">
@@ -70,6 +99,21 @@ router.get("/", (req, res) => {
             <div class="stat-label">Categories</div>
             <a href="/admin/categories">Edit</a>
           </div>
+          <div class="stat-card">
+            <div class="stat-number">${gasPrices.regular || "0.00"}</div>
+            <div class="stat-label">Regular Gas</div>
+            <a href="/admin/gas-prices">Update</a>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${activePromos}</div>
+            <div class="stat-label">Active Promos</div>
+            <a href="/admin/promotions">Manage</a>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${winners.length}</div>
+            <div class="stat-label">Winners</div>
+            <a href="/admin/winners">View</a>
+          </div>
         </div>`,
     }),
   );
@@ -83,6 +127,7 @@ router.get("/content", (req, res) => {
     adminLayout({
       title: "Site Content",
       activeNav: "content",
+      role: req.session.role,
       flash,
       content: `
         <form method="POST" action="/admin/content">
@@ -122,8 +167,11 @@ router.get("/content", (req, res) => {
 });
 
 router.post("/content", verifyCsrf, (req, res) => {
+  const oldContent = readJSON("site-content.json", {});
   const { businessName, phone, address, hours, hoursNote, promoBanner, facebookUrl } = req.body;
-  writeJSON("site-content.json", { businessName, phone, address, hours, hoursNote, promoBanner, facebookUrl });
+  const newContent = { businessName, phone, address, hours, hoursNote, promoBanner, facebookUrl };
+  writeJSON("site-content.json", newContent);
+  appendAuditLog({ req, actionType: "update", entityType: "site-content", oldValue: oldContent, newValue: newContent });
   res.redirect("/admin/content?saved=1");
 });
 
@@ -141,6 +189,7 @@ router.get("/categories", (req, res) => {
     adminLayout({
       title: "Categories",
       activeNav: "categories",
+      role: req.session.role,
       flash,
       content: `
         <table class="admin-table">
@@ -159,6 +208,7 @@ router.get("/categories/:slug", (req, res) => {
     adminLayout({
       title: `Edit: ${cat.nav}`,
       activeNav: "categories",
+      role: req.session.role,
       content: `
         <form method="POST" action="/admin/categories/${escapeHtml(cat.slug)}">
           ${csrfField(req.session.csrf)}
@@ -183,6 +233,7 @@ router.post("/categories/:slug", verifyCsrf, (req, res) => {
   const cats = readJSON("categories.json", []);
   const idx = cats.findIndex((c) => c.slug === req.params.slug);
   if (idx === -1) return res.status(404).send("Category not found");
+  const oldCat = { ...cats[idx] };
   const b = req.body;
   cats[idx] = {
     ...cats[idx],
@@ -198,6 +249,7 @@ router.post("/categories/:slug", verifyCsrf, (req, res) => {
     keywords: (b.keywords || "").split(",").map((s) => s.trim()).filter(Boolean),
   };
   writeJSON("categories.json", cats);
+  appendAuditLog({ req, actionType: "update", entityType: "category", entityId: cats[idx].slug, oldValue: oldCat, newValue: cats[idx] });
   res.redirect("/admin/categories?saved=1");
 });
 
@@ -219,6 +271,7 @@ router.get("/faqs", (req, res) => {
     adminLayout({
       title: "FAQs",
       activeNav: "faqs",
+      role: req.session.role,
       flash,
       content: `
         <form method="POST" action="/admin/faqs">
@@ -231,10 +284,12 @@ router.get("/faqs", (req, res) => {
 });
 
 router.post("/faqs", verifyCsrf, (req, res) => {
+  const oldFaqs = readJSON("faqs.json", []);
   const questions = Array.isArray(req.body.question) ? req.body.question : [req.body.question];
   const answers = Array.isArray(req.body.answer) ? req.body.answer : [req.body.answer];
   const faqs = questions.map((q, i) => ({ question: q, answer: answers[i] || "" })).filter((f) => f.question.trim());
   writeJSON("faqs.json", faqs);
+  appendAuditLog({ req, actionType: "update", entityType: "faq", oldValue: oldFaqs, newValue: faqs });
   res.redirect("/admin/faqs?saved=1");
 });
 
@@ -252,6 +307,7 @@ router.get("/blog", (req, res) => {
     adminLayout({
       title: "Blog Posts",
       activeNav: "blog",
+      role: req.session.role,
       flash,
       content: `
         <a href="/admin/blog/new" class="btn-action">New Post</a>
@@ -269,6 +325,7 @@ router.get("/blog/new", (req, res) => {
     adminLayout({
       title: "New Blog Post",
       activeNav: "blog",
+      role: req.session.role,
       content: `
         <form method="POST" action="/admin/blog">
           ${csrfField(req.session.csrf)}
@@ -280,6 +337,12 @@ router.get("/blog/new", (req, res) => {
           <div class="form-group"><label for="author">Author</label><input type="text" id="author" name="author" value="L&amp;M Enterprises" /></div>
           <div class="form-group"><label for="content">Content</label><textarea id="content" name="content" rows="12"></textarea></div>
           <div class="form-group"><label><input type="checkbox" name="published" value="1" checked /> Published</label></div>
+          <details class="fr-fields" style="margin-top:1.5rem;border:1px solid var(--border,#d5d8db);border-radius:8px;padding:1rem;">
+            <summary style="cursor:pointer;font-weight:600;">French Translation (Optional)</summary>
+            <div class="form-group"><label for="titleFr">Titre (FR)</label><input type="text" id="titleFr" name="titleFr" /></div>
+            <div class="form-group"><label for="excerptFr">Extrait (FR)</label><textarea id="excerptFr" name="excerptFr" rows="2"></textarea></div>
+            <div class="form-group"><label for="contentFr">Contenu (FR)</label><textarea id="contentFr" name="contentFr" rows="8"></textarea></div>
+          </details>
           <button type="submit">Create Post</button>
           <a href="/admin/blog" class="btn-link">Cancel</a>
         </form>`,
@@ -291,7 +354,7 @@ router.post("/blog", verifyCsrf, (req, res) => {
   const posts = readJSON("blog-posts.json", []);
   const title = req.body.title || "Untitled";
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  posts.unshift({
+  const newPost = {
     id: crypto.randomBytes(8).toString("hex"),
     title,
     slug,
@@ -303,8 +366,13 @@ router.post("/blog", verifyCsrf, (req, res) => {
     author: req.body.author || "L&M Enterprises",
     date: new Date().toISOString().slice(0, 10),
     published: req.body.published === "1",
-  });
+    titleFr: req.body.titleFr || "",
+    excerptFr: req.body.excerptFr || "",
+    contentFr: req.body.contentFr || "",
+  };
+  posts.unshift(newPost);
   writeJSON("blog-posts.json", posts);
+  appendAuditLog({ req, actionType: "create", entityType: "blog-post", entityId: newPost.id, newValue: { title: newPost.title, slug: newPost.slug } });
   res.redirect("/admin/blog?saved=1");
 });
 
@@ -317,6 +385,7 @@ router.get("/blog/:id", (req, res) => {
     adminLayout({
       title: `Edit: ${post.title}`,
       activeNav: "blog",
+      role: req.session.role,
       content: `
         <form method="POST" action="/admin/blog/${escapeHtml(post.id)}">
           ${csrfField(req.session.csrf)}
@@ -329,6 +398,12 @@ router.get("/blog/:id", (req, res) => {
           <div class="form-group"><label for="author">Author</label><input type="text" id="author" name="author" value="${escapeHtml(post.author || "L&M Enterprises")}" /></div>
           <div class="form-group"><label for="content">Content</label><textarea id="content" name="content" rows="12">${escapeHtml(post.content)}</textarea></div>
           <div class="form-group"><label><input type="checkbox" name="published" value="1" ${post.published ? "checked" : ""} /> Published</label></div>
+          <details class="fr-fields" style="margin-top:1.5rem;border:1px solid var(--border,#d5d8db);border-radius:8px;padding:1rem;">
+            <summary style="cursor:pointer;font-weight:600;">French Translation (Optional)</summary>
+            <div class="form-group"><label for="titleFr">Titre (FR)</label><input type="text" id="titleFr" name="titleFr" value="${escapeHtml(post.titleFr || "")}" /></div>
+            <div class="form-group"><label for="excerptFr">Extrait (FR)</label><textarea id="excerptFr" name="excerptFr" rows="2">${escapeHtml(post.excerptFr || "")}</textarea></div>
+            <div class="form-group"><label for="contentFr">Contenu (FR)</label><textarea id="contentFr" name="contentFr" rows="8">${escapeHtml(post.contentFr || "")}</textarea></div>
+          </details>
           <button type="submit">Save Post</button>
           <a href="/admin/blog" class="btn-link">Cancel</a>
         </form>
@@ -344,6 +419,7 @@ router.post("/blog/:id", verifyCsrf, (req, res) => {
   const posts = readJSON("blog-posts.json", []);
   const idx = posts.findIndex((p) => p.id === req.params.id);
   if (idx === -1) return res.status(404).send("Post not found");
+  const oldPost = { title: posts[idx].title, slug: posts[idx].slug };
   posts[idx] = {
     ...posts[idx],
     title: req.body.title || posts[idx].title,
@@ -355,15 +431,21 @@ router.post("/blog/:id", verifyCsrf, (req, res) => {
     featuredImageAlt: req.body.featuredImageAlt || "",
     author: req.body.author || "L&M Enterprises",
     published: req.body.published === "1",
+    titleFr: req.body.titleFr || "",
+    excerptFr: req.body.excerptFr || "",
+    contentFr: req.body.contentFr || "",
   };
   writeJSON("blog-posts.json", posts);
+  appendAuditLog({ req, actionType: "update", entityType: "blog-post", entityId: posts[idx].id, oldValue: oldPost, newValue: { title: posts[idx].title, slug: posts[idx].slug } });
   res.redirect("/admin/blog?saved=1");
 });
 
 router.post("/blog/:id/delete", verifyCsrf, (req, res) => {
   let posts = readJSON("blog-posts.json", []);
+  const post = posts.find((p) => p.id === req.params.id);
   posts = posts.filter((p) => p.id !== req.params.id);
   writeJSON("blog-posts.json", posts);
+  appendAuditLog({ req, actionType: "delete", entityType: "blog-post", entityId: req.params.id, oldValue: post ? { title: post.title } : null });
   res.redirect("/admin/blog?deleted=1");
 });
 
@@ -381,6 +463,7 @@ router.get("/messages", (req, res) => {
     adminLayout({
       title: "Messages",
       activeNav: "messages",
+      role: req.session.role,
       flash,
       content: `
         <table class="admin-table">
@@ -403,6 +486,7 @@ router.get("/messages/:id", (req, res) => {
     adminLayout({
       title: "Message",
       activeNav: "messages",
+      role: req.session.role,
       content: `
         <div class="message-detail">
           <p><strong>From:</strong> ${escapeHtml(msg.name)} &lt;${escapeHtml(msg.email)}&gt;</p>
@@ -425,8 +509,10 @@ router.get("/messages/:id", (req, res) => {
 
 router.post("/messages/:id/delete", verifyCsrf, (req, res) => {
   let messages = readJSON("contact-messages.json", []);
+  const msg = messages.find((m) => m.id === req.params.id);
   messages = messages.filter((m) => m.id !== req.params.id);
   writeJSON("contact-messages.json", messages);
+  appendAuditLog({ req, actionType: "delete", entityType: "message", entityId: req.params.id, oldValue: msg ? { name: msg.name, subject: msg.subject } : null });
   res.redirect("/admin/messages?deleted=1");
 });
 
@@ -437,6 +523,7 @@ router.get("/password", (req, res) => {
     adminLayout({
       title: "Change Password",
       activeNav: "password",
+      role: req.session.role,
       flash,
       content: `
         <form method="POST" action="/admin/password">
@@ -452,15 +539,16 @@ router.get("/password", (req, res) => {
 
 router.post("/password", verifyCsrf, async (req, res) => {
   const { current, newpass, confirm } = req.body;
-  const creds = readJSON("credentials.json");
-  if (!creds) return res.status(500).send("Credentials file missing");
+  const user = findUserById(req.session.userId);
+  if (!user) return res.status(500).send("User not found");
 
-  const valid = await bcrypt.compare(current, creds.passwordHash);
+  const valid = await bcrypt.compare(current, user.passwordHash);
   if (!valid) {
     return res.send(
       adminLayout({
         title: "Change Password",
         activeNav: "password",
+        role: req.session.role,
         flash: "Current password is incorrect.",
         content: `<a href="/admin/password">Try again</a>`,
       }),
@@ -471,6 +559,7 @@ router.post("/password", verifyCsrf, async (req, res) => {
       adminLayout({
         title: "Change Password",
         activeNav: "password",
+        role: req.session.role,
         flash: "New passwords do not match.",
         content: `<a href="/admin/password">Try again</a>`,
       }),
@@ -481,14 +570,288 @@ router.post("/password", verifyCsrf, async (req, res) => {
       adminLayout({
         title: "Change Password",
         activeNav: "password",
+        role: req.session.role,
         flash: "Password must be at least 8 characters.",
         content: `<a href="/admin/password">Try again</a>`,
       }),
     );
   }
-  creds.passwordHash = await bcrypt.hash(newpass, 10);
-  writeJSON("credentials.json", creds);
+  changeUserPassword(user.id, newpass);
+  appendAuditLog({ req, actionType: "password-change", entityType: "staff", entityId: user.id });
   res.redirect("/admin/password?saved=1");
+});
+
+// ── Staff Management (owner only) ──
+router.get("/staff", requireRole("owner"), (req, res) => {
+  const users = getAllUsers();
+  res.send(staffListPage({ users, csrf: req.session.csrf, role: req.session.role }));
+});
+
+router.get("/staff/new", requireRole("owner"), (req, res) => {
+  res.send(staffFormPage({ user: {}, csrf: req.session.csrf, isNew: true, role: req.session.role }));
+});
+
+router.post("/staff", requireRole("owner"), verifyCsrf, (req, res) => {
+  const { username, displayName, email, role, password } = req.body;
+  if (!username || !password || password.length < 8) {
+    return res.send(
+      adminLayout({
+        title: "New Staff Member",
+        activeNav: "staff",
+        role: req.session.role,
+        flash: "Username and password (min 8 chars) are required.",
+        content: `<a href="/admin/staff/new">Try again</a>`,
+      }),
+    );
+  }
+  try {
+    const newUser = createUser({ username, displayName, email, password, role: role || "staff" });
+    appendAuditLog({ req, actionType: "create", entityType: "staff", entityId: newUser.id, newValue: { username: newUser.username, role: newUser.role } });
+    res.redirect("/admin/staff");
+  } catch (err) {
+    return res.send(
+      adminLayout({
+        title: "New Staff Member",
+        activeNav: "staff",
+        role: req.session.role,
+        flash: err.message,
+        content: `<a href="/admin/staff/new">Try again</a>`,
+      }),
+    );
+  }
+});
+
+router.get("/staff/:id", requireRole("owner"), (req, res) => {
+  const user = findUserById(req.params.id);
+  if (!user) return res.status(404).send("User not found");
+  res.send(staffFormPage({ user, csrf: req.session.csrf, isNew: false, role: req.session.role }));
+});
+
+router.post("/staff/:id", requireRole("owner"), verifyCsrf, (req, res) => {
+  const { displayName, email, role } = req.body;
+  const oldUser = findUserById(req.params.id);
+  const updated = updateUser(req.params.id, { displayName, email, role });
+  if (!updated) return res.status(404).send("User not found");
+  appendAuditLog({ req, actionType: "update", entityType: "staff", entityId: req.params.id, oldValue: oldUser ? { displayName: oldUser.displayName, role: oldUser.role } : null, newValue: { displayName, role } });
+  res.redirect("/admin/staff");
+});
+
+router.post("/staff/:id/toggle-active", requireRole("owner"), verifyCsrf, (req, res) => {
+  const user = findUserById(req.params.id);
+  if (!user) return res.status(404).send("User not found");
+  if (user.id === req.session.userId) {
+    return res.send(
+      adminLayout({
+        title: "Staff Management",
+        activeNav: "staff",
+        role: req.session.role,
+        flash: "You cannot deactivate your own account.",
+        content: `<a href="/admin/staff">Go back</a>`,
+      }),
+    );
+  }
+  if (user.isActive) {
+    deactivateUser(user.id);
+    appendAuditLog({ req, actionType: "update", entityType: "staff", entityId: user.id, newValue: { isActive: false } });
+  } else {
+    reactivateUser(user.id);
+    appendAuditLog({ req, actionType: "update", entityType: "staff", entityId: user.id, newValue: { isActive: true } });
+  }
+  res.redirect("/admin/staff");
+});
+
+router.post("/staff/:id/reset-password", requireRole("owner"), verifyCsrf, (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 8) {
+    return res.send(
+      adminLayout({
+        title: "Staff Management",
+        activeNav: "staff",
+        role: req.session.role,
+        flash: "Password must be at least 8 characters.",
+        content: `<a href="/admin/staff/${escapeHtml(req.params.id)}">Go back</a>`,
+      }),
+    );
+  }
+  const result = changeUserPassword(req.params.id, newPassword);
+  if (!result) return res.status(404).send("User not found");
+  appendAuditLog({ req, actionType: "password-change", entityType: "staff", entityId: req.params.id });
+  res.redirect("/admin/staff");
+});
+
+// ── Gas Prices ──
+router.get("/gas-prices", (req, res) => {
+  const gasPrices = readJSON("gas-prices.json", {});
+  const flash = req.query.saved === "1" ? "Gas prices updated successfully." : "";
+  const types = [
+    { key: "regular", label: "Regular" },
+    { key: "midGrade", label: "Mid-Grade" },
+    { key: "premium", label: "Premium" },
+    { key: "diesel", label: "Diesel" },
+  ];
+  const fields = types
+    .map(
+      (t) => `
+      <div class="form-group">
+        <label for="${t.key}">${escapeHtml(t.label)} (cents/litre)</label>
+        <input type="text" id="${t.key}" name="${t.key}" value="${escapeHtml(gasPrices[t.key] || "0.00")}" pattern="[0-9]*\\.?[0-9]*" />
+      </div>`,
+    )
+    .join("");
+
+  res.send(
+    adminLayout({
+      title: "Gas Prices",
+      activeNav: "gas-prices",
+      role: req.session.role,
+      flash,
+      content: `
+        <p>Set current fuel prices. These are displayed on the public site. Set to 0.00 to hide a fuel type.</p>
+        <form method="POST" action="/admin/gas-prices">
+          ${csrfField(req.session.csrf)}
+          ${fields}
+          <div class="form-group">
+            <label for="updatedLabel">Last Updated Label</label>
+            <input type="text" id="updatedLabel" name="updatedLabel" value="${escapeHtml(gasPrices.updatedLabel || "")}" placeholder="e.g. Updated today at 8:00 AM" />
+          </div>
+          <button type="submit">Save Gas Prices</button>
+        </form>`,
+    }),
+  );
+});
+
+router.post("/gas-prices", verifyCsrf, (req, res) => {
+  const oldPrices = readJSON("gas-prices.json", {});
+  const newPrices = {
+    regular: req.body.regular || "0.00",
+    midGrade: req.body.midGrade || "0.00",
+    premium: req.body.premium || "0.00",
+    diesel: req.body.diesel || "0.00",
+    updatedLabel: req.body.updatedLabel || "",
+    lastUpdatedAt: new Date().toISOString(),
+  };
+  writeJSON("gas-prices.json", newPrices);
+  appendAuditLog({ req, actionType: "update", entityType: "gas-prices", oldValue: oldPrices, newValue: newPrices });
+  res.redirect("/admin/gas-prices?saved=1");
+});
+
+// ── Promotions ──
+router.get("/promotions", (req, res) => {
+  const promotions = readJSON("promotions.json", []);
+  const flash = req.query.saved === "1" ? "Promotion saved." : req.query.deleted === "1" ? "Promotion deleted." : "";
+  res.send(promotionsListPage({ promotions, csrf: req.session.csrf, role: req.session.role }));
+});
+
+router.get("/promotions/new", (req, res) => {
+  res.send(promotionFormPage({ promotion: null, csrf: req.session.csrf, isNew: true, role: req.session.role }));
+});
+
+router.post("/promotions", verifyCsrf, (req, res) => {
+  const promotions = readJSON("promotions.json", []);
+  const newPromo = {
+    id: crypto.randomBytes(8).toString("hex"),
+    title: req.body.title || "Untitled Promotion",
+    description: req.body.description || "",
+    details: req.body.details || "",
+    startDate: req.body.startDate || "",
+    endDate: req.body.endDate || "",
+    isActive: req.body.isActive === "1",
+    createdAt: new Date().toISOString(),
+  };
+  promotions.unshift(newPromo);
+  writeJSON("promotions.json", promotions);
+  appendAuditLog({ req, actionType: "create", entityType: "promotion", entityId: newPromo.id, newValue: { title: newPromo.title } });
+  res.redirect("/admin/promotions?saved=1");
+});
+
+router.get("/promotions/:id", (req, res) => {
+  const promotions = readJSON("promotions.json", []);
+  const promo = promotions.find((p) => p.id === req.params.id);
+  if (!promo) return res.status(404).send("Promotion not found");
+  res.send(promotionFormPage({ promotion: promo, csrf: req.session.csrf, isNew: false, role: req.session.role }));
+});
+
+router.post("/promotions/:id", verifyCsrf, (req, res) => {
+  const promotions = readJSON("promotions.json", []);
+  const idx = promotions.findIndex((p) => p.id === req.params.id);
+  if (idx === -1) return res.status(404).send("Promotion not found");
+  const oldPromo = { title: promotions[idx].title };
+  promotions[idx] = {
+    ...promotions[idx],
+    title: req.body.title || promotions[idx].title,
+    description: req.body.description || "",
+    details: req.body.details || "",
+    startDate: req.body.startDate || "",
+    endDate: req.body.endDate || "",
+    isActive: req.body.isActive === "1",
+  };
+  writeJSON("promotions.json", promotions);
+  appendAuditLog({ req, actionType: "update", entityType: "promotion", entityId: req.params.id, oldValue: oldPromo, newValue: { title: promotions[idx].title } });
+  res.redirect("/admin/promotions?saved=1");
+});
+
+router.post("/promotions/:id/delete", verifyCsrf, (req, res) => {
+  let promotions = readJSON("promotions.json", []);
+  const promo = promotions.find((p) => p.id === req.params.id);
+  promotions = promotions.filter((p) => p.id !== req.params.id);
+  writeJSON("promotions.json", promotions);
+  appendAuditLog({ req, actionType: "delete", entityType: "promotion", entityId: req.params.id, oldValue: promo ? { title: promo.title } : null });
+  res.redirect("/admin/promotions?deleted=1");
+});
+
+// ── Winners ──
+router.get("/winners", (req, res) => {
+  const winners = readJSON("winners.json", []);
+  const flash = req.query.saved === "1" ? "Winner added." : req.query.deleted === "1" ? "Winner removed." : "";
+  res.send(winnersListPage({ winners, csrf: req.session.csrf, role: req.session.role }));
+});
+
+router.post("/winners", verifyCsrf, (req, res) => {
+  const winners = readJSON("winners.json", []);
+  const newWinner = {
+    id: crypto.randomBytes(8).toString("hex"),
+    name: req.body.name || "Unknown",
+    prize: req.body.prize || "",
+    date: req.body.date || new Date().toISOString().slice(0, 10),
+    testimonial: req.body.testimonial || "",
+    createdAt: new Date().toISOString(),
+  };
+  winners.unshift(newWinner);
+  writeJSON("winners.json", winners);
+  appendAuditLog({ req, actionType: "create", entityType: "winner", entityId: newWinner.id, newValue: { name: newWinner.name, prize: newWinner.prize } });
+  res.redirect("/admin/winners?saved=1");
+});
+
+router.post("/winners/:id/delete", verifyCsrf, (req, res) => {
+  let winners = readJSON("winners.json", []);
+  const winner = winners.find((w) => w.id === req.params.id);
+  winners = winners.filter((w) => w.id !== req.params.id);
+  writeJSON("winners.json", winners);
+  appendAuditLog({ req, actionType: "delete", entityType: "winner", entityId: req.params.id, oldValue: winner ? { name: winner.name } : null });
+  res.redirect("/admin/winners?deleted=1");
+});
+
+// ── Reviews ──
+router.get("/reviews", (req, res) => {
+  const reviewData = readJSON("google-reviews.json", null);
+  const flash = req.query.synced === "1" ? "Reviews synced from Google." : req.query.error ? `Sync error: ${req.query.error}` : "";
+  res.send(reviewsPage({ reviewData, csrf: req.session.csrf, role: req.session.role }));
+});
+
+router.post("/reviews/sync", verifyCsrf, async (req, res) => {
+  try {
+    await syncGoogleReviews();
+    appendAuditLog({ req, actionType: "sync", entityType: "review" });
+    res.redirect("/admin/reviews?synced=1");
+  } catch (err) {
+    res.redirect(`/admin/reviews?error=${encodeURIComponent(err.message)}`);
+  }
+});
+
+// ── Audit Log ──
+router.get("/audit-log", requireRole("owner"), (req, res) => {
+  const entries = readJSON("audit-log.json", []);
+  res.send(auditLogPage({ entries, role: req.session.role }));
 });
 
 module.exports = router;

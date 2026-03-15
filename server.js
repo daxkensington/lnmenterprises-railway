@@ -2,7 +2,8 @@ const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
 const { readJSON, writeJSON, BLOG_CATEGORIES } = require("./admin/data");
-const { seedCredentials } = require("./admin/auth");
+const { seedAdminUsers } = require("./admin/auth");
+const { t } = require("./translations");
 
 const app = express();
 const publicDir = path.join(__dirname, "public");
@@ -194,7 +195,7 @@ const defaultFaqs = [
 ];
 
 /* ── Seed defaults + load from JSON ── */
-seedCredentials();
+seedAdminUsers();
 if (!readJSON("categories.json")) writeJSON("categories.json", defaultCategories);
 if (!readJSON("faqs.json")) writeJSON("faqs.json", defaultFaqs);
 if (!readJSON("site-content.json")) {
@@ -269,6 +270,9 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
   if (updated) writeJSON("blog-posts.json", posts);
 })();
 if (!readJSON("contact-messages.json")) writeJSON("contact-messages.json", []);
+if (!readJSON("gas-prices.json")) writeJSON("gas-prices.json", { regular: "0.00", midGrade: "0.00", premium: "0.00", diesel: "0.00", updatedLabel: "", lastUpdatedAt: null });
+if (!readJSON("promotions.json")) writeJSON("promotions.json", []);
+if (!readJSON("winners.json")) writeJSON("winners.json", []);
 
 function loadCategories() { return readJSON("categories.json", defaultCategories); }
 function loadFaqs() { return readJSON("faqs.json", defaultFaqs); }
@@ -282,6 +286,19 @@ function loadSiteContent() {
   });
 }
 
+function loadGasPrices() {
+  return readJSON("gas-prices.json", { regular: "0.00", midGrade: "0.00", premium: "0.00", diesel: "0.00", updatedLabel: "", lastUpdatedAt: null });
+}
+function loadPromotions() {
+  return readJSON("promotions.json", []);
+}
+function loadWinners() {
+  return readJSON("winners.json", []);
+}
+function loadReviews() {
+  return readJSON("google-reviews.json", null);
+}
+
 app.disable("x-powered-by");
 app.use(require("compression")());
 app.use((req, res, next) => {
@@ -289,9 +306,12 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  const umamiHost = process.env.UMAMI_HOST || "https://cloud.umami.is";
+  const cspScriptSrc = process.env.UMAMI_WEBSITE_ID ? `'self' ${umamiHost}` : "'self'";
+  const cspConnectSrc = process.env.UMAMI_WEBSITE_ID ? `'self' ${umamiHost}` : "'self'";
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-src 'self' https://www.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    `default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src ${cspScriptSrc}; connect-src ${cspConnectSrc}; frame-src 'self' https://www.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests`,
   );
 
   if (req.hostname === "lnmenterprises.ca") {
@@ -299,6 +319,20 @@ app.use((req, res, next) => {
     return;
   }
 
+  next();
+});
+
+// Language detection
+app.use((req, res, next) => {
+  const langParam = req.query.lang;
+  if (langParam === "fr" || langParam === "en") {
+    req.lang = langParam;
+    res.cookie("lang", langParam, { maxAge: 365 * 24 * 60 * 60 * 1000, sameSite: "Lax", path: "/" });
+  } else {
+    const cookieHeader = req.headers.cookie || "";
+    const langMatch = cookieHeader.match(/(?:^|;\s*)lang=(\w+)/);
+    req.lang = langMatch && langMatch[1] === "fr" ? "fr" : "en";
+  }
   next();
 });
 
@@ -311,6 +345,7 @@ function pageTemplate({
   keywords = [],
   noindex = false,
   ogImage = null,
+  lang = "en",
 }) {
   const canonical = `${siteUrl}${canonicalPath}`;
   const keywordsContent = keywords.join(", ");
@@ -318,7 +353,7 @@ function pageTemplate({
   const canonicalTag = canonicalPath ? `<link rel="canonical" href="${canonical}" />` : "";
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -344,7 +379,8 @@ function pageTemplate({
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css?v=5" />
-    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${process.env.UMAMI_WEBSITE_ID ? `
+    <script defer src="${process.env.UMAMI_HOST || "https://cloud.umami.is"}/script.js" data-website-id="${escapeHtml(process.env.UMAMI_WEBSITE_ID)}"></script>` : ""}
   </head>
   <body>
     ${content}
@@ -481,12 +517,12 @@ function blogListJsonLd(posts) {
   };
 }
 
-function layout(body) {
+function layout(body, lang = "en") {
   const sc = loadSiteContent();
   return `
     <div class="promo-banner">
       <div class="container">
-        ${icons.gift} 🎉 ${escapeHtml(sc.promoBanner)}
+        ${icons.gift} ${escapeHtml(sc.promoBanner)}
       </div>
     </div>
     <header class="site-header">
@@ -499,11 +535,12 @@ function layout(body) {
           </span>
         </a>
         <nav class="nav">
-          <a href="/">Home</a>
-          <a href="/#prices">Prices</a>
-          <a href="/deseronto-convenience-store-gas-station">Location</a>
-          <a href="/blog">Blog</a>
-          <a class="nav-cta" href="tel:${escapeHtml(sc.phone)}">${icons.phone} Call Now</a>
+          <a href="/">${t(lang, "nav.home")}</a>
+          <a href="/#prices">${t(lang, "nav.prices")}</a>
+          <a href="/deseronto-convenience-store-gas-station">${t(lang, "nav.location")}</a>
+          <a href="/blog">${t(lang, "nav.blog")}</a>
+          <a class="nav-cta" href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-nav">${icons.phone} ${t(lang, "nav.callNow")}</a>
+          <a href="?lang=${lang === "en" ? "fr" : "en"}" class="lang-switch" title="${lang === "en" ? "Fran\u00e7ais" : "English"}">${lang === "en" ? "FR" : "EN"}</a>
         </nav>
       </div>
     </header>
@@ -514,59 +551,210 @@ function layout(body) {
         <div class="footer-divider"></div>
         <p class="footer-tagline">SAGO Gas Bar Partner &bull; Full-Service Gas &amp; Convenience Store</p>
         <div class="footer-contact">
-          <a href="tel:${escapeHtml(sc.phone)}">${escapeHtml(sc.phone)}</a>
+          <a href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-footer">${escapeHtml(sc.phone)}</a>
           <span class="sep">&bull;</span>
           <span>${escapeHtml(sc.address)}</span>
           <span class="sep">&bull;</span>
           <span>${escapeHtml(sc.hoursNote)} ${escapeHtml(sc.hours)}</span>
         </div>
-        <p class="footer-subtext">Proudly serving Tyendinaga Mohawk Territory and surrounding communities</p>
-        <a class="footer-social" href="${escapeHtml(sc.facebookUrl)}" target="_blank" rel="noopener noreferrer">
-          ${icons.facebook} <span>Follow Us on Facebook</span>
+        <p class="footer-subtext">${t(lang, "footer.serving")}</p>
+        <a class="footer-social" href="${escapeHtml(sc.facebookUrl)}" target="_blank" rel="noopener noreferrer" data-umami-event="facebook-link">
+          ${icons.facebook} <span>${t(lang, "footer.followUs")}</span>
         </a>
         <div class="footer-bottom">
-          &copy; ${new Date().getFullYear()} ${escapeHtml(sc.businessName)}. All rights reserved.
+          &copy; ${new Date().getFullYear()} ${escapeHtml(sc.businessName)}. ${t(lang, "footer.rights")}
         </div>
       </div>
     </footer>
   `;
 }
 
-function locationPage() {
+function gasPriceSection(lang = "en") {
+  const gp = loadGasPrices();
+  const types = [
+    { key: "regular", label: t(lang, "gasPrices.regular"), icon: icons.fuel },
+    { key: "midGrade", label: "Mid-Grade", icon: icons.fuel },
+    { key: "premium", label: t(lang, "gasPrices.premium"), icon: icons.fuel },
+    { key: "diesel", label: "Diesel", icon: icons.fuel },
+  ];
+  const cards = types
+    .filter((t) => gp[t.key] && gp[t.key] !== "0.00")
+    .map(
+      (t) => `
+      <div class="info-card" style="text-align:center;">
+        <div class="icon-circle">${t.icon}</div>
+        <h3>${escapeHtml(t.label)}</h3>
+        <p style="font-size:2rem;font-weight:800;color:var(--red);">${escapeHtml(gp[t.key])}<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted);"> &cent;/L</span></p>
+      </div>`,
+    )
+    .join("");
+
+  if (!cards) return "";
+
+  const updatedNote = gp.updatedLabel
+    ? `<p style="text-align:center;color:var(--text-muted);margin-top:1rem;font-size:0.9rem;">${escapeHtml(gp.updatedLabel)}</p>`
+    : "";
+
+  return `
+    <section class="section" id="prices">
+      <div class="container">
+        <div class="section-header">
+          <h2>${t(lang, "gasPrices.title")}</h2>
+          <div class="section-divider"></div>
+          <p>Competitive fuel prices every day at L&amp;M Enterprises.</p>
+        </div>
+        <div class="info-grid">${cards}</div>
+        ${updatedNote}
+      </div>
+    </section>`;
+}
+
+function promotionsSection(lang = "en") {
+  const promos = loadPromotions().filter((p) => p.isActive);
+  if (!promos.length) return "";
+
+  const cards = promos
+    .map(
+      (p) => `
+      <article class="card">
+        <div class="icon-circle">${icons.gift}</div>
+        <h3>${escapeHtml(p.title)}</h3>
+        <p>${escapeHtml(p.description)}</p>
+        ${p.endDate ? `<p style="font-size:0.85rem;color:var(--text-muted);">Ends: ${escapeHtml(p.endDate)}</p>` : ""}
+      </article>`,
+    )
+    .join("");
+
+  return `
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2>${t(lang, "promotions.title")}</h2>
+          <div class="section-divider"></div>
+        </div>
+        <div class="card-grid">${cards}</div>
+      </div>
+    </section>`;
+}
+
+function winnersSection(lang = "en") {
+  const winners = loadWinners();
+  if (!winners.length) return "";
+
+  const items = winners.slice(0, 6)
+    .map(
+      (w) => `
+      <div class="info-card" style="text-align:center;">
+        <div class="icon-circle">${icons.gift}</div>
+        <h3>${escapeHtml(w.name)}</h3>
+        <p style="font-weight:600;color:var(--red);">${escapeHtml(w.prize)}</p>
+        ${w.testimonial ? `<p style="font-style:italic;font-size:0.9rem;color:var(--text-muted);">"${escapeHtml(w.testimonial)}"</p>` : ""}
+        <p style="font-size:0.85rem;color:var(--text-muted);">${escapeHtml(w.date || "")}</p>
+      </div>`,
+    )
+    .join("");
+
+  return `
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>${t(lang, "winners.title")}</h2>
+          <div class="section-divider"></div>
+          <p>Congratulations to our recent winners!</p>
+        </div>
+        <div class="info-grid">${items}</div>
+      </div>
+    </section>`;
+}
+
+function reviewsSection(lang = "en") {
+  const reviewData = loadReviews();
+
+  // Fallback testimonials if no Google reviews
+  const fallbackTestimonials = [
+    { authorName: "Local Customer", rating: 5, text: "Great prices on gas and a well-stocked convenience store. Always my first stop on Highway 49." },
+    { authorName: "Highway Traveler", rating: 5, text: "Best gas prices between Kingston and Belleville. The staff are friendly and the store has everything you need." },
+    { authorName: "Deseronto Resident", rating: 4, text: "Convenient location, good prices, and they always have what I need. A staple in the community." },
+  ];
+
+  const reviews = (reviewData && reviewData.reviews && reviewData.reviews.length > 0)
+    ? reviewData.reviews.slice(0, 5)
+    : fallbackTestimonials;
+
+  const overallRating = reviewData && reviewData.rating ? reviewData.rating : null;
+
+  const starsHtml = (rating) => {
+    let s = "";
+    for (let i = 1; i <= 5; i++) {
+      s += i <= Math.round(rating) ? '<span style="color:#f59e0b;">&#9733;</span>' : '<span style="color:#d1d5db;">&#9734;</span>';
+    }
+    return s;
+  };
+
+  const reviewCards = reviews
+    .map(
+      (r) => `
+      <div class="card" style="text-align:left;">
+        <div style="margin-bottom:0.5rem;">${starsHtml(r.rating)}</div>
+        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 200))}${(r.text || "").length > 200 ? "..." : ""}"</p>
+        <p style="font-weight:600;font-size:0.9rem;">— ${escapeHtml(r.authorName)}</p>
+      </div>`,
+    )
+    .join("");
+
+  const ratingHeader = overallRating
+    ? `<p style="font-size:1.5rem;margin-bottom:0.5rem;">${starsHtml(overallRating)} <strong>${escapeHtml(String(overallRating))}</strong>/5${reviewData.totalReviews ? ` (${escapeHtml(String(reviewData.totalReviews))} reviews)` : ""}</p>`
+    : "";
+
+  return `
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2>${t(lang, "reviews.title")}</h2>
+          <div class="section-divider"></div>
+          ${ratingHeader}
+        </div>
+        <div class="card-grid">${reviewCards}</div>
+      </div>
+    </section>`;
+}
+
+function locationPage(lang = "en") {
   const content = `
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-badge">Deseronto Location</div>
-        <h1>Your Local Gas Station &amp; Convenience Store</h1>
-        <p class="lead">Serving Deseronto, Tyendinaga Mohawk Territory, and nearby communities with fuel, everyday essentials, and in-store product categories.</p>
+        <div class="hero-badge">${t(lang, "location.title")}</div>
+        <h1>${t(lang, "hero.title")}</h1>
+        <p class="lead">${t(lang, "hero.subtitle")}</p>
         <div class="hero-buttons">
-          <a class="btn btn-primary" href="/contact-directions">${icons.mapPin} Get Directions</a>
-          <a class="btn btn-secondary" href="tel:+16133962224">${icons.phone} Call 613-396-2224</a>
+          <a class="btn btn-primary" href="/contact-directions" data-umami-event="directions-hero">${icons.mapPin} ${t(lang, "location.getDirections")}</a>
+          <a class="btn btn-secondary" href="tel:+16133962224" data-umami-event="phone-call-hero">${icons.phone} ${t(lang, "nav.callNow")} 613-396-2224</a>
         </div>
       </div>
     </section>
     <main>
+      ${gasPriceSection(lang)}
       <section class="section">
         <div class="container">
           <div class="section-header">
-            <h2>Store Information</h2>
+            <h2>${t(lang, "location.title")}</h2>
             <div class="section-divider"></div>
             <p>Everything you need to plan your visit to L&amp;M Enterprises.</p>
           </div>
           <div class="info-grid">
             <div class="info-card">
               <div class="icon-circle">${icons.mapPin}</div>
-              <h3>Address</h3>
+              <h3>${t(lang, "location.address")}</h3>
               <p>43 Dundas Street<br>Deseronto, ON K0K 1X0</p>
             </div>
             <div class="info-card">
               <div class="icon-circle">${icons.clock}</div>
-              <h3>Hours</h3>
+              <h3>${t(lang, "location.hours")}</h3>
               <p>Open Daily<br>6:00 AM &ndash; 10:00 PM</p>
             </div>
             <div class="info-card">
               <div class="icon-circle">${icons.phone}</div>
-              <h3>Phone</h3>
+              <h3>${t(lang, "location.phone")}</h3>
               <p><a href="tel:+16133962224">613-396-2224</a><br>Call for store info</p>
             </div>
           </div>
@@ -575,7 +763,7 @@ function locationPage() {
       <section class="section section-alt">
         <div class="container">
           <div class="section-header">
-            <h2>What We Offer</h2>
+            <h2>${t(lang, "category.whatWeOffer")}</h2>
             <div class="section-divider"></div>
           </div>
           <div class="card-grid">
@@ -615,6 +803,9 @@ function locationPage() {
           </div>
         </div>
       </section>
+      ${promotionsSection(lang)}
+      ${winnersSection(lang)}
+      ${reviewsSection(lang)}
     </main>`;
 
   return pageTemplate({
@@ -636,15 +827,16 @@ function locationPage() {
         url: `${siteUrl}/deseronto-convenience-store-gas-station`,
       },
     ],
-    content: layout(content),
+    lang,
+    content: layout(content, lang),
   });
 }
 
-function contactPage() {
+function contactPage(lang = "en") {
   const content = `
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-badge">Contact &amp; Directions</div>
+        <div class="hero-badge">${t(lang, "contact.title")}</div>
         <h1>Visit, Call, or Get Directions</h1>
         <p class="lead">Find L&amp;M Enterprises at 43 Dundas Street in Deseronto. We are open daily from 6am to 10pm.</p>
         <div class="hero-buttons">
@@ -700,26 +892,26 @@ function contactPage() {
           </div>
           <form method="POST" action="/contact" style="text-align:left;">
             <div style="margin-bottom:1rem;">
-              <label for="name" style="display:block;font-weight:600;margin-bottom:0.25rem;">Name *</label>
+              <label for="name" style="display:block;font-weight:600;margin-bottom:0.25rem;">${t(lang, "contact.name")} *</label>
               <input type="text" id="name" name="name" required style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
             </div>
             <div style="margin-bottom:1rem;">
-              <label for="email" style="display:block;font-weight:600;margin-bottom:0.25rem;">Email *</label>
+              <label for="email" style="display:block;font-weight:600;margin-bottom:0.25rem;">${t(lang, "contact.email")} *</label>
               <input type="email" id="email" name="email" required style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
             </div>
             <div style="margin-bottom:1rem;">
-              <label for="phone" style="display:block;font-weight:600;margin-bottom:0.25rem;">Phone</label>
+              <label for="phone" style="display:block;font-weight:600;margin-bottom:0.25rem;">${t(lang, "contact.phone")}</label>
               <input type="tel" id="phone" name="phone" style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
             </div>
             <div style="margin-bottom:1rem;">
-              <label for="subject" style="display:block;font-weight:600;margin-bottom:0.25rem;">Subject</label>
+              <label for="subject" style="display:block;font-weight:600;margin-bottom:0.25rem;">${t(lang, "contact.subject")}</label>
               <input type="text" id="subject" name="subject" style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;" />
             </div>
             <div style="margin-bottom:1.5rem;">
-              <label for="message" style="display:block;font-weight:600;margin-bottom:0.25rem;">Message *</label>
+              <label for="message" style="display:block;font-weight:600;margin-bottom:0.25rem;">${t(lang, "contact.message")} *</label>
               <textarea id="message" name="message" rows="5" required style="width:100%;padding:0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;resize:vertical;"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;padding:0.75rem;font-size:1rem;">Send Message</button>
+            <button type="submit" class="btn btn-primary" style="width:100%;padding:0.75rem;font-size:1rem;">${t(lang, "contact.send")}</button>
           </form>
         </div>
       </section>
@@ -743,12 +935,13 @@ function contactPage() {
         url: `${siteUrl}/contact-directions`,
       },
     ],
-    content: layout(content),
+    lang,
+    content: layout(content, lang),
   });
 }
 
 
-function categoryPage(category) {
+function categoryPage(category, lang = "en") {
   const relatedLinks = loadCategories()
     .filter((entry) => entry.slug !== category.slug)
     .slice(0, 4)
@@ -799,7 +992,7 @@ function categoryPage(category) {
             <p>${escapeHtml(category.localAngle)}</p>
           </div>
           <div>
-            <h2>Related Categories</h2>
+            <h2>${t(lang, "category.relatedCategories")}</h2>
             <ul class="related-list">${relatedLinks}</ul>
           </div>
         </div>
@@ -830,11 +1023,12 @@ function categoryPage(category) {
       description: category.description,
       url: `${siteUrl}/${category.slug}`,
     }],
-    content: layout(content),
+    lang,
+    content: layout(content, lang),
   });
 }
 
-function blogPage(activeCategory = null) {
+function blogPage(activeCategory = null, lang = "en") {
   let posts = readJSON("blog-posts.json", []).filter((p) => p.published);
   if (activeCategory) posts = posts.filter((p) => p.category === activeCategory);
 
@@ -843,40 +1037,41 @@ function blogPage(activeCategory = null) {
 
   const filterPills = `
     <div class="blog-filters">
-      <a class="blog-filter-pill${!activeCategory ? " active" : ""}" href="/blog">All</a>
+      <a class="blog-filter-pill${!activeCategory ? " active" : ""}" href="/blog">${t(lang, "blog.all")}</a>
       ${usedCategories.map((c) => `<a class="blog-filter-pill${activeCategory === c ? " active" : ""}" href="/blog?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join("")}
     </div>`;
 
   const postCards = posts.length
     ? posts.map((p) => {
-        const excerpt = p.excerpt || (p.content || "").slice(0, 150) + ((p.content || "").length > 150 ? "..." : "");
+        const displayTitle = (lang === "fr" && p.titleFr) ? p.titleFr : p.title;
+        const displayExcerpt = (lang === "fr" && p.excerptFr) ? p.excerptFr : (p.excerpt || (p.content || "").slice(0, 150) + ((p.content || "").length > 150 ? "..." : ""));
         const imgHtml = p.featuredImage
-          ? `<img class="blog-post-card__img" src="${escapeHtml(p.featuredImage)}" alt="${escapeHtml(p.featuredImageAlt || p.title)}" loading="lazy" />`
+          ? `<img class="blog-post-card__img" src="${escapeHtml(p.featuredImage)}" alt="${escapeHtml(p.featuredImageAlt || displayTitle)}" loading="lazy" />`
           : `<div class="blog-post-card__img blog-post-card__img--fallback"></div>`;
         return `
           <a href="/blog/${escapeHtml(p.slug)}" class="blog-post-card">
             ${imgHtml}
             <div class="blog-post-card__body">
               ${p.category ? `<span class="blog-post-card__cat">${escapeHtml(p.category)}</span>` : ""}
-              <h3 class="blog-post-card__title">${escapeHtml(p.title)}</h3>
-              <p class="blog-post-card__excerpt">${escapeHtml(excerpt)}</p>
+              <h3 class="blog-post-card__title">${escapeHtml(displayTitle)}</h3>
+              <p class="blog-post-card__excerpt">${escapeHtml(displayExcerpt)}</p>
             </div>
             <div class="blog-post-card__meta">
               <span>${formatDate(p.date)}</span>
-              <span>${readingTime(p.content)} min read</span>
+              <span>${readingTime(p.content)} ${t(lang, "blog.minRead")}</span>
             </div>
           </a>`;
       }).join("")
     : `<div style="text-align:center;padding:3rem 0;color:var(--text-muted);">
-        <p>No posts found${activeCategory ? ` in "${escapeHtml(activeCategory)}"` : ""}. Check back soon!</p>
+        <p>${t(lang, "blog.noPosts")}</p>
       </div>`;
 
   const content = `
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-badge">Blog</div>
+        <div class="hero-badge">${t(lang, "blog.title")}</div>
         <h1>Store Updates &amp; Local Info</h1>
-        <p class="lead">News, tips, and product highlights from L&amp;M Enterprises in Deseronto.</p>
+        <p class="lead">${t(lang, "blog.subtitle")}</p>
       </div>
     </section>
     <main>
@@ -897,19 +1092,19 @@ function blogPage(activeCategory = null) {
               <div class="icon-circle">${icons.fuel}</div>
               <h3>Gas Station</h3>
               <p>Fuel prices, full-service pumping, and SAGO Gas Bar partnership details.</p>
-              <a class="btn btn-outline" href="/gas-station-deseronto" style="margin-top:1rem;">Learn More</a>
+              <a class="btn btn-outline" href="/gas-station-deseronto" style="margin-top:1rem;">${t(lang, "common.learnMore")}</a>
             </article>
             <article class="card">
               <div class="icon-circle">${icons.shoppingBag}</div>
               <h3>Convenience Store</h3>
               <p>Snacks, drinks, and everyday essentials at your local stop.</p>
-              <a class="btn btn-outline" href="/convenience-store-deseronto" style="margin-top:1rem;">Learn More</a>
+              <a class="btn btn-outline" href="/convenience-store-deseronto" style="margin-top:1rem;">${t(lang, "common.learnMore")}</a>
             </article>
             <article class="card">
               <div class="icon-circle">${icons.mapPin}</div>
-              <h3>Contact &amp; Directions</h3>
+              <h3>${t(lang, "contact.title")}</h3>
               <p>Find the store, get directions, or call ahead before visiting.</p>
-              <a class="btn btn-outline" href="/contact-directions" style="margin-top:1rem;">Learn More</a>
+              <a class="btn btn-outline" href="/contact-directions" style="margin-top:1rem;">${t(lang, "common.learnMore")}</a>
             </article>
           </div>
         </div>
@@ -922,20 +1117,24 @@ function blogPage(activeCategory = null) {
     canonicalPath: "/blog",
     keywords: ["L&M Enterprises blog", "Deseronto store updates", "gas station blog", "convenience store news"],
     jsonLd: blogListJsonLd(allPosts),
-    content: layout(content),
+    lang,
+    content: layout(content, lang),
   });
 }
 
-function blogPostPage(post) {
+function blogPostPage(post, lang = "en") {
   const allPosts = readJSON("blog-posts.json", []).filter((p) => p.published);
   const related = allPosts
     .filter((p) => p.id !== post.id && post.category && p.category === post.category)
     .slice(0, 3);
-  const mins = readingTime(post.content);
+  const displayTitle = (lang === "fr" && post.titleFr) ? post.titleFr : post.title;
+  const displayContent = (lang === "fr" && post.contentFr) ? post.contentFr : post.content;
+  const displayExcerpt = (lang === "fr" && post.excerptFr) ? post.excerptFr : (post.excerpt || (post.content || "").slice(0, 160));
+  const mins = readingTime(displayContent);
   const date = formatDate(post.date);
   const author = post.author || "L&M Enterprises";
   const category = post.category || "";
-  const excerpt = post.excerpt || (post.content || "").slice(0, 160);
+  const excerpt = displayExcerpt;
   const heroStyle = post.featuredImage
     ? `background-image:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('${escapeHtml(post.featuredImage)}');background-size:cover;background-position:center;`
     : "";
@@ -944,24 +1143,26 @@ function blogPostPage(post) {
   const relatedHtml = related.length
     ? `<section class="section" style="background:var(--bg-alt);">
         <div class="container">
-          <h2 style="text-align:center;margin-bottom:2rem;">Related Posts</h2>
+          <h2 style="text-align:center;margin-bottom:2rem;">${t(lang, "blog.relatedPosts")}</h2>
           <div class="blog-grid">
             ${related.map((r) => {
+              const rTitle = (lang === "fr" && r.titleFr) ? r.titleFr : r.title;
+              const rExcerpt = (lang === "fr" && r.excerptFr) ? r.excerptFr : (r.excerpt || (r.content || "").slice(0, 120));
               const rMins = readingTime(r.content);
               const rDate = formatDate(r.date);
               const imgHtml = r.featuredImage
-                ? `<img class="blog-post-card__img" src="${escapeHtml(r.featuredImage)}" alt="${escapeHtml(r.featuredImageAlt || r.title)}" loading="lazy" />`
+                ? `<img class="blog-post-card__img" src="${escapeHtml(r.featuredImage)}" alt="${escapeHtml(r.featuredImageAlt || rTitle)}" loading="lazy" />`
                 : `<div class="blog-post-card__img blog-post-card__img--fallback"></div>`;
               return `<a href="/blog/${escapeHtml(r.slug)}" class="blog-post-card">
                 ${imgHtml}
                 <div class="blog-post-card__body">
                   ${r.category ? `<span class="blog-post-card__cat">${escapeHtml(r.category)}</span>` : ""}
-                  <h3 class="blog-post-card__title">${escapeHtml(r.title)}</h3>
-                  <p class="blog-post-card__excerpt">${escapeHtml(r.excerpt || (r.content || "").slice(0, 120))}</p>
+                  <h3 class="blog-post-card__title">${escapeHtml(rTitle)}</h3>
+                  <p class="blog-post-card__excerpt">${escapeHtml(rExcerpt)}</p>
                 </div>
                 <div class="blog-post-card__meta">
                   <span>${rDate}</span>
-                  <span>${rMins} min read</span>
+                  <span>${rMins} ${t(lang, "blog.minRead")}</span>
                 </div>
               </a>`;
             }).join("")}
@@ -978,9 +1179,9 @@ function blogPostPage(post) {
           <span aria-hidden="true">/</span>
           <a href="/blog">Blog</a>
           <span aria-hidden="true">/</span>
-          <span>${escapeHtml(post.title)}</span>
+          <span>${escapeHtml(displayTitle)}</span>
         </nav>
-        <h1>${escapeHtml(post.title)}</h1>
+        <h1>${escapeHtml(displayTitle)}</h1>
       </div>
     </section>
     <main>
@@ -990,13 +1191,13 @@ function blogPostPage(post) {
             <span>${icons.user} ${escapeHtml(author)}</span>
             <span>${icons.calendar} ${date}</span>
             ${category ? `<span><a href="/blog?category=${encodeURIComponent(category)}">${escapeHtml(category)}</a></span>` : ""}
-            <span>${mins} min read</span>
+            <span>${mins} ${t(lang, "blog.minRead")}</span>
           </div>
           <article class="blog-post-body">
-            ${contentToHtml(post.content)}
+            ${contentToHtml(displayContent)}
           </article>
           <div style="margin-top:3rem;text-align:center;">
-            <a class="btn btn-primary" href="/blog">${icons.arrowRight} Back to Blog</a>
+            <a class="btn btn-primary" href="/blog">${icons.arrowRight} ${t(lang, "blog.backToBlog")}</a>
           </div>
         </div>
       </section>
@@ -1004,34 +1205,36 @@ function blogPostPage(post) {
     </main>`;
 
   return pageTemplate({
-    title: `${post.title} | L&M Enterprises`,
+    title: `${displayTitle} | L&M Enterprises`,
     description: excerpt,
     canonicalPath: `/blog/${post.slug}`,
     keywords: ["L&M Enterprises blog", "Deseronto store updates", ...(category ? [category.toLowerCase()] : [])],
     jsonLd: blogPostJsonLd(post),
     ogImage: post.featuredImage || null,
-    content: layout(content),
+    lang,
+    content: layout(content, lang),
   });
 }
 
-function notFoundPage() {
+function notFoundPage(lang = "en") {
   return pageTemplate({
-    title: "Page Not Found | L&M Enterprises",
+    title: `${t(lang, "notFound.title")} | L&M Enterprises`,
     description: "The page you requested could not be found.",
     canonicalPath: "",
     noindex: true,
     jsonLd: siteJsonLd(),
+    lang,
     content: layout(`
       <main>
         <div class="not-found">
           <div class="container">
             <p class="eyebrow">404</p>
-            <h1>Page Not Found</h1>
-            <p>The page you are looking for does not exist, but you can head back to the homepage or explore our store pages.</p>
-            <a class="btn btn-primary" href="/">Back to Homepage</a>
+            <h1>${t(lang, "notFound.title")}</h1>
+            <p>${t(lang, "notFound.message")}</p>
+            <a class="btn btn-primary" href="/">${t(lang, "notFound.backHome")}</a>
           </div>
         </div>
-      </main>`),
+      </main>`, lang),
   });
 }
 
@@ -1052,6 +1255,7 @@ const contactRateLimit = new Map();
 app.use("/contact", express.urlencoded({ extended: false, limit: "100kb" }));
 
 app.post("/contact", (req, res) => {
+  const lang = req.lang || "en";
   const ip = req.ip;
   const now = Date.now();
   const entry = contactRateLimit.get(ip) || { count: 0, resetTime: now + 3600000 };
@@ -1061,8 +1265,8 @@ app.post("/contact", (req, res) => {
   if (entry.count > 5) {
     res.status(429).send(pageTemplate({
       title: "Too Many Requests", description: "Rate limited.",
-      noindex: true, jsonLd: siteJsonLd(),
-      content: layout(`<main><div class="not-found"><div class="container"><h1>Too Many Requests</h1><p>Please wait before submitting another message.</p><a class="btn btn-primary" href="/contact-directions">Go Back</a></div></div></main>`),
+      noindex: true, jsonLd: siteJsonLd(), lang,
+      content: layout(`<main><div class="not-found"><div class="container"><h1>Too Many Requests</h1><p>Please wait before submitting another message.</p><a class="btn btn-primary" href="/contact-directions">Go Back</a></div></div></main>`, lang),
     }));
     return;
   }
@@ -1079,10 +1283,10 @@ app.post("/contact", (req, res) => {
   });
   writeJSON("contact-messages.json", messages);
   res.send(pageTemplate({
-    title: "Message Sent | L&M Enterprises",
+    title: `${t(lang, "contact.messageSent")} | L&M Enterprises`,
     description: "Thank you for your message.",
-    noindex: true, jsonLd: siteJsonLd(),
-    content: layout(`<main><div class="not-found"><div class="container"><p class="eyebrow">Thank You</p><h1>Message Sent</h1><p>We received your message and will get back to you soon.</p><a class="btn btn-primary" href="/">Back to Homepage</a></div></div></main>`),
+    noindex: true, jsonLd: siteJsonLd(), lang,
+    content: layout(`<main><div class="not-found"><div class="container"><p class="eyebrow">Thank You</p><h1>${t(lang, "contact.messageSent")}</h1><p>${t(lang, "contact.messageSentDesc")}</p><a class="btn btn-primary" href="/">${t(lang, "notFound.backHome")}</a></div></div></main>`, lang),
   }));
 });
 
@@ -1099,38 +1303,120 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/blog", (req, res) => {
-  res.send(blogPage(req.query.category || null));
+  res.send(blogPage(req.query.category || null, req.lang));
 });
 
 app.get("/blog/:slug", (req, res, next) => {
   const posts = readJSON("blog-posts.json", []);
   const post = posts.find((p) => p.slug === req.params.slug && p.published);
   if (!post) return next();
-  res.send(blogPostPage(post));
+  res.send(blogPostPage(post, req.lang));
 });
 
-app.get("/deseronto-convenience-store-gas-station", (_req, res) => {
-  res.send(locationPage());
+app.get("/deseronto-convenience-store-gas-station", (req, res) => {
+  res.send(locationPage(req.lang));
 });
 
-app.get("/contact-directions", (_req, res) => {
-  res.send(contactPage());
+app.get("/contact-directions", (req, res) => {
+  res.send(contactPage(req.lang));
 });
 
 const categorySlugs = new Set(defaultCategories.map((c) => c.slug));
 for (const slug of categorySlugs) {
-  app.get(`/${slug}`, (_req, res) => {
+  app.get(`/${slug}`, (req, res) => {
     const cats = loadCategories();
     const category = cats.find((c) => c.slug === slug);
-    if (!category) return res.status(404).send(notFoundPage());
-    res.send(categoryPage(category));
+    if (!category) return res.status(404).send(notFoundPage(req.lang));
+    res.send(categoryPage(category, req.lang));
   });
 }
 
+/* ── RSS Feed ── */
+function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+app.get("/blog/rss.xml", (_req, res) => {
+  const posts = readJSON("blog-posts.json", []).filter((p) => p.published).slice(0, 20);
+  const items = posts
+    .map(
+      (p) => `
+    <item>
+      <title>${escapeXml(p.title)}</title>
+      <link>${siteUrl}/blog/${escapeXml(p.slug)}</link>
+      <guid isPermaLink="true">${siteUrl}/blog/${escapeXml(p.slug)}</guid>
+      <description>${escapeXml(p.excerpt || (p.content || "").slice(0, 200))}</description>
+      <pubDate>${new Date(p.date + "T00:00:00").toUTCString()}</pubDate>
+      ${p.category ? `<category>${escapeXml(p.category)}</category>` : ""}
+    </item>`,
+    )
+    .join("");
+
+  const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>L&amp;M Enterprises Blog</title>
+    <link>${siteUrl}/blog</link>
+    <description>News, tips, and product highlights from L&amp;M Enterprises in Deseronto, Ontario.</description>
+    <language>en-ca</language>
+    <atom:link href="${siteUrl}/blog/rss.xml" rel="self" type="application/rss+xml" />
+    ${items}
+  </channel>
+</rss>`;
+
+  res.set("Content-Type", "application/rss+xml; charset=utf-8");
+  res.send(rss);
+});
+
+/* ── Sitemap ── */
+app.get("/sitemap.xml", (_req, res) => {
+  const cats = loadCategories();
+  const posts = readJSON("blog-posts.json", []).filter((p) => p.published);
+
+  const urls = [
+    { loc: "/", priority: "1.0", changefreq: "weekly" },
+    { loc: "/deseronto-convenience-store-gas-station", priority: "0.9", changefreq: "weekly" },
+    { loc: "/contact-directions", priority: "0.8", changefreq: "monthly" },
+    { loc: "/blog", priority: "0.8", changefreq: "daily" },
+  ];
+
+  for (const cat of cats) {
+    urls.push({ loc: `/${cat.slug}`, priority: "0.7", changefreq: "monthly" });
+  }
+
+  for (const post of posts) {
+    urls.push({ loc: `/blog/${post.slug}`, priority: "0.6", changefreq: "monthly" });
+  }
+
+  const urlEntries = urls
+    .map(
+      (u) => `
+  <url>
+    <loc>${escapeXml(siteUrl + u.loc)}</loc>
+    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`,
+    )
+    .join("");
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  ${urlEntries}
+</urlset>`;
+
+  res.set("Content-Type", "application/xml; charset=utf-8");
+  res.send(sitemap);
+});
+
 app.use(express.static(publicDir, { maxAge: "7d" }));
 
-app.use((_req, res) => {
-  res.status(404).send(notFoundPage());
+app.use((req, res) => {
+  res.status(404).send(notFoundPage(req.lang));
 });
 
 app.use((err, _req, res, _next) => {

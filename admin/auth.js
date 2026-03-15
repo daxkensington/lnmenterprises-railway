@@ -7,24 +7,75 @@ const COOKIE_SECRET = process.env.COOKIE_SECRET || crypto.randomBytes(32).toStri
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours
 const sessions = new Map();
 
-function seedCredentials() {
-  const existing = readJSON("credentials.json");
-  if (existing) return;
+/* ── Multi-user seeding ── */
+
+function seedAdminUsers() {
+  const existing = readJSON("admin-users.json");
+  if (existing && Array.isArray(existing) && existing.length > 0) return;
+
+  // Migrate from legacy credentials.json if it exists
+  const legacy = readJSON("credentials.json");
+  if (legacy && legacy.username && legacy.passwordHash) {
+    const user = {
+      id: crypto.randomBytes(8).toString("hex"),
+      username: legacy.username,
+      email: "",
+      displayName: legacy.username === "admin" ? "Admin" : legacy.username,
+      passwordHash: legacy.passwordHash,
+      isActive: true,
+      role: "owner",
+      createdAt: new Date().toISOString(),
+      lastLoginAt: null,
+    };
+    writeJSON("admin-users.json", [user]);
+    console.log(`Migrated legacy credentials to admin-users.json (user: ${user.username}, role: owner).`);
+    return;
+  }
+
+  // Fresh seed
   const hash = bcrypt.hashSync("changeme", 10);
-  writeJSON("credentials.json", { username: "admin", passwordHash: hash });
-  console.log("Admin credentials seeded (username: admin, password: changeme). Change immediately!");
+  const user = {
+    id: crypto.randomBytes(8).toString("hex"),
+    username: "admin",
+    email: "",
+    displayName: "Admin",
+    passwordHash: hash,
+    isActive: true,
+    role: "owner",
+    createdAt: new Date().toISOString(),
+    lastLoginAt: null,
+  };
+  writeJSON("admin-users.json", [user]);
+  console.log("Admin users seeded (username: admin, password: changeme). Change immediately!");
 }
+
+/* ── Login verification ── */
 
 async function verifyLogin(username, password) {
-  const creds = readJSON("credentials.json");
-  if (!creds || creds.username !== username) return false;
-  return bcrypt.compare(password, creds.passwordHash);
+  const users = readJSON("admin-users.json", []);
+  const user = users.find((u) => u.username === username && u.isActive);
+  if (!user) return null;
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) return null;
+  // Update lastLoginAt
+  user.lastLoginAt = new Date().toISOString();
+  writeJSON("admin-users.json", users);
+  return user;
 }
 
-function createSession(username) {
+/* ── Session management ── */
+
+function createSession(user) {
   const id = crypto.randomBytes(32).toString("hex");
   const csrf = crypto.randomBytes(24).toString("hex");
-  sessions.set(id, { username, csrf, createdAt: Date.now() });
+  sessions.set(id, {
+    userId: user.id,
+    username: user.username,
+    role: user.role,
+    displayName: user.displayName,
+    csrf,
+    createdAt: Date.now(),
+  });
   return id;
 }
 
@@ -55,6 +106,8 @@ function clearSessionCookie(res) {
   res.setHeader("Set-Cookie", `session=; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=0`);
 }
 
+/* ── Middleware ── */
+
 function requireAuth(req, res, next) {
   const session = getSession(req);
   if (!session) {
@@ -63,6 +116,20 @@ function requireAuth(req, res, next) {
   }
   req.session = session;
   next();
+}
+
+function requireRole(role) {
+  return (req, res, next) => {
+    if (!req.session) {
+      res.redirect("/admin/login");
+      return;
+    }
+    if (req.session.role !== role) {
+      res.status(403).send("Access denied. You do not have permission for this action. <a href='/admin'>Go back</a>");
+      return;
+    }
+    next();
+  };
 }
 
 function verifyCsrf(req, res, next) {
@@ -75,6 +142,81 @@ function verifyCsrf(req, res, next) {
   next();
 }
 
+/* ── User CRUD helpers ── */
+
+function getAllUsers() {
+  return readJSON("admin-users.json", []);
+}
+
+function findUserById(id) {
+  const users = readJSON("admin-users.json", []);
+  return users.find((u) => u.id === id) || null;
+}
+
+function createUser({ username, email, displayName, password, role }) {
+  const users = readJSON("admin-users.json", []);
+  if (users.find((u) => u.username === username)) {
+    throw new Error("Username already exists");
+  }
+  const user = {
+    id: crypto.randomBytes(8).toString("hex"),
+    username,
+    email: email || "",
+    displayName: displayName || username,
+    passwordHash: bcrypt.hashSync(password, 10),
+    isActive: true,
+    role: role || "staff",
+    createdAt: new Date().toISOString(),
+    lastLoginAt: null,
+  };
+  users.push(user);
+  writeJSON("admin-users.json", users);
+  return user;
+}
+
+function updateUser(id, updates) {
+  const users = readJSON("admin-users.json", []);
+  const idx = users.findIndex((u) => u.id === id);
+  if (idx === -1) return null;
+  const allowed = ["email", "displayName", "role"];
+  for (const key of allowed) {
+    if (updates[key] !== undefined) {
+      users[idx][key] = updates[key];
+    }
+  }
+  writeJSON("admin-users.json", users);
+  return users[idx];
+}
+
+function deactivateUser(id) {
+  const users = readJSON("admin-users.json", []);
+  const user = users.find((u) => u.id === id);
+  if (!user) return null;
+  user.isActive = false;
+  writeJSON("admin-users.json", users);
+  return user;
+}
+
+function reactivateUser(id) {
+  const users = readJSON("admin-users.json", []);
+  const user = users.find((u) => u.id === id);
+  if (!user) return null;
+  user.isActive = true;
+  writeJSON("admin-users.json", users);
+  return user;
+}
+
+function changeUserPassword(id, newPassword) {
+  const users = readJSON("admin-users.json", []);
+  const user = users.find((u) => u.id === id);
+  if (!user) return null;
+  user.passwordHash = bcrypt.hashSync(newPassword, 10);
+  writeJSON("admin-users.json", users);
+  return user;
+}
+
+/* ── Cookie parsing ── */
+
 function parseCookies(req) {
   const header = req.headers.cookie || "";
   const cookies = {};
@@ -86,7 +228,8 @@ function parseCookies(req) {
 }
 
 module.exports = {
-  seedCredentials,
+  seedAdminUsers,
+  seedCredentials: seedAdminUsers, // backward compat alias
   verifyLogin,
   createSession,
   getSession,
@@ -94,5 +237,13 @@ module.exports = {
   setSessionCookie,
   clearSessionCookie,
   requireAuth,
+  requireRole,
   verifyCsrf,
+  getAllUsers,
+  findUserById,
+  createUser,
+  updateUser,
+  deactivateUser,
+  reactivateUser,
+  changeUserPassword,
 };

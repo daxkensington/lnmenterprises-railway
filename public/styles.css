@@ -907,6 +907,26 @@ img {
   margin-bottom: 0;
 }
 
+/* ─── Language Switcher ─── */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: background 0.2s;
+}
+.lang-switch:hover {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
 /* ─── Focus Styles ─── */
 :focus-visible {
   outline: 2px solid var(--accent);
