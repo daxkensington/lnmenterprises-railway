@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>L&amp;M Enterprises</title>
     <meta
       name="description"
@@ -101,5 +104,33 @@
   <body>
     <noscript>This site requires JavaScript to display properly.</noscript>
     <div id="root"></div>
+    <script>
+      (function() {
+        function updatePrices() {
+          var section = document.getElementById('prices');
+          if (!section) return setTimeout(updatePrices, 200);
+          fetch('/api/gas-prices')
+            .then(function(r) { return r.json(); })
+            .then(function(gp) {
+              var map = { 'Regular': gp.regular, 'Premium': gp.premium, 'Dyed Diesel': gp.dyedDiesel, 'Clear Diesel': gp.diesel };
+              var cards = section.querySelectorAll('[data-slot="card-content"]');
+              cards.forEach(function(card) {
+                var h3 = card.querySelector('h3');
+                var priceP = card.querySelector('p.text-accent, p[class*="text-5xl"]');
+                if (h3 && priceP && map[h3.textContent]) {
+                  var val = map[h3.textContent];
+                  if (val && val !== '0.00') priceP.textContent = val + '¢';
+                }
+              });
+            })
+            .catch(function() {});
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() { setTimeout(updatePrices, 300); });
+        } else {
+          setTimeout(updatePrices, 300);
+        }
+      })();
+    </script>
   </body>
   </html>

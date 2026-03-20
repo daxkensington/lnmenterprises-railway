@@ -19,15 +19,21 @@ const {
   deactivateUser,
   reactivateUser,
   changeUserPassword,
+  createResetToken,
+  verifyResetToken,
+  consumeResetToken,
+  findUserByEmail,
 } = require("./auth");
 const {
   adminLayout,
   loginPage,
+  registerPage,
+  forgotPasswordPage,
+  resetPasswordPage,
   csrfField,
   escapeHtml,
   staffListPage,
   staffFormPage,
-  gasPricesPage,
   promotionsListPage,
   promotionFormPage,
   winnersListPage,
@@ -64,6 +70,115 @@ router.get("/logout", (req, res) => {
   res.redirect("/admin/login");
 });
 
+// ── Register ──
+router.get("/register", (req, res) => {
+  if (getSession(req)) return res.redirect("/admin");
+  res.send(registerPage());
+});
+
+router.post("/register", async (req, res) => {
+  const { username, email, displayName, password, confirmPassword } = req.body;
+  if (!username || !email || !displayName || !password) {
+    return res.send(registerPage("All fields are required."));
+  }
+  if (password.length < 8) {
+    return res.send(registerPage("Password must be at least 8 characters."));
+  }
+  if (password !== confirmPassword) {
+    return res.send(registerPage("Passwords do not match."));
+  }
+  try {
+    createUser({ username, email, displayName, password, role: "staff" });
+    appendAuditLog({ req: { session: { username, userId: "self-register" }, ip: req.ip, connection: req.connection }, actionType: "register", entityType: "staff", entityId: username });
+    res.send(registerPage("", "Account created successfully! You can now sign in."));
+  } catch (err) {
+    res.send(registerPage(err.message || "Registration failed."));
+  }
+});
+
+// ── Forgot Password ──
+router.get("/forgot-password", (req, res) => {
+  res.send(forgotPasswordPage());
+});
+
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.send(forgotPasswordPage("Please enter your email address."));
+
+  const user = findUserByEmail(email);
+  // Always show success to prevent email enumeration
+  const successMsg = "If an account with that email exists, a reset link has been sent.";
+
+  if (!user) return res.send(forgotPasswordPage("", successMsg));
+
+  const token = createResetToken(user.id);
+  const host = req.headers.host || "lnmenterprises.ca";
+  const protocol = req.headers["x-forwarded-proto"] || (host.includes("localhost") ? "http" : "https");
+  const resetUrl = `${protocol}://${host}/admin/reset-password?token=${token}`;
+
+  // Send email via Resend
+  try {
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY || "re_cN9HR9Ff_DPAwFvhwr78BUAxDzEek815o"}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || "L&M Enterprises <onboarding@resend.dev>",
+        to: [email],
+        subject: "Password Reset - L&M Enterprises Admin",
+        html: `
+          <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+            <h2 style="color:#1e293b;">Password Reset</h2>
+            <p>Hi ${user.displayName},</p>
+            <p>We received a request to reset your password for the L&M Enterprises admin dashboard.</p>
+            <p><a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Reset Password</a></p>
+            <p style="color:#6b7280;font-size:14px;">This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;" />
+            <p style="color:#9ca3af;font-size:12px;">L&M Enterprises • 43 Dundas St, Deseronto, ON</p>
+          </div>`,
+      }),
+    });
+    if (!resp.ok) console.error("Resend error:", await resp.text());
+  } catch (err) {
+    console.error("Failed to send reset email:", err);
+  }
+
+  appendAuditLog({ req: { session: { username: user.username, userId: user.id }, ip: req.ip, connection: req.connection }, actionType: "password-reset-request", entityType: "staff", entityId: user.id });
+  res.send(forgotPasswordPage("", successMsg));
+});
+
+// ── Reset Password (via token) ──
+router.get("/reset-password", (req, res) => {
+  const { token } = req.query;
+  if (!token || !verifyResetToken(token)) {
+    return res.send(forgotPasswordPage("Invalid or expired reset link. Please request a new one."));
+  }
+  res.send(resetPasswordPage(token));
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { token, password, confirmPassword } = req.body;
+  if (!token) return res.send(forgotPasswordPage("Invalid reset request."));
+
+  if (!password || password.length < 8) {
+    return res.send(resetPasswordPage(token, "Password must be at least 8 characters."));
+  }
+  if (password !== confirmPassword) {
+    return res.send(resetPasswordPage(token, "Passwords do not match."));
+  }
+
+  const userId = consumeResetToken(token);
+  if (!userId) {
+    return res.send(forgotPasswordPage("Reset link has expired. Please request a new one."));
+  }
+
+  changeUserPassword(userId, password);
+  appendAuditLog({ req: { session: { username: "system", userId }, ip: req.ip, connection: req.connection }, actionType: "password-reset", entityType: "staff", entityId: userId });
+  res.send(loginPage("", "Password reset successfully! You can now sign in."));
+});
+
 // ── All routes below require auth ──
 router.use(requireAuth);
 
@@ -76,43 +191,133 @@ router.get("/", (req, res) => {
   const promotions = readJSON("promotions.json", []);
   const activePromos = promotions.filter((p) => p.isActive).length;
   const winners = readJSON("winners.json", []);
+  const reviewData = readJSON("google-reviews.json", null);
+  const recentAudit = readJSON("audit-log.json", []).slice(-5).reverse();
+  const flash = req.query.saved === "1" ? "Changes saved successfully." : "";
+
+  const auditRows = recentAudit.length
+    ? recentAudit.map((e) => `<tr><td style="white-space:nowrap;font-size:0.8rem;">${escapeHtml((e.timestamp || "").slice(0, 16).replace("T", " "))}</td><td>${escapeHtml(e.adminUsername)}</td><td>${escapeHtml(e.actionType)} ${escapeHtml(e.entityType)}</td></tr>`).join("")
+    : `<tr><td colspan="3" style="color:var(--text-muted);">No recent activity</td></tr>`;
 
   res.send(
     adminLayout({
-      title: "Dashboard",
+      title: "Staff Dashboard",
       activeNav: "dashboard",
       role: req.session.role,
+      flash,
       content: `
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-number">${posts.length}</div>
-            <div class="stat-label">Blog Posts</div>
-            <a href="/admin/blog">Manage</a>
+        <p class="dash-subtitle">Update gas prices, promotions, and manage your site content.</p>
+
+        <div class="dash-actions">
+          <a href="/admin/gas-prices" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 22H3"/><path d="M15 10h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/><path d="M7 10h4"/></svg> Gas Prices</a>
+          <a href="/admin/promotions" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/></svg> Promotions</a>
+          <a href="/admin/winners" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Winners</a>
+          <a href="/admin/blog" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z"/></svg> Blog</a>
+          <a href="/admin/reviews" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Reviews</a>
+          <a href="/admin/messages" class="dash-action-btn">${unread > 0 ? `<span class="dash-badge">${unread}</span>` : ""}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Messages</a>
+          ${req.session.role === "owner" ? `<a href="/admin/staff" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Staff</a>
+          <a href="/admin/audit-log" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Audit Log</a>` : ""}
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div class="dash-card-icon dash-card-icon--red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 22H3"/><path d="M15 10h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/><path d="M7 10h4"/></svg></div>
+              <div>
+                <h3>Gas Prices</h3>
+                <p>Update daily gas prices (&cent;/L)</p>
+              </div>
+            </div>
+            <form method="POST" action="/admin/gas-prices" class="dash-card-body">
+              ${csrfField(req.session.csrf)}
+              <input type="hidden" name="_return" value="dashboard" />
+              <div class="dash-form-grid">
+                <div class="form-group"><label>Regular</label><input type="text" name="regular" value="${escapeHtml(gasPrices.regular || "0.00")}" pattern="[0-9]*\\.?[0-9]*" /></div>
+                <div class="form-group"><label>Premium</label><input type="text" name="premium" value="${escapeHtml(gasPrices.premium || "0.00")}" pattern="[0-9]*\\.?[0-9]*" /></div>
+                <div class="form-group"><label>Dyed Diesel</label><input type="text" name="dyedDiesel" value="${escapeHtml(gasPrices.dyedDiesel || "0.00")}" pattern="[0-9]*\\.?[0-9]*" /></div>
+                <div class="form-group"><label>Clear Diesel</label><input type="text" name="diesel" value="${escapeHtml(gasPrices.diesel || "0.00")}" pattern="[0-9]*\\.?[0-9]*" /></div>
+              </div>
+              <div class="form-group"><label>Updated Label</label><input type="text" name="updatedLabel" value="${escapeHtml(gasPrices.updatedLabel || "")}" placeholder="e.g. Updated today at 8:00 AM" /></div>
+              <button type="submit" class="btn-action" style="background:var(--accent);">Save Gas Prices</button>
+            </form>
           </div>
-          <div class="stat-card">
-            <div class="stat-number">${unread}</div>
-            <div class="stat-label">Unread Messages</div>
-            <a href="/admin/messages">View</a>
+
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div class="dash-card-icon dash-card-icon--blue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></div>
+              <div>
+                <h3>Quick Add Winner</h3>
+                <p>Add a new contest winner</p>
+              </div>
+            </div>
+            <form method="POST" action="/admin/winners" class="dash-card-body">
+              ${csrfField(req.session.csrf)}
+              <div class="dash-form-grid">
+                <div class="form-group"><label>Winner Name</label><input type="text" name="name" required placeholder="Full name" /></div>
+                <div class="form-group"><label>Prize</label><input type="text" name="prize" required placeholder="e.g. $1000 Free Gas" /></div>
+              </div>
+              <div class="dash-form-grid">
+                <div class="form-group"><label>Date</label><input type="date" name="date" value="${new Date().toISOString().slice(0, 10)}" /></div>
+                <div class="form-group"><label>Testimonial (optional)</label><input type="text" name="testimonial" placeholder="Short quote" /></div>
+              </div>
+              <button type="submit" class="btn-action" style="background:#1e40af;">Add Winner</button>
+            </form>
           </div>
-          <div class="stat-card">
-            <div class="stat-number">6</div>
-            <div class="stat-label">Categories</div>
-            <a href="/admin/categories">Edit</a>
+        </div>
+
+        <div class="dash-grid" style="margin-top:1.5rem;">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>Overview</h3>
+            </div>
+            <div class="dash-card-body">
+              <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+                <div class="stat-card">
+                  <div class="stat-number">${posts.filter(p => p.published).length}</div>
+                  <div class="stat-label">Published Posts</div>
+                  <a href="/admin/blog">Manage</a>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${unread}</div>
+                  <div class="stat-label">Unread Messages</div>
+                  <a href="/admin/messages">View</a>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${activePromos}</div>
+                  <div class="stat-label">Active Promos</div>
+                  <a href="/admin/promotions">Manage</a>
+                </div>
+              </div>
+              <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-top:1rem;">
+                <div class="stat-card">
+                  <div class="stat-number">${winners.length}</div>
+                  <div class="stat-label">Winners</div>
+                  <a href="/admin/winners">View</a>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${reviewData && reviewData.rating ? reviewData.rating : "—"}</div>
+                  <div class="stat-label">Google Rating</div>
+                  <a href="/admin/reviews">Reviews</a>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${readJSON("categories.json", []).length || 6}</div>
+                  <div class="stat-label">Categories</div>
+                  <a href="/admin/categories">Edit</a>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-number">${gasPrices.regular || "0.00"}</div>
-            <div class="stat-label">Regular Gas</div>
-            <a href="/admin/gas-prices">Update</a>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">${activePromos}</div>
-            <div class="stat-label">Active Promos</div>
-            <a href="/admin/promotions">Manage</a>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">${winners.length}</div>
-            <div class="stat-label">Winners</div>
-            <a href="/admin/winners">View</a>
+
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>Recent Activity</h3>
+            </div>
+            <div class="dash-card-body">
+              <table class="admin-table" style="margin-top:0;">
+                <thead><tr><th>Time</th><th>User</th><th>Action</th></tr></thead>
+                <tbody>${auditRows}</tbody>
+              </table>
+            </div>
           </div>
         </div>`,
     }),
@@ -685,9 +890,9 @@ router.get("/gas-prices", (req, res) => {
   const flash = req.query.saved === "1" ? "Gas prices updated successfully." : "";
   const types = [
     { key: "regular", label: "Regular" },
-    { key: "midGrade", label: "Mid-Grade" },
     { key: "premium", label: "Premium" },
-    { key: "diesel", label: "Diesel" },
+    { key: "dyedDiesel", label: "Dyed Diesel" },
+    { key: "diesel", label: "Clear Diesel" },
   ];
   const fields = types
     .map(
@@ -724,7 +929,7 @@ router.post("/gas-prices", verifyCsrf, (req, res) => {
   const oldPrices = readJSON("gas-prices.json", {});
   const newPrices = {
     regular: req.body.regular || "0.00",
-    midGrade: req.body.midGrade || "0.00",
+    dyedDiesel: req.body.dyedDiesel || "0.00",
     premium: req.body.premium || "0.00",
     diesel: req.body.diesel || "0.00",
     updatedLabel: req.body.updatedLabel || "",
@@ -732,14 +937,15 @@ router.post("/gas-prices", verifyCsrf, (req, res) => {
   };
   writeJSON("gas-prices.json", newPrices);
   appendAuditLog({ req, actionType: "update", entityType: "gas-prices", oldValue: oldPrices, newValue: newPrices });
-  res.redirect("/admin/gas-prices?saved=1");
+  const returnTo = req.body._return === "dashboard" ? "/admin?saved=1" : "/admin/gas-prices?saved=1";
+  res.redirect(returnTo);
 });
 
 // ── Promotions ──
 router.get("/promotions", (req, res) => {
   const promotions = readJSON("promotions.json", []);
   const flash = req.query.saved === "1" ? "Promotion saved." : req.query.deleted === "1" ? "Promotion deleted." : "";
-  res.send(promotionsListPage({ promotions, csrf: req.session.csrf, role: req.session.role }));
+  res.send(promotionsListPage({ promotions, csrf: req.session.csrf, role: req.session.role, flash }));
 });
 
 router.get("/promotions/new", (req, res) => {
@@ -803,7 +1009,7 @@ router.post("/promotions/:id/delete", verifyCsrf, (req, res) => {
 router.get("/winners", (req, res) => {
   const winners = readJSON("winners.json", []);
   const flash = req.query.saved === "1" ? "Winner added." : req.query.deleted === "1" ? "Winner removed." : "";
-  res.send(winnersListPage({ winners, csrf: req.session.csrf, role: req.session.role }));
+  res.send(winnersListPage({ winners, csrf: req.session.csrf, role: req.session.role, flash }));
 });
 
 router.post("/winners", verifyCsrf, (req, res) => {
@@ -835,7 +1041,7 @@ router.post("/winners/:id/delete", verifyCsrf, (req, res) => {
 router.get("/reviews", (req, res) => {
   const reviewData = readJSON("google-reviews.json", null);
   const flash = req.query.synced === "1" ? "Reviews synced from Google." : req.query.error ? `Sync error: ${req.query.error}` : "";
-  res.send(reviewsPage({ reviewData, csrf: req.session.csrf, role: req.session.role }));
+  res.send(reviewsPage({ reviewData, csrf: req.session.csrf, role: req.session.role, flash }));
 });
 
 router.post("/reviews/sync", verifyCsrf, async (req, res) => {

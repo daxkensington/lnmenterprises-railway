@@ -46,7 +46,7 @@ function adminLayout({ title, content, activeNav = "", flash = "", role = "staff
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css" />
+  <link rel="stylesheet" href="/admin.css?v=2" />
 </head>
 <body>
   <div class="admin-shell">
@@ -74,9 +74,12 @@ function adminLayout({ title, content, activeNav = "", flash = "", role = "staff
 </html>`;
 }
 
-function loginPage(error = "") {
+function loginPage(error = "", success = "") {
   const errorHtml = error
     ? `<div class="admin-error">${escapeHtml(error)}</div>`
+    : "";
+  const successHtml = success
+    ? `<div class="admin-flash">${escapeHtml(success)}</div>`
     : "";
 
   return `<!doctype html>
@@ -89,20 +92,172 @@ function loginPage(error = "") {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css" />
+  <link rel="stylesheet" href="/admin.css?v=2" />
 </head>
 <body class="login-body">
   <div class="login-card">
-    <h1>L&amp;M Admin</h1>
-    <p class="login-subtitle">Sign in to manage your site</p>
+    <div class="login-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
+    </div>
+    <h1>Staff Login</h1>
+    <p class="login-subtitle">L&amp;M Enterprises Admin Dashboard</p>
     ${errorHtml}
+    ${successHtml}
     <form method="POST" action="/admin/login">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required autocomplete="username" />
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required autocomplete="current-password" />
-      <button type="submit">Sign In</button>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter your username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password" />
+      </div>
+      <button type="submit" style="width:100%;padding:0.75rem;">Sign In</button>
     </form>
+    <div class="login-links">
+      <a href="/admin/register">Create an account</a>
+      <span>•</span>
+      <a href="/admin/forgot-password">Forgot password?</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function registerPage(error = "", success = "") {
+  const errorHtml = error ? `<div class="admin-error">${escapeHtml(error)}</div>` : "";
+  const successHtml = success ? `<div class="admin-flash">${escapeHtml(success)}</div>` : "";
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Register | L&amp;M Enterprises Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css?v=2" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    </div>
+    <h1>Create Account</h1>
+    <p class="login-subtitle">Register for staff access</p>
+    ${errorHtml}
+    ${successHtml}
+    <form method="POST" action="/admin/register">
+      <div class="form-group">
+        <label for="displayName">Full Name</label>
+        <input type="text" id="displayName" name="displayName" required placeholder="Your full name" />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required placeholder="your@email.com" />
+      </div>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username" placeholder="Choose a username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password (min 8 characters)</label>
+        <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" placeholder="Choose a strong password" />
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8" autocomplete="new-password" placeholder="Re-enter your password" />
+      </div>
+      <button type="submit" style="width:100%;padding:0.75rem;">Register</button>
+    </form>
+    <div class="login-links">
+      <a href="/admin/login">Already have an account? Sign in</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function forgotPasswordPage(error = "", success = "") {
+  const errorHtml = error ? `<div class="admin-error">${escapeHtml(error)}</div>` : "";
+  const successHtml = success ? `<div class="admin-flash">${escapeHtml(success)}</div>` : "";
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Forgot Password | L&amp;M Enterprises Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css?v=2" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+    </div>
+    <h1>Reset Password</h1>
+    <p class="login-subtitle">Enter your email to receive a reset link</p>
+    ${errorHtml}
+    ${successHtml}
+    <form method="POST" action="/admin/forgot-password">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="your@email.com" />
+      </div>
+      <button type="submit" style="width:100%;padding:0.75rem;">Send Reset Link</button>
+    </form>
+    <div class="login-links">
+      <a href="/admin/login">Back to login</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function resetPasswordPage(token, error = "") {
+  const errorHtml = error ? `<div class="admin-error">${escapeHtml(error)}</div>` : "";
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Set New Password | L&amp;M Enterprises Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css?v=2" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h1>Set New Password</h1>
+    <p class="login-subtitle">Choose a new password for your account</p>
+    ${errorHtml}
+    <form method="POST" action="/admin/reset-password">
+      <input type="hidden" name="token" value="${escapeHtml(token)}" />
+      <div class="form-group">
+        <label for="password">New Password (min 8 characters)</label>
+        <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" placeholder="Enter new password" />
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8" autocomplete="new-password" placeholder="Re-enter new password" />
+      </div>
+      <button type="submit" style="width:100%;padding:0.75rem;">Reset Password</button>
+    </form>
+    <div class="login-links">
+      <a href="/admin/login">Back to login</a>
+    </div>
   </div>
 </body>
 </html>`;
@@ -200,9 +355,9 @@ function staffFormPage({ user, csrf, isNew, role }) {
 function gasPricesPage({ gasPrices, csrf, role }) {
   const types = [
     { key: "regular", label: "Regular" },
-    { key: "midGrade", label: "Mid-Grade" },
     { key: "premium", label: "Premium" },
-    { key: "diesel", label: "Diesel" },
+    { key: "dyedDiesel", label: "Dyed Diesel" },
+    { key: "diesel", label: "Clear Diesel" },
   ];
 
   const fields = types
@@ -235,7 +390,7 @@ function gasPricesPage({ gasPrices, csrf, role }) {
 
 /* ── Promotions templates ── */
 
-function promotionsListPage({ promotions, csrf, role }) {
+function promotionsListPage({ promotions, csrf, role, flash = "" }) {
   const rows = promotions
     .map(
       (p) => `
@@ -253,6 +408,7 @@ function promotionsListPage({ promotions, csrf, role }) {
     title: "Promotions",
     activeNav: "promotions",
     role,
+    flash,
     content: `
       <a href="/admin/promotions/new" class="btn-action">New Promotion</a>
       <table class="admin-table">
@@ -308,7 +464,7 @@ function promotionFormPage({ promotion, csrf, isNew, role }) {
 
 /* ── Winners templates ── */
 
-function winnersListPage({ winners, csrf, role }) {
+function winnersListPage({ winners, csrf, role, flash = "" }) {
   const rows = winners
     .map(
       (w) => `
@@ -330,6 +486,7 @@ function winnersListPage({ winners, csrf, role }) {
     title: "Contest Winners",
     activeNav: "winners",
     role,
+    flash,
     content: `
       <h3>Add Winner</h3>
       <form method="POST" action="/admin/winners" style="margin-bottom:2rem;">
@@ -394,7 +551,7 @@ function auditLogPage({ entries, role }) {
 
 /* ── Reviews template ── */
 
-function reviewsPage({ reviewData, csrf, role }) {
+function reviewsPage({ reviewData, csrf, role, flash = "" }) {
   const hasData = reviewData && reviewData.reviews && reviewData.reviews.length > 0;
 
   const starsHtml = (rating) => {
@@ -441,6 +598,7 @@ function reviewsPage({ reviewData, csrf, role }) {
     title: "Google Reviews",
     activeNav: "reviews",
     role,
+    flash,
     content: `
       ${summaryHtml}
       <form method="POST" action="/admin/reviews/sync" style="margin-bottom:2rem;">
@@ -458,6 +616,9 @@ function reviewsPage({ reviewData, csrf, role }) {
 module.exports = {
   adminLayout,
   loginPage,
+  registerPage,
+  forgotPasswordPage,
+  resetPasswordPage,
   csrfField,
   escapeHtml,
   staffListPage,

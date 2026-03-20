@@ -215,6 +215,38 @@ function changeUserPassword(id, newPassword) {
   return user;
 }
 
+/* ── Password reset tokens ── */
+
+const resetTokens = new Map(); // token -> { userId, expiresAt }
+const RESET_TTL = 60 * 60 * 1000; // 1 hour
+
+function createResetToken(userId) {
+  const token = crypto.randomBytes(32).toString("hex");
+  resetTokens.set(token, { userId, expiresAt: Date.now() + RESET_TTL });
+  return token;
+}
+
+function verifyResetToken(token) {
+  const entry = resetTokens.get(token);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    resetTokens.delete(token);
+    return null;
+  }
+  return entry.userId;
+}
+
+function consumeResetToken(token) {
+  const userId = verifyResetToken(token);
+  if (userId) resetTokens.delete(token);
+  return userId;
+}
+
+function findUserByEmail(email) {
+  const users = readJSON("admin-users.json", []);
+  return users.find((u) => u.email && u.email.toLowerCase() === email.toLowerCase()) || null;
+}
+
 /* ── Cookie parsing ── */
 
 function parseCookies(req) {
@@ -246,4 +278,8 @@ module.exports = {
   deactivateUser,
   reactivateUser,
   changeUserPassword,
+  createResetToken,
+  verifyResetToken,
+  consumeResetToken,
+  findUserByEmail,
 };

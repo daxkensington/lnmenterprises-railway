@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const crypto = require("crypto");
 const { readJSON, writeJSON, BLOG_CATEGORIES } = require("./admin/data");
 const { seedAdminUsers } = require("./admin/auth");
@@ -211,10 +212,75 @@ if (!readJSON("site-content.json")) {
 }
 if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
 
-// Seed SEO blog posts if they don't already exist
-(function seedSeoPosts() {
+// Seed blog posts if they don't already exist
+(function seedBlogPosts() {
   const posts = readJSON("blog-posts.json", []);
-  const seoPosts = [
+  const seedPosts = [
+    {
+      id: "seed001",
+      title: "Welcome to L&M Enterprises \u2014 Now Online",
+      slug: "welcome-to-lm-enterprises-now-online",
+      excerpt: "We\u2019re excited to launch our new website and bring L&M Enterprises online. Learn about what\u2019s new and what to expect from our Deseronto location.",
+      content: "We\u2019re thrilled to announce the launch of our brand-new website for L&M Enterprises. After years of serving the Tyendinaga Mohawk Territory and Deseronto community, we\u2019re bringing the L&M experience online.\n\nOur new site makes it easier than ever to learn about our products, check our hours, and stay up to date on promotions. Whether you\u2019re stopping in for gas, grabbing a quick snack, or picking up your favourite tobacco and vape products, L&M Enterprises is your one-stop shop on Dundas Street.\n\nWhat\u2019s coming next? We\u2019ll be using this blog to share store news, product spotlights, fuel-saving tips, and community updates. Bookmark the page and check back often.\n\nWe want to thank every customer who has supported us over the years. Your loyalty keeps us going, and we\u2019re committed to offering competitive prices, friendly service, and a clean, well-stocked store every single day.\n\nSee you at 43 Dundas Street, Deseronto. Stop in and say hello!",
+      category: "Store News",
+      featuredImage: "/images/blog/welcome-lm-enterprises.svg",
+      featuredImageAlt: "L&M Enterprises store front in Deseronto, Ontario",
+      author: "L&M Enterprises",
+      date: "2026-03-01",
+      published: true
+    },
+    {
+      id: "seed002",
+      title: "5 Ways to Save on Gas This Spring",
+      slug: "5-ways-to-save-on-gas-this-spring",
+      excerpt: "Fuel prices fluctuate, but these five practical tips will help you get more kilometres out of every fill-up at L&M Enterprises.",
+      content: "Gas prices can take a big bite out of your budget, especially if you commute or drive for work. Here are five practical tips to help you save at the pump this spring.\n\n1. Keep your tires properly inflated. Under-inflated tires increase rolling resistance, which means your engine works harder and burns more fuel. Check your tire pressure at least once a month.\n\n2. Drive smoothly. Aggressive acceleration and hard braking can increase fuel consumption by up to 40 percent. Ease into speed and coast to a stop whenever it\u2019s safe to do so.\n\n3. Remove extra weight. That box of tools or bag of sports gear in your trunk adds weight your engine has to haul around. Clear out anything you don\u2019t need for today\u2019s trip.\n\n4. Plan your errands. Combining multiple stops into one loop saves fuel compared to making separate trips. A warm engine is more fuel-efficient than a cold one, so batch your errands together.\n\n5. Fill up at L&M Enterprises. We work hard to keep our fuel prices competitive. Pair that with our monthly Win $1000 in FREE GAS contest through SAGO Gas Bar, and you\u2019ll stretch every dollar further.\n\nStop by 43 Dundas Street in Deseronto and fuel up smart this season.",
+      category: "Tips & Savings",
+      featuredImage: "/images/blog/save-on-gas-tips.svg",
+      featuredImageAlt: "Fuel pump with money-saving tips",
+      author: "L&M Enterprises",
+      date: "2026-03-05",
+      published: true
+    },
+    {
+      id: "seed003",
+      title: "Your Quick Guide to Our Convenience Store",
+      slug: "your-quick-guide-to-our-convenience-store",
+      excerpt: "From snacks and drinks to everyday essentials, here\u2019s what you\u2019ll find inside L&M Enterprises\u2019 fully stocked convenience store.",
+      content: "Need a cold drink on a hot day? Forgot milk on the way home? Looking for a quick lunch? Our convenience store has you covered.\n\nAt L&M Enterprises, we carry a wide selection of everyday items so you never have to make a special trip to a big-box store. Here\u2019s a look at what you\u2019ll find on our shelves.\n\nSnacks and drinks are our bread and butter. We stock chips, chocolate bars, jerky, gum, and candy alongside a full cooler of pop, juice, water, energy drinks, and iced tea. Perfect for road trips or a mid-afternoon pick-me-up.\n\nEveryday essentials are always in stock. We carry bread, milk, eggs, butter, canned goods, and basic toiletries. If you run out of something at home, chances are we have it.\n\nSeasonal items rotate throughout the year. In summer, you\u2019ll find ice, sunscreen, and bug spray. In winter, we keep windshield washer fluid and hand warmers near the front.\n\nLottery tickets are available at the counter. Try your luck with scratch cards or draw-based games while you\u2019re picking up your other items.\n\nWe pride ourselves on keeping our store clean, well-organized, and easy to shop. Pop in next time you need something quick \u2014 we\u2019re open 6 AM to 10 PM daily at 43 Dundas Street, Deseronto.",
+      category: "Product Spotlight",
+      featuredImage: "/images/blog/convenience-store-guide.svg",
+      featuredImageAlt: "Convenience store shelves stocked with snacks and drinks",
+      author: "L&M Enterprises",
+      date: "2026-03-08",
+      published: true
+    },
+    {
+      id: "seed004",
+      title: "Understanding Vape Products at L&M",
+      slug: "understanding-vape-products-at-lm",
+      excerpt: "New to vaping or looking for something different? Here\u2019s what we carry and how our staff can help you choose the right product.",
+      content: "Whether you\u2019re an experienced vaper or just exploring your options, L&M Enterprises carries a solid selection of vape and tobacco products to suit different preferences.\n\nOur vape selection includes disposable vapes, pod systems, and a variety of e-liquid flavours. We carry well-known brands and rotate new arrivals regularly, so there\u2019s usually something new to try on your next visit.\n\nFor traditional tobacco customers, we stock a full range of cigarettes, cigars, rolling tobacco, and accessories. Our prices are competitive, and we keep popular brands in stock so you don\u2019t have to make a second trip.\n\nNot sure what you want? Our staff are happy to answer questions and help you compare options. We can walk you through nicotine strengths, flavour profiles, and device types so you leave with something that works for you.\n\nA few things to keep in mind. All tobacco and vape products are sold to adults only. We check ID and follow all applicable regulations. If you have questions about what we carry or want to request a specific brand, just ask at the counter.\n\nVisit us at 43 Dundas Street in Deseronto and browse our selection in person. We\u2019re here from 6 AM to 10 PM every day.",
+      category: "Vape & Tobacco",
+      featuredImage: "/images/blog/vape-tobacco-products.svg",
+      featuredImageAlt: "Vape and tobacco products selection",
+      author: "L&M Enterprises",
+      date: "2026-03-10",
+      published: true
+    },
+    {
+      id: "seed005",
+      title: "Serving the Tyendinaga Mohawk Territory Community",
+      slug: "serving-the-tyendinaga-mohawk-territory-community",
+      excerpt: "L&M Enterprises is proud to be part of the Tyendinaga Mohawk Territory and Deseronto community. Here\u2019s how we give back and support our neighbours.",
+      content: "L&M Enterprises is more than a gas station and convenience store. We\u2019re part of a community, and we take that role seriously.\n\nLocated at 43 Dundas Street in Deseronto, right in the heart of the Tyendinaga Mohawk Territory, we serve customers from across the region. From families filling up on a weekend road trip to regulars who stop in every morning for coffee, we see familiar faces every day.\n\nCommunity means showing up. We keep our prices fair because we know budgets are tight. We stay open long hours because we know people need a reliable place to grab essentials early in the morning or late at night.\n\nWe\u2019re proud to be locally owned and operated. When you shop at L&M, your money stays in the community. It supports local jobs, local families, and local growth.\n\nWe also believe in being good neighbours. Whether it\u2019s keeping our lot clean, greeting customers by name, or going the extra mile to track down a product someone needs, we try to do things the right way.\n\nLooking ahead, we\u2019re excited about continuing to improve our store, expand our selection, and find new ways to serve the community better. If you have suggestions or feedback, we\u2019d love to hear from you \u2014 drop by the store or use the contact form on our website.\n\nThank you for supporting L&M Enterprises. We\u2019re here because of you.",
+      category: "Community",
+      featuredImage: "/images/blog/tyendinaga-community.svg",
+      featuredImageAlt: "Serving the Tyendinaga Mohawk Territory and Deseronto community",
+      author: "L&M Enterprises",
+      date: "2026-03-12",
+      published: true
+    },
     {
       id: "seo001",
       title: "The Complete Guide to Gas Prices in Deseronto and Tyendinaga: Why We Have the Cheapest Fill-Up Near the 401",
@@ -222,7 +288,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Deseronto and the Tyendinaga Mohawk Territory consistently offer some of the lowest gas prices in Ontario. Here\u2019s why drivers from Belleville, Napanee, and the 401 corridor save big by filling up at L&M Enterprises on Highway 49.",
       content: "If you have driven through the Deseronto and Tyendinaga Mohawk Territory area on Highway 49, you have probably noticed something that catches every driver\u2019s attention: the gas prices here are consistently among the lowest in all of Ontario.\n\nThis is not a fluke. There is a reason the stretch of Highway 49 between the 401 and Deseronto has become one of the most popular fuel stops in Eastern Ontario. Let us break down why gas is cheaper here, how much you can save, and why L&M Enterprises should be your go-to stop.\n\nWhy Gas Prices Are Lower in Deseronto and Tyendinaga\n\nThe Deseronto and Tyendinaga area has one of the highest concentrations of gas stations in Ontario. Within just a few kilometres along Highway 49, there are over a dozen fuel stations competing for your business. That kind of competition keeps prices sharp.\n\nThe result is that gas prices along Highway 49 regularly come in well below what you would pay at stations in Belleville, Napanee, Kingston, or at any of the highway rest stops along the 401. GasBuddy data consistently shows Deseronto area stations among the lowest-priced in the province.\n\nHow Much Can You Actually Save?\n\nThe savings add up fast. On a typical fill-up of 50 litres, the price difference between Deseronto area stations and a Belleville or Napanee station can easily save you five to ten dollars or more. For commuters who fill up weekly, that is hundreds of dollars a year staying in your pocket.\n\nFor drivers passing through on the 401, the five-minute detour down Highway 49 to L&M Enterprises pays for itself on a single tank. Whether you are driving between Toronto and Montreal, heading to Ottawa, or commuting between Kingston and Belleville, stopping in Deseronto is the smart move.\n\nWhat Fuels Does L&M Enterprises Offer?\n\nAt L&M Enterprises, we offer regular unleaded gasoline at competitive prices every day. Our pumps are well-maintained, our lot is clean, and we are open from 6 AM to 10 PM daily so you can fill up early in the morning or on your way home in the evening.\n\nWhile you are filling up, step inside our fully stocked convenience store for snacks, drinks, tobacco products, vapes, cigars, and everyday essentials. One stop covers everything you need.\n\nHow to Find L&M Enterprises from the 401\n\nGetting here from the 401 is simple. Take the Highway 49 South exit near Marysville. Head south on Highway 49 toward Deseronto. L&M Enterprises is located at 43 Dundas Street, just a five-minute drive from the highway.\n\nThe route is straightforward with no complicated turns. You will pass several other gas stations along the way, but keep driving to L&M for the best combination of price, service, and convenience store selection.\n\nDirections from Belleville: Head east on Highway 2 or take the 401 east to Highway 49 South. About 20 minutes total.\n\nDirections from Napanee: Head west on Highway 2 or take the 401 west to Highway 49 South. About 15 minutes total.\n\nDirections from Kingston: Take the 401 west to Highway 49 South. About 45 minutes.\n\nSeasonal Price Trends\n\nGas prices in Ontario tend to rise in the summer months as demand increases with road trip season. The good news is that the competitive Deseronto market means prices here stay lower than average even during peak season.\n\nSpring and fall tend to offer the best prices. Winter can see slight increases due to supply factors, but the Deseronto area still comes out ahead compared to most Eastern Ontario communities.\n\nCheck Before You Drive\n\nWant to see current prices before you make the trip? Check GasBuddy for real-time Deseronto gas prices. You can also follow L&M Enterprises on social media for updates on pricing and promotions.\n\nThe Bottom Line\n\nWhether you live in Deseronto, commute through the Bay of Quinte area, or are passing through on the 401, filling up at L&M Enterprises on Highway 49 is one of the easiest ways to save money on fuel in Ontario. Our prices are competitive, our store is stocked, and our staff are friendly.\n\nStop by L&M Enterprises at 43 Dundas Street, Deseronto. We are open 6 AM to 10 PM daily. Your wallet will thank you.",
       category: "Gas & Fuel",
-      featuredImage: "/images/blog/gas-station-deseronto.jpg",
+      featuredImage: "/images/blog/gas-prices-deseronto.svg",
       featuredImageAlt: "Gas pumps at L&M Enterprises in Deseronto offering competitive fuel prices near Highway 401",
       author: "L&M Enterprises",
       date: "2026-03-14",
@@ -235,7 +301,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Driving the 401 between Kingston and Belleville? The Highway 49 exit to Deseronto puts you five minutes from some of the cheapest gas in Ontario at L&M Enterprises.",
       content: "If you are driving the Highway 401 anywhere between Kingston and Belleville, here is a tip that experienced Ontario drivers already know: take the Highway 49 exit south toward Deseronto. In about five minutes, you will find gas prices that are significantly cheaper than anything along the 401 itself.\n\nL&M Enterprises at 43 Dundas Street in Deseronto is right on Highway 49, making it one of the easiest and most rewarding fuel stops for 401 travellers.\n\nThe Five-Minute Detour That Pays for Itself\n\nThe Highway 49 exit off the 401 is clearly marked. Head south and you will reach L&M Enterprises within five minutes. The road is straight, well-maintained, and easy to navigate even for larger vehicles.\n\nThe savings are real. Gas prices in the Deseronto and Tyendinaga area regularly come in significantly lower than what you will find at highway rest stops, truck stops, or gas stations in Belleville, Napanee, or along the 401 corridor. On a full tank, you can easily save enough to cover a coffee and a snack from our convenience store.\n\nAfter you fill up, getting back on the 401 is just as easy. Head north on Highway 49 and you are back on the highway in minutes, continuing your journey with a full tank and more money in your pocket.\n\nPerfect for Long-Distance Drivers\n\nThe 401 is the busiest highway in North America, carrying hundreds of thousands of vehicles every day. Whether you are making the Toronto to Montreal drive, heading from Toronto to Ottawa via the 416, driving between Kingston and Belleville for work, or on a road trip through Eastern Ontario, the Deseronto exit is your smart fuel stop.\n\nMany experienced drivers and truckers already know about the Deseronto gas price advantage. RV forums, travel groups, and GasBuddy communities regularly mention the Highway 49 corridor as one of the best fuel stops in the province.\n\nMore Than Just Gas\n\nWhen you pull into L&M Enterprises, you get more than cheap fuel. Our convenience store is fully stocked with everything you need for the road ahead.\n\nSnacks and drinks for the drive, including chips, chocolate bars, jerky, cold pop, water, juice, and energy drinks. Coffee and hot beverages to keep you alert on long drives. Tobacco products including cigarettes, rolling tobacco, and accessories. A full vape selection with disposable vapes, pod systems, and e-liquid. Cigars for every budget and occasion. Everyday essentials if you need anything on the go.\n\nOur staff are friendly and knowledgeable. If you need directions, a product recommendation, or just a quick chat to break up a long drive, we are happy to help.\n\nOpen When You Need Us\n\nL&M Enterprises is open from 6 AM to 10 PM daily. That means we are here for early-morning commuters leaving Kingston for Belleville, afternoon travellers heading to Ottawa or Montreal, and evening drivers making their way home.\n\nHow to Find Us from the 401\n\nTake the Highway 49 South exit from the 401 near Marysville. Drive south on Highway 49 for approximately five minutes. L&M Enterprises is located at 43 Dundas Street in Deseronto, right on the main road. You cannot miss us.\n\nComing from the west, this is the exit after Shannonville. Coming from the east, it is the exit before Napanee. The interchange is well-signed and easy to navigate.\n\nWhy This Stop Makes Sense\n\nLet us do the math. A typical sedan has a 50-litre tank. If Deseronto gas prices are even a few cents per litre cheaper than 401 highway stations, which they usually are by a noticeable margin, you save several dollars per fill-up.\n\nIf you drive the 401 regularly, those savings compound quickly. Weekly commuters could save hundreds of dollars a year just by making L&M Enterprises their regular fuel stop.\n\nAnd the detour costs you less than ten minutes. That is a hard deal to beat.\n\nJoin the Drivers Who Already Know\n\nThousands of drivers already take the Highway 49 exit to fill up in Deseronto. Now you know why. Cheaper gas, a great convenience store, and a quick easy detour that gets you back on the 401 in minutes.\n\nNext time you are driving between Kingston and Belleville, take the Highway 49 exit and stop at L&M Enterprises. Your tank and your wallet will both be fuller for it.\n\nL&M Enterprises is located at 43 Dundas Street, Deseronto, Ontario. Open 6 AM to 10 PM daily.",
       category: "Gas & Fuel",
-      featuredImage: "/images/blog/highway-401-exit.jpg",
+      featuredImage: "/images/blog/highway-49-401-exit.svg",
       featuredImageAlt: "Highway 401 exit to Deseronto for cheap gas at L&M Enterprises",
       author: "L&M Enterprises",
       date: "2026-03-14",
@@ -248,7 +314,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Heading to Prince Edward County via the Skyway Bridge? L&M Enterprises on Highway 49 in Deseronto is your perfect last stop for cheap gas, snacks, and supplies before crossing into the County.",
       content: "If you are heading to Prince Edward County from the east on Highway 49, you are about to drive right past one of the best fuel and supply stops in the region. L&M Enterprises sits on Highway 49 in Deseronto, just minutes before you reach the Bay of Quinte Skyway Bridge that takes you into the County.\n\nWhether you are planning a weekend of wine tasting, a beach day at Sandbanks Provincial Park, or a leisurely drive through the County\u2019s rolling farmland, stopping at L&M first is a smart move. Here is why.\n\nFuel Up Before the County\n\nPrince Edward County is a beautiful destination, but gas options inside the County can be limited and prices tend to be higher in tourist areas like Picton and Wellington. By filling up at L&M Enterprises in Deseronto, you take advantage of some of the lowest gas prices in Ontario.\n\nThe Deseronto and Tyendinaga area is well known for its competitive fuel pricing. You will pay noticeably less per litre here than at stations inside Prince Edward County or along the 401. On a full tank, the savings are enough to put toward a bottle of County wine or a nice lunch.\n\nStock Up on Road Trip Essentials\n\nOur convenience store has everything you need for a day in the County. Cold drinks including pop, water, juice, and iced tea to keep you refreshed during winery visits and beach days. Snacks like chips, chocolate bars, jerky, trail mix, and candy. Ice for your cooler, because nothing ruins a beach day like warm drinks. Sunscreen and bug spray for outdoor adventures. And all the everyday essentials you might have forgotten to pack.\n\nHeading to a campground near Sandbanks or a rental cottage? We have got your last-minute supply needs covered.\n\nTobacco, Vapes, and Cigars\n\nPlanning to enjoy a cigar at sunset overlooking the County? L&M carries a selection of cigars for every occasion and budget. We also stock a full range of cigarettes, rolling tobacco, disposable vapes, pod systems, and vape accessories. Prices on tobacco and vape products in Deseronto are competitive, so stock up before you cross the bridge.\n\nYour Gateway to Prince Edward County\n\nHighway 49 is the eastern gateway to Prince Edward County. The road runs south from the 401 through Deseronto, crosses the Bay of Quinte Skyway Bridge, and enters the County near Ameliasburgh. From there, it is a scenic drive to Picton, the County\u2019s main town, and onward to Sandbanks, Wellington, Bloomfield, and all the other charming County destinations.\n\nL&M Enterprises is perfectly positioned on this route. You will pass right by us on your way to the bridge. Pull in, fill up, grab your supplies, and continue on your way. The whole stop takes just a few minutes.\n\nWhat to Do in Prince Edward County\n\nOnce you cross the Skyway Bridge, Prince Edward County offers some of the best experiences in Ontario. Over forty wineries and cideries dot the countryside, with world-class Pinot Noir and Chardonnay leading the way. Sandbanks Provincial Park features some of the best beaches in Ontario. The town of Picton has charming shops, restaurants, and the Regent Theatre. Bloomfield and Wellington offer farm-to-table dining, craft breweries, and artisan shops. The County\u2019s quiet back roads are perfect for cycling, with gentle hills and stunning lake views.\n\nWhether you are visiting for the day or spending a long weekend, having a full tank and a car stocked with snacks makes the experience that much better.\n\nHow to Find L&M Enterprises\n\nFrom the 401: Take the Highway 49 South exit near Marysville. Drive south for about five minutes. L&M Enterprises is at 43 Dundas Street in Deseronto.\n\nFrom Belleville: Take Highway 2 east or the 401 east to Highway 49 South. About 20 minutes.\n\nFrom Napanee: Take Highway 2 west or the 401 west to Highway 49 South. About 15 minutes.\n\nFrom Kingston: Take the 401 west to Highway 49 South. About 45 minutes.\n\nOnce you leave L&M, continue south on Highway 49. You will cross the Skyway Bridge in about ten minutes and arrive in Prince Edward County.\n\nMake L&M Your County Trip Tradition\n\nMany of our regular customers have made L&M Enterprises their standard stop before heading into the County. They fill up, grab a cold drink and some snacks, and cross the bridge with everything they need for the day.\n\nIt is a simple habit that saves money and time. No need to hunt for a gas station once you are in the County. No paying tourist-area prices. Just a quick, easy stop at a friendly local store with great prices and a well-stocked shop.\n\nNext time you are heading to Prince Edward County, make L&M Enterprises your first stop. We are open 6 AM to 10 PM daily at 43 Dundas Street, Deseronto, Ontario, right on Highway 49 before the Skyway Bridge. See you on your way to the County.",
       category: "Tips & Savings",
-      featuredImage: "/images/blog/prince-edward-county-drive.jpg",
+      featuredImage: "/images/blog/prince-edward-county.svg",
       featuredImageAlt: "Bay of Quinte Skyway Bridge on Highway 49 near L&M Enterprises in Deseronto",
       author: "L&M Enterprises",
       date: "2026-03-14",
@@ -256,21 +322,32 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
     }
   ];
   let updated = false;
-  for (const seoPost of seoPosts) {
-    const existing = posts.find(p => p.id === seoPost.id);
+  for (const post of seedPosts) {
+    const existing = posts.find(p => p.id === post.id);
     if (!existing) {
-      posts.push(seoPost);
+      posts.push(post);
       updated = true;
-    } else if (existing.featuredImage !== seoPost.featuredImage) {
-      existing.featuredImage = seoPost.featuredImage;
-      existing.featuredImageAlt = seoPost.featuredImageAlt;
+    } else if (existing.featuredImage !== post.featuredImage) {
+      existing.featuredImage = post.featuredImage;
+      existing.featuredImageAlt = post.featuredImageAlt;
       updated = true;
     }
   }
   if (updated) writeJSON("blog-posts.json", posts);
 })();
 if (!readJSON("contact-messages.json")) writeJSON("contact-messages.json", []);
-if (!readJSON("gas-prices.json")) writeJSON("gas-prices.json", { regular: "0.00", midGrade: "0.00", premium: "0.00", diesel: "0.00", updatedLabel: "", lastUpdatedAt: null });
+if (!readJSON("gas-prices.json")) {
+  writeJSON("gas-prices.json", { regular: "0.00", dyedDiesel: "0.00", premium: "0.00", diesel: "0.00", updatedLabel: "", lastUpdatedAt: null });
+} else {
+  // Migrate old midGrade field to dyedDiesel
+  const gp = readJSON("gas-prices.json", {});
+  if (gp.midGrade !== undefined && gp.dyedDiesel === undefined) {
+    gp.dyedDiesel = gp.midGrade;
+    delete gp.midGrade;
+    writeJSON("gas-prices.json", gp);
+    console.log("Migrated gas-prices.json: midGrade → dyedDiesel");
+  }
+}
 if (!readJSON("promotions.json")) writeJSON("promotions.json", []);
 if (!readJSON("winners.json")) writeJSON("winners.json", []);
 
@@ -287,7 +364,7 @@ function loadSiteContent() {
 }
 
 function loadGasPrices() {
-  return readJSON("gas-prices.json", { regular: "0.00", midGrade: "0.00", premium: "0.00", diesel: "0.00", updatedLabel: "", lastUpdatedAt: null });
+  return readJSON("gas-prices.json", { regular: "0.00", dyedDiesel: "0.00", premium: "0.00", diesel: "0.00", updatedLabel: "", lastUpdatedAt: null });
 }
 function loadPromotions() {
   return readJSON("promotions.json", []);
@@ -372,6 +449,7 @@ function pageTemplate({
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${ogImage || `${siteUrl}/og-image.svg`}" />
+    <link rel="alternate" type="application/rss+xml" title="L&amp;M Enterprises Blog" href="${siteUrl}/blog/rss.xml" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#c90019" />
@@ -573,18 +651,18 @@ function gasPriceSection(lang = "en") {
   const gp = loadGasPrices();
   const types = [
     { key: "regular", label: t(lang, "gasPrices.regular"), icon: icons.fuel },
-    { key: "midGrade", label: "Mid-Grade", icon: icons.fuel },
     { key: "premium", label: t(lang, "gasPrices.premium"), icon: icons.fuel },
-    { key: "diesel", label: "Diesel", icon: icons.fuel },
+    { key: "dyedDiesel", label: t(lang, "gasPrices.dyedDiesel"), icon: icons.fuel },
+    { key: "diesel", label: t(lang, "gasPrices.clearDiesel"), icon: icons.fuel },
   ];
   const cards = types
-    .filter((t) => gp[t.key] && gp[t.key] !== "0.00")
+    .filter((f) => gp[f.key] && gp[f.key] !== "0.00")
     .map(
-      (t) => `
+      (f) => `
       <div class="info-card" style="text-align:center;">
-        <div class="icon-circle">${t.icon}</div>
-        <h3>${escapeHtml(t.label)}</h3>
-        <p style="font-size:2rem;font-weight:800;color:var(--red);">${escapeHtml(gp[t.key])}<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted);"> &cent;/L</span></p>
+        <div class="icon-circle">${f.icon}</div>
+        <h3>${escapeHtml(f.label)}</h3>
+        <p style="font-size:2rem;font-weight:800;color:var(--red);">${escapeHtml(gp[f.key])}<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted);"> &cent;/L</span></p>
       </div>`,
     )
     .join("");
@@ -1252,6 +1330,13 @@ app.use("/admin", require("./admin/routes"));
 
 /* ── Contact form handler ── */
 const contactRateLimit = new Map();
+// Clean up expired rate-limit entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of contactRateLimit) {
+    if (now > entry.resetTime) contactRateLimit.delete(ip);
+  }
+}, 600000);
 app.use("/contact", express.urlencoded({ extended: false, limit: "100kb" }));
 
 app.post("/contact", (req, res) => {
@@ -1290,6 +1375,19 @@ app.post("/contact", (req, res) => {
   }));
 });
 
+/* ── Gas Prices API (for SPA homepage) ── */
+app.get("/api/gas-prices", (_req, res) => {
+  const gp = loadGasPrices();
+  res.json({
+    regular: gp.regular || "0.00",
+    premium: gp.premium || "0.00",
+    dyedDiesel: gp.dyedDiesel || "0.00",
+    diesel: gp.diesel || "0.00",
+    updatedLabel: gp.updatedLabel || "",
+    lastUpdatedAt: gp.lastUpdatedAt || null,
+  });
+});
+
 app.get(/^\/(api)(\/|$)/, (_req, res) => {
   res.status(404).send("Not found");
 });
@@ -1298,40 +1396,34 @@ app.get("/files", (_req, res) => {
   res.redirect(301, "/");
 });
 
-app.get("/", (_req, res) => {
+app.get(["/", "/index.html"], (_req, res) => {
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   res.sendFile(indexFile);
+});
+
+// Intercept the React JS bundle to replace hardcoded gas prices with live values
+app.get("/assets/index-*.js", (req, res, next) => {
+  const filePath = path.join(publicDir, req.path);
+  if (!fs.existsSync(filePath)) return next();
+  const gp = loadGasPrices();
+  let js = fs.readFileSync(filePath, "utf8");
+  // Replace hardcoded prices in the bundle with live API values
+  js = js.replace(/type:"Regular",price:"[^"]*"/g,      `type:"Regular",price:"${gp.regular || "0.00"}¢"`);
+  js = js.replace(/type:"Premium",price:"[^"]*"/g,      `type:"Premium",price:"${gp.premium || "0.00"}¢"`);
+  js = js.replace(/type:"Dyed Diesel",price:"[^"]*"/g,  `type:"Dyed Diesel",price:"${gp.dyedDiesel || "0.00"}¢"`);
+  js = js.replace(/type:"Clear Diesel",price:"[^"]*"/g, `type:"Clear Diesel",price:"${gp.diesel || "0.00"}¢"`);
+  res.set("Content-Type", "application/javascript; charset=utf-8");
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.send(js);
 });
 
 app.get("/blog", (req, res) => {
   res.send(blogPage(req.query.category || null, req.lang));
 });
 
-app.get("/blog/:slug", (req, res, next) => {
-  const posts = readJSON("blog-posts.json", []);
-  const post = posts.find((p) => p.slug === req.params.slug && p.published);
-  if (!post) return next();
-  res.send(blogPostPage(post, req.lang));
-});
-
-app.get("/deseronto-convenience-store-gas-station", (req, res) => {
-  res.send(locationPage(req.lang));
-});
-
-app.get("/contact-directions", (req, res) => {
-  res.send(contactPage(req.lang));
-});
-
-const categorySlugs = new Set(defaultCategories.map((c) => c.slug));
-for (const slug of categorySlugs) {
-  app.get(`/${slug}`, (req, res) => {
-    const cats = loadCategories();
-    const category = cats.find((c) => c.slug === slug);
-    if (!category) return res.status(404).send(notFoundPage(req.lang));
-    res.send(categoryPage(category, req.lang));
-  });
-}
-
-/* ── RSS Feed ── */
+/* ── RSS Feed (must be before /blog/:slug) ── */
 function escapeXml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -1373,6 +1465,31 @@ app.get("/blog/rss.xml", (_req, res) => {
   res.send(rss);
 });
 
+app.get("/blog/:slug", (req, res, next) => {
+  const posts = readJSON("blog-posts.json", []);
+  const post = posts.find((p) => p.slug === req.params.slug && p.published);
+  if (!post) return next();
+  res.send(blogPostPage(post, req.lang));
+});
+
+app.get("/deseronto-convenience-store-gas-station", (req, res) => {
+  res.send(locationPage(req.lang));
+});
+
+app.get("/contact-directions", (req, res) => {
+  res.send(contactPage(req.lang));
+});
+
+const categorySlugs = new Set(defaultCategories.map((c) => c.slug));
+for (const slug of categorySlugs) {
+  app.get(`/${slug}`, (req, res) => {
+    const cats = loadCategories();
+    const category = cats.find((c) => c.slug === slug);
+    if (!category) return res.status(404).send(notFoundPage(req.lang));
+    res.send(categoryPage(category, req.lang));
+  });
+}
+
 /* ── Sitemap ── */
 app.get("/sitemap.xml", (_req, res) => {
   const cats = loadCategories();
@@ -1413,7 +1530,16 @@ app.get("/sitemap.xml", (_req, res) => {
   res.send(sitemap);
 });
 
-app.use(express.static(publicDir, { maxAge: "7d" }));
+app.use(express.static(publicDir, {
+  maxAge: "7d",
+  index: false,                        // Don't auto-serve index.html (our route handles /)
+  setHeaders(res, filePath) {
+    // Don't cache index.html even if requested directly
+    if (filePath.endsWith("index.html")) {
+      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    }
+  },
+}));
 
 app.use((req, res) => {
   res.status(404).send(notFoundPage(req.lang));

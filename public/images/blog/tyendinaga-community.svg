@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <g opacity="0.04" stroke="#fff" stroke-width="1">
+    <line x1="0" y1="75" x2="800" y2="75"/><line x1="0" y1="150" x2="800" y2="150"/>
+    <line x1="0" y1="225" x2="800" y2="225"/><line x1="0" y1="300" x2="800" y2="300"/>
+  </g>
+  <!-- Community / People icon -->
+  <g transform="translate(400,155)" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Center person -->
+    <circle cx="0" cy="-35" r="14" fill="#dc262620"/>
+    <path d="M-22,-5 Q-22,-18 0,-18 Q22,-18 22,-5" fill="#dc262615"/>
+    <!-- Left person -->
+    <circle cx="-45" cy="-28" r="11" fill="#dc262615"/>
+    <path d="M-62,-3 Q-62,-14 -45,-14 Q-28,-14 -28,-3" fill="#dc262610"/>
+    <!-- Right person -->
+    <circle cx="45" cy="-28" r="11" fill="#dc262615"/>
+    <path d="M28,-3 Q28,-14 45,-14 Q62,-14 62,-3" fill="#dc262610"/>
+    <!-- Handshake -->
+    <g transform="translate(0,25)">
+      <path d="M-25,0 L-10,0 L0,8 L10,0 L25,0" stroke-width="3"/>
+      <path d="M-10,0 L-5,10 L5,10 L10,0" fill="#dc262620" stroke-width="2"/>
+    </g>
+    <!-- Heart -->
+    <path d="M0,55 L-3,52 Q-12,44 -12,38 Q-12,33 -8,33 Q-4,33 -2,36 L0,38 L2,36 Q4,33 8,33 Q12,33 12,38 Q12,44 3,52 Z" fill="#dc2626" opacity="0.4"/>
+  </g>
+  <text x="400" y="290" text-anchor="middle" fill="#ffffff" font-family="Inter,sans-serif" font-size="28" font-weight="800">OUR COMMUNITY</text>
+  <text x="400" y="320" text-anchor="middle" fill="#94a3b8" font-family="Inter,sans-serif" font-size="16">Proudly serving Tyendinaga &amp; Deseronto</text>
+  <rect x="350" y="340" width="100" height="3" rx="1.5" fill="url(#accent)"/>
+</svg>
