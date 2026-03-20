@@ -146,7 +146,7 @@ function registerPage(error = "", success = "") {
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
     </div>
     <h1>Create Account</h1>
-    <p class="login-subtitle">Register for staff access</p>
+    <p class="login-subtitle">Register for staff access (requires admin approval)</p>
     ${errorHtml}
     ${successHtml}
     <form method="POST" action="/admin/register">

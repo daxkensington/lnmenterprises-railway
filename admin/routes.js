@@ -23,6 +23,8 @@ const {
   verifyResetToken,
   consumeResetToken,
   findUserByEmail,
+  checkLoginRateLimit,
+  checkResetRateLimit,
 } = require("./auth");
 const {
   adminLayout,
@@ -54,9 +56,15 @@ router.get("/login", (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
+  if (!checkLoginRateLimit(req.ip)) {
+    return res.send(loginPage("Too many login attempts. Please wait 15 minutes and try again."));
+  }
   const { username, password } = req.body;
   const user = await verifyLogin(username, password);
-  if (!user) return res.send(loginPage("Invalid username or password."));
+  if (!user) {
+    appendAuditLog({ req: { session: { username: username || "unknown", userId: "failed" }, ip: req.ip, connection: req.connection }, actionType: "login-failed", entityType: "staff", entityId: username || "unknown" });
+    return res.send(loginPage("Invalid username or password."));
+  }
   const sessionId = createSession(user);
   setSessionCookie(res, sessionId);
   appendAuditLog({ req: { session: { username: user.username, userId: user.id }, ip: req.ip, connection: req.connection }, actionType: "login", entityType: "staff", entityId: user.id });
@@ -87,10 +95,19 @@ router.post("/register", async (req, res) => {
   if (password !== confirmPassword) {
     return res.send(registerPage("Passwords do not match."));
   }
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.send(registerPage("Please enter a valid email address."));
+  }
   try {
-    createUser({ username, email, displayName, password, role: "staff" });
+    const user = createUser({ username, email, displayName, password, role: "staff" });
+    // Set inactive — requires owner approval to activate
+    const users = readJSON("admin-users.json", []);
+    const u = users.find((u) => u.id === user.id);
+    if (u) { u.isActive = false; writeJSON("admin-users.json", users); }
     appendAuditLog({ req: { session: { username, userId: "self-register" }, ip: req.ip, connection: req.connection }, actionType: "register", entityType: "staff", entityId: username });
-    res.send(registerPage("", "Account created successfully! You can now sign in."));
+    res.send(registerPage("", "Account created! An administrator must approve your account before you can sign in."));
   } catch (err) {
     res.send(registerPage(err.message || "Registration failed."));
   }
@@ -102,6 +119,9 @@ router.get("/forgot-password", (req, res) => {
 });
 
 router.post("/forgot-password", async (req, res) => {
+  if (!checkResetRateLimit(req.ip)) {
+    return res.send(forgotPasswordPage("Too many reset requests. Please wait and try again later."));
+  }
   const { email } = req.body;
   if (!email) return res.send(forgotPasswordPage("Please enter your email address."));
 
@@ -111,17 +131,23 @@ router.post("/forgot-password", async (req, res) => {
 
   if (!user) return res.send(forgotPasswordPage("", successMsg));
 
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not configured — cannot send password reset email");
+    return res.send(forgotPasswordPage("Password reset is temporarily unavailable. Please contact the site owner."));
+  }
+
   const token = createResetToken(user.id);
   const host = req.headers.host || "lnmenterprises.ca";
   const protocol = req.headers["x-forwarded-proto"] || (host.includes("localhost") ? "http" : "https");
   const resetUrl = `${protocol}://${host}/admin/reset-password?token=${token}`;
 
   // Send email via Resend
+  let emailSent = false;
   try {
     const resp = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.RESEND_API_KEY || "re_cN9HR9Ff_DPAwFvhwr78BUAxDzEek815o"}`,
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -131,21 +157,29 @@ router.post("/forgot-password", async (req, res) => {
         html: `
           <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px;">
             <h2 style="color:#1e293b;">Password Reset</h2>
-            <p>Hi ${user.displayName},</p>
-            <p>We received a request to reset your password for the L&M Enterprises admin dashboard.</p>
+            <p>Hi ${escapeHtml(user.displayName)},</p>
+            <p>We received a request to reset your password for the L&amp;M Enterprises admin dashboard.</p>
             <p><a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Reset Password</a></p>
             <p style="color:#6b7280;font-size:14px;">This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
             <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;" />
-            <p style="color:#9ca3af;font-size:12px;">L&M Enterprises • 43 Dundas St, Deseronto, ON</p>
+            <p style="color:#9ca3af;font-size:12px;">L&amp;M Enterprises &bull; 43 Dundas St, Deseronto, ON</p>
           </div>`,
       }),
     });
-    if (!resp.ok) console.error("Resend error:", await resp.text());
+    if (resp.ok) {
+      emailSent = true;
+    } else {
+      console.error("Resend error:", await resp.text());
+    }
   } catch (err) {
     console.error("Failed to send reset email:", err);
   }
 
   appendAuditLog({ req: { session: { username: user.username, userId: user.id }, ip: req.ip, connection: req.connection }, actionType: "password-reset-request", entityType: "staff", entityId: user.id });
+
+  if (!emailSent) {
+    return res.send(forgotPasswordPage("There was a problem sending the reset email. Please try again or contact the site owner."));
+  }
   res.send(forgotPasswordPage("", successMsg));
 });
 

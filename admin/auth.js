@@ -3,9 +3,56 @@ const bcrypt = require("bcryptjs");
 const signature = require("cookie-signature");
 const { readJSON, writeJSON } = require("./data");
 
-const COOKIE_SECRET = process.env.COOKIE_SECRET || crypto.randomBytes(32).toString("hex");
+const COOKIE_SECRET = process.env.COOKIE_SECRET || (() => {
+  const fallback = crypto.randomBytes(32).toString("hex");
+  console.warn("WARNING: COOKIE_SECRET not set. Sessions will not survive restarts. Set COOKIE_SECRET env var in production.");
+  return fallback;
+})();
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours
 const sessions = new Map();
+
+/* ── Login rate limiting ── */
+const loginAttempts = new Map(); // ip -> { count, resetTime }
+const LOGIN_WINDOW = 15 * 60 * 1000; // 15 minutes
+const MAX_LOGIN_ATTEMPTS = 10;
+
+// Clean up expired login attempts every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of loginAttempts) {
+    if (now > entry.resetTime) loginAttempts.delete(ip);
+  }
+}, 300000);
+
+function checkLoginRateLimit(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip) || { count: 0, resetTime: now + LOGIN_WINDOW };
+  if (now > entry.resetTime) { entry.count = 0; entry.resetTime = now + LOGIN_WINDOW; }
+  entry.count++;
+  loginAttempts.set(ip, entry);
+  return entry.count <= MAX_LOGIN_ATTEMPTS;
+}
+
+/* ── Password reset rate limiting ── */
+const resetAttempts = new Map(); // ip -> { count, resetTime }
+const RESET_WINDOW = 60 * 60 * 1000; // 1 hour
+const MAX_RESET_ATTEMPTS = 5;
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of resetAttempts) {
+    if (now > entry.resetTime) resetAttempts.delete(ip);
+  }
+}, 300000);
+
+function checkResetRateLimit(ip) {
+  const now = Date.now();
+  const entry = resetAttempts.get(ip) || { count: 0, resetTime: now + RESET_WINDOW };
+  if (now > entry.resetTime) { entry.count = 0; entry.resetTime = now + RESET_WINDOW; }
+  entry.count++;
+  resetAttempts.set(ip, entry);
+  return entry.count <= MAX_RESET_ATTEMPTS;
+}
 
 /* ── Multi-user seeding ── */
 
@@ -55,11 +102,16 @@ async function verifyLogin(username, password) {
   const users = readJSON("admin-users.json", []);
   const user = users.find((u) => u.username === username && u.isActive);
   if (!user) return null;
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) return null;
+  try {
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) return null;
+  } catch (err) {
+    console.error("bcrypt.compare error:", err);
+    return null;
+  }
   // Update lastLoginAt
   user.lastLoginAt = new Date().toISOString();
-  writeJSON("admin-users.json", users);
+  try { writeJSON("admin-users.json", users); } catch (err) { console.error("Failed to update lastLoginAt:", err); }
   return user;
 }
 
@@ -90,6 +142,8 @@ function getSession(req) {
     sessions.delete(id);
     return null;
   }
+  // Sliding window: refresh session on activity
+  session.createdAt = Date.now();
   return { id, ...session };
 }
 
@@ -282,4 +336,6 @@ module.exports = {
   verifyResetToken,
   consumeResetToken,
   findUserByEmail,
+  checkLoginRateLimit,
+  checkResetRateLimit,
 };

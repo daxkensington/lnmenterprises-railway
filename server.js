@@ -383,6 +383,8 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
   const umamiHost = process.env.UMAMI_HOST || "https://cloud.umami.is";
   const cspScriptSrc = process.env.UMAMI_WEBSITE_ID ? `'self' ${umamiHost}` : "'self'";
   const cspConnectSrc = process.env.UMAMI_WEBSITE_ID ? `'self' ${umamiHost}` : "'self'";
@@ -1409,11 +1411,13 @@ app.get("/assets/index-*.js", (req, res, next) => {
   if (!fs.existsSync(filePath)) return next();
   const gp = loadGasPrices();
   let js = fs.readFileSync(filePath, "utf8");
+  // Sanitize gas prices to digits and dots only to prevent injection
+  const sanitize = (v) => String(v || "0.00").replace(/[^0-9.]/g, "");
   // Replace hardcoded prices in the bundle with live API values
-  js = js.replace(/type:"Regular",price:"[^"]*"/g,      `type:"Regular",price:"${gp.regular || "0.00"}¢"`);
-  js = js.replace(/type:"Premium",price:"[^"]*"/g,      `type:"Premium",price:"${gp.premium || "0.00"}¢"`);
-  js = js.replace(/type:"Dyed Diesel",price:"[^"]*"/g,  `type:"Dyed Diesel",price:"${gp.dyedDiesel || "0.00"}¢"`);
-  js = js.replace(/type:"Clear Diesel",price:"[^"]*"/g, `type:"Clear Diesel",price:"${gp.diesel || "0.00"}¢"`);
+  js = js.replace(/type:"Regular",price:"[^"]*"/g,      `type:"Regular",price:"${sanitize(gp.regular)}¢"`);
+  js = js.replace(/type:"Premium",price:"[^"]*"/g,      `type:"Premium",price:"${sanitize(gp.premium)}¢"`);
+  js = js.replace(/type:"Dyed Diesel",price:"[^"]*"/g,  `type:"Dyed Diesel",price:"${sanitize(gp.dyedDiesel)}¢"`);
+  js = js.replace(/type:"Clear Diesel",price:"[^"]*"/g, `type:"Clear Diesel",price:"${sanitize(gp.diesel)}¢"`);
   res.set("Content-Type", "application/javascript; charset=utf-8");
   res.set("Cache-Control", "no-cache, no-store, must-revalidate");
   res.send(js);
