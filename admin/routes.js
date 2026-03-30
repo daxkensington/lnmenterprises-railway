@@ -227,6 +227,8 @@ router.get("/", (req, res) => {
   const winners = readJSON("winners.json", []);
   const reviewData = readJSON("google-reviews.json", null);
   const recentAudit = readJSON("audit-log.json", []).slice(-5).reverse();
+  const allUsers = readJSON("admin-users.json", []);
+  const pendingApprovals = allUsers.filter((u) => !u.isActive && !u.lastLoginAt).length;
   const flash = req.query.saved === "1" ? "Changes saved successfully." : "";
 
   const auditRows = recentAudit.length
@@ -241,6 +243,11 @@ router.get("/", (req, res) => {
       flash,
       content: `
         <p class="dash-subtitle">Update gas prices, promotions, and manage your site content.</p>
+        ${req.session.role === "owner" && pendingApprovals > 0 ? `
+        <div class="staff-pending-alert">
+          <strong>${pendingApprovals} staff account${pendingApprovals > 1 ? "s" : ""} waiting for approval.</strong>
+          <a href="/admin/staff">Review now &rarr;</a>
+        </div>` : ""}
 
         <div class="dash-actions">
           <a href="/admin/gas-prices" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 22H3"/><path d="M15 10h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/><path d="M7 10h4"/></svg> Gas Prices</a>
@@ -249,7 +256,7 @@ router.get("/", (req, res) => {
           <a href="/admin/blog" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z"/></svg> Blog</a>
           <a href="/admin/reviews" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Reviews</a>
           <a href="/admin/messages" class="dash-action-btn">${unread > 0 ? `<span class="dash-badge">${unread}</span>` : ""}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Messages</a>
-          ${req.session.role === "owner" ? `<a href="/admin/staff" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Staff</a>
+          ${req.session.role === "owner" ? `<a href="/admin/staff" class="dash-action-btn">${pendingApprovals > 0 ? `<span class="dash-badge">${pendingApprovals}</span>` : ""}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Staff</a>
           <a href="/admin/audit-log" class="dash-action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Audit Log</a>` : ""}
         </div>
 
@@ -896,6 +903,28 @@ router.post("/staff/:id/toggle-active", requireRole("owner"), verifyCsrf, (req, 
     reactivateUser(user.id);
     appendAuditLog({ req, actionType: "update", entityType: "staff", entityId: user.id, newValue: { isActive: true } });
   }
+  res.redirect("/admin/staff");
+});
+
+router.post("/staff/:id/deny", requireRole("owner"), verifyCsrf, (req, res) => {
+  const user = findUserById(req.params.id);
+  if (!user) return res.status(404).send("User not found");
+  // Only allow denying pending (inactive + never logged in) accounts
+  if (user.isActive || user.lastLoginAt) {
+    return res.send(
+      adminLayout({
+        title: "Staff Management",
+        activeNav: "staff",
+        role: req.session.role,
+        flash: "Only pending accounts can be denied. Use Deactivate for active accounts.",
+        content: `<a href="/admin/staff">Go back</a>`,
+      }),
+    );
+  }
+  const users = readJSON("admin-users.json", []);
+  const filtered = users.filter((u) => u.id !== req.params.id);
+  writeJSON("admin-users.json", filtered);
+  appendAuditLog({ req, actionType: "deny-registration", entityType: "staff", entityId: req.params.id, oldValue: { username: user.username } });
   res.redirect("/admin/staff");
 });
 

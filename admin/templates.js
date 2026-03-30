@@ -46,7 +46,7 @@ function adminLayout({ title, content, activeNav = "", flash = "", role = "staff
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css?v=2" />
+  <link rel="stylesheet" href="/admin.css?v=3" />
 </head>
 <body>
   <div class="admin-shell">
@@ -92,7 +92,7 @@ function loginPage(error = "", success = "") {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css?v=2" />
+  <link rel="stylesheet" href="/admin.css?v=3" />
 </head>
 <body class="login-body">
   <div class="login-card">
@@ -138,7 +138,7 @@ function registerPage(error = "", success = "") {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css?v=2" />
+  <link rel="stylesheet" href="/admin.css?v=3" />
 </head>
 <body class="login-body">
   <div class="login-card">
@@ -194,7 +194,7 @@ function forgotPasswordPage(error = "", success = "") {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css?v=2" />
+  <link rel="stylesheet" href="/admin.css?v=3" />
 </head>
 <body class="login-body">
   <div class="login-card">
@@ -233,7 +233,7 @@ function resetPasswordPage(token, error = "") {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin.css?v=2" />
+  <link rel="stylesheet" href="/admin.css?v=3" />
 </head>
 <body class="login-body">
   <div class="login-card">
@@ -270,20 +270,73 @@ function csrfField(token) {
 /* ── Staff management templates ── */
 
 function staffListPage({ users, csrf, role }) {
-  const rows = users
-    .map(
-      (u) => `
+  const pending = users.filter((u) => !u.isActive && !u.lastLoginAt);
+  const rest = users.filter((u) => u.isActive || u.lastLoginAt);
+
+  function statusBadge(u) {
+    if (!u.isActive && !u.lastLoginAt) return '<span class="staff-badge staff-badge--pending">Pending Approval</span>';
+    if (!u.isActive) return '<span class="staff-badge staff-badge--inactive">Deactivated</span>';
+    return '<span class="staff-badge staff-badge--active">Active</span>';
+  }
+
+  function actionButtons(u) {
+    const isSelf = false; // checked server-side
+    if (!u.isActive && !u.lastLoginAt) {
+      return `
+        <form method="POST" action="/admin/staff/${escapeHtml(u.id)}/toggle-active" style="display:inline;">
+          <input type="hidden" name="_csrf" value="${csrf}" />
+          <button type="submit" class="btn-approve">Approve</button>
+        </form>
+        <form method="POST" action="/admin/staff/${escapeHtml(u.id)}/deny" style="display:inline; margin-left:0.25rem;">
+          <input type="hidden" name="_csrf" value="${csrf}" />
+          <button type="submit" class="btn-deny">Deny</button>
+        </form>`;
+    }
+    if (u.isActive) {
+      return `
+        <a href="/admin/staff/${escapeHtml(u.id)}" class="btn-edit">Edit</a>
+        <form method="POST" action="/admin/staff/${escapeHtml(u.id)}/toggle-active" style="display:inline; margin-left:0.25rem;">
+          <input type="hidden" name="_csrf" value="${csrf}" />
+          <button type="submit" class="btn-danger btn-sm">Deactivate</button>
+        </form>`;
+    }
+    return `
+      <form method="POST" action="/admin/staff/${escapeHtml(u.id)}/toggle-active" style="display:inline;">
+        <input type="hidden" name="_csrf" value="${csrf}" />
+        <button type="submit" class="btn-action btn-sm">Reactivate</button>
+      </form>
+      <a href="/admin/staff/${escapeHtml(u.id)}" class="btn-edit" style="margin-left:0.25rem;">Edit</a>`;
+  }
+
+  function userRow(u) {
+    return `
       <tr>
         <td>${escapeHtml(u.displayName)}</td>
         <td>${escapeHtml(u.username)}</td>
         <td>${escapeHtml(u.email || "—")}</td>
         <td>${escapeHtml(u.role)}</td>
-        <td>${u.isActive ? '<span style="color:green;">Active</span>' : '<span style="color:#999;">Inactive</span>'}</td>
+        <td>${statusBadge(u)}</td>
         <td>${u.lastLoginAt ? escapeHtml(u.lastLoginAt.slice(0, 10)) : "Never"}</td>
-        <td><a href="/admin/staff/${escapeHtml(u.id)}">Edit</a></td>
-      </tr>`,
-    )
-    .join("");
+        <td class="staff-actions">${actionButtons(u)}</td>
+      </tr>`;
+  }
+
+  const pendingSection = pending.length
+    ? `<div class="staff-pending-section">
+        <h3 class="staff-pending-title">Pending Approval (${pending.length})</h3>
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead>
+          <tbody>${pending.map(userRow).join("")}</tbody>
+        </table>
+      </div>`
+    : "";
+
+  const activeSection = `
+    <h3 style="margin-top:1.5rem; font-size:1rem; color:var(--text-muted);">All Staff</h3>
+    <table class="admin-table">
+      <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead>
+      <tbody>${rest.length ? rest.map(userRow).join("") : "<tr><td colspan='7'>No staff members.</td></tr>"}</tbody>
+    </table>`;
 
   return adminLayout({
     title: "Staff Management",
@@ -291,10 +344,8 @@ function staffListPage({ users, csrf, role }) {
     role,
     content: `
       <a href="/admin/staff/new" class="btn-action">New Staff Member</a>
-      <table class="admin-table">
-        <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Action</th></tr></thead>
-        <tbody>${rows || "<tr><td colspan='7'>No staff members.</td></tr>"}</tbody>
-      </table>`,
+      ${pendingSection}
+      ${activeSection}`,
   });
 }
 
