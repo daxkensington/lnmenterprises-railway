@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-const { readJSON, writeJSON, BLOG_CATEGORIES } = require("./admin/data");
+const { readJSON, writeJSON, BLOG_CATEGORIES, formatDrawMonth } = require("./admin/data");
 const { seedAdminUsers } = require("./admin/auth");
 const { t } = require("./translations");
 
@@ -734,7 +734,8 @@ function winnersSection(lang = "en") {
           : "";
         const prize = w.prize ? `<p style="font-weight:600;color:var(--red);">${escapeHtml(w.prize)}</p>` : "";
         const testimonial = w.testimonial ? `<p style="font-style:italic;font-size:0.9rem;color:var(--text-muted);">"${escapeHtml(w.testimonial)}"</p>` : "";
-        const date = w.date ? `<p style="font-size:0.85rem;color:var(--text-muted);">${escapeHtml(w.date)}</p>` : "";
+        const formattedDate = formatDrawMonth(w.date, lang);
+        const date = formattedDate ? `<p style="font-size:0.85rem;color:var(--text-muted);">${escapeHtml(formattedDate)}</p>` : "";
         return `
       <div class="info-card" style="text-align:center;">
         <div class="icon-circle">${icons.gift}</div>

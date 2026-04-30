@@ -1,3 +1,5 @@
+const { formatDrawMonth } = require("./data");
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -523,7 +525,7 @@ function winnersListPage({ winners, csrf, role, flash = "" }) {
         <td style="font-family:ui-monospace,Menlo,monospace;font-weight:600;">${escapeHtml(w.winningNumber || "—")}</td>
         <td>${escapeHtml(w.name || "Pending claim")}</td>
         <td>${escapeHtml(w.prize || "—")}</td>
-        <td>${escapeHtml(w.date || "—")}</td>
+        <td>${escapeHtml(formatDrawMonth(w.date) || "—")}</td>
         <td>
           <form method="POST" action="/admin/winners/${escapeHtml(w.id)}/delete" style="display:inline;">
             ${csrfField(csrf)}
@@ -557,8 +559,8 @@ function winnersListPage({ winners, csrf, role, flash = "" }) {
           <input type="text" id="prize" name="prize" placeholder="e.g. $1000 Free Gas" />
         </div>
         <div class="form-group">
-          <label for="date">Draw Date</label>
-          <input type="date" id="date" name="date" />
+          <label for="date">Draw Month</label>
+          <input type="month" id="date" name="date" placeholder="YYYY-MM" />
         </div>
         <div class="form-group">
           <label for="testimonial">Testimonial (optional)</label>
