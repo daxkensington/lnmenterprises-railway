@@ -721,16 +721,30 @@ function winnersSection(lang = "en") {
   const winners = loadWinners();
   if (!winners.length) return "";
 
+  const numberLabel = t(lang, "winners.winnerNumber");
   const items = winners.slice(0, 6)
     .map(
-      (w) => `
+      (w) => {
+        const headline = w.winningNumber
+          ? `<div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem;">${escapeHtml(numberLabel)}</div>
+             <h3 style="font-family:ui-monospace,Menlo,monospace;font-size:2rem;color:var(--red);margin:0 0 0.5rem;">#${escapeHtml(w.winningNumber)}</h3>`
+          : `<h3>${escapeHtml(w.name || "")}</h3>`;
+        const sub = w.winningNumber && w.name
+          ? `<p style="font-weight:600;">${escapeHtml(w.name)}</p>`
+          : "";
+        const prize = w.prize ? `<p style="font-weight:600;color:var(--red);">${escapeHtml(w.prize)}</p>` : "";
+        const testimonial = w.testimonial ? `<p style="font-style:italic;font-size:0.9rem;color:var(--text-muted);">"${escapeHtml(w.testimonial)}"</p>` : "";
+        const date = w.date ? `<p style="font-size:0.85rem;color:var(--text-muted);">${escapeHtml(w.date)}</p>` : "";
+        return `
       <div class="info-card" style="text-align:center;">
         <div class="icon-circle">${icons.gift}</div>
-        <h3>${escapeHtml(w.name)}</h3>
-        <p style="font-weight:600;color:var(--red);">${escapeHtml(w.prize)}</p>
-        ${w.testimonial ? `<p style="font-style:italic;font-size:0.9rem;color:var(--text-muted);">"${escapeHtml(w.testimonial)}"</p>` : ""}
-        <p style="font-size:0.85rem;color:var(--text-muted);">${escapeHtml(w.date || "")}</p>
-      </div>`,
+        ${headline}
+        ${sub}
+        ${prize}
+        ${testimonial}
+        ${date}
+      </div>`;
+      },
     )
     .join("");
 

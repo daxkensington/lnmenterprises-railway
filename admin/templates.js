@@ -520,8 +520,9 @@ function winnersListPage({ winners, csrf, role, flash = "" }) {
     .map(
       (w) => `
       <tr>
-        <td>${escapeHtml(w.name)}</td>
-        <td>${escapeHtml(w.prize)}</td>
+        <td style="font-family:ui-monospace,Menlo,monospace;font-weight:600;">${escapeHtml(w.winningNumber || "—")}</td>
+        <td>${escapeHtml(w.name || "Pending claim")}</td>
+        <td>${escapeHtml(w.prize || "—")}</td>
         <td>${escapeHtml(w.date || "—")}</td>
         <td>
           <form method="POST" action="/admin/winners/${escapeHtml(w.id)}/delete" style="display:inline;">
@@ -539,31 +540,36 @@ function winnersListPage({ winners, csrf, role, flash = "" }) {
     role,
     flash,
     content: `
-      <h3>Add Winner</h3>
+      <h3>Post Winning Number</h3>
+      <p style="color:var(--text-muted);margin-top:-0.5rem;">Post just the winning number, or fill in the winner's name and prize once they claim.</p>
       <form method="POST" action="/admin/winners" style="margin-bottom:2rem;">
         ${csrfField(csrf)}
         <div class="form-group">
-          <label for="name">Winner Name</label>
-          <input type="text" id="name" name="name" required />
+          <label for="winningNumber">Winning Number</label>
+          <input type="text" id="winningNumber" name="winningNumber" placeholder="e.g. 158270" inputmode="numeric" />
         </div>
         <div class="form-group">
-          <label for="prize">Prize</label>
-          <input type="text" id="prize" name="prize" required placeholder="e.g. $1000 Free Gas" />
+          <label for="name">Winner Name (optional)</label>
+          <input type="text" id="name" name="name" placeholder="Leave blank if unclaimed" />
         </div>
         <div class="form-group">
-          <label for="date">Date</label>
+          <label for="prize">Prize (optional)</label>
+          <input type="text" id="prize" name="prize" placeholder="e.g. $1000 Free Gas" />
+        </div>
+        <div class="form-group">
+          <label for="date">Draw Date</label>
           <input type="date" id="date" name="date" />
         </div>
         <div class="form-group">
           <label for="testimonial">Testimonial (optional)</label>
           <textarea id="testimonial" name="testimonial" rows="2"></textarea>
         </div>
-        <button type="submit">Add Winner</button>
+        <button type="submit">Post Winner</button>
       </form>
       <h3>Past Winners</h3>
       <table class="admin-table">
-        <thead><tr><th>Name</th><th>Prize</th><th>Date</th><th>Action</th></tr></thead>
-        <tbody>${rows || "<tr><td colspan='4'>No winners yet.</td></tr>"}</tbody>
+        <thead><tr><th>Winning #</th><th>Name</th><th>Prize</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody>${rows || "<tr><td colspan='5'>No winners yet.</td></tr>"}</tbody>
       </table>`,
   });
 }

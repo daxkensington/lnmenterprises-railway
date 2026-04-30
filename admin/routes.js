@@ -1077,9 +1077,15 @@ router.get("/winners", (req, res) => {
 
 router.post("/winners", verifyCsrf, (req, res) => {
   const winners = readJSON("winners.json", []);
+  const winningNumber = (req.body.winningNumber || "").trim();
+  const name = (req.body.name || "").trim();
+  if (!winningNumber && !name) {
+    return res.redirect("/admin/winners");
+  }
   const newWinner = {
     id: crypto.randomBytes(8).toString("hex"),
-    name: req.body.name || "Unknown",
+    winningNumber,
+    name,
     prize: req.body.prize || "",
     date: req.body.date || new Date().toISOString().slice(0, 10),
     testimonial: req.body.testimonial || "",
@@ -1087,7 +1093,7 @@ router.post("/winners", verifyCsrf, (req, res) => {
   };
   winners.unshift(newWinner);
   writeJSON("winners.json", winners);
-  appendAuditLog({ req, actionType: "create", entityType: "winner", entityId: newWinner.id, newValue: { name: newWinner.name, prize: newWinner.prize } });
+  appendAuditLog({ req, actionType: "create", entityType: "winner", entityId: newWinner.id, newValue: { winningNumber: newWinner.winningNumber, name: newWinner.name, prize: newWinner.prize } });
   res.redirect("/admin/winners?saved=1");
 });
 
