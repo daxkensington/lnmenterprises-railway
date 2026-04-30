@@ -1433,6 +1433,20 @@ app.get("/assets/index-*.js", (req, res, next) => {
   js = js.replace(/type:"Premium",price:"[^"]*"/g,      `type:"Premium",price:"${sanitize(gp.premium)}¢"`);
   js = js.replace(/type:"Dyed Diesel",price:"[^"]*"/g,  `type:"Dyed Diesel",price:"${sanitize(gp.dyedDiesel)}¢"`);
   js = js.replace(/type:"Clear Diesel",price:"[^"]*"/g, `type:"Clear Diesel",price:"${sanitize(gp.diesel)}¢"`);
+
+  // Replace the bundle's hardcoded monthly winners array with live winners.json
+  const liveWinners = (loadWinners() || [])
+    .map((w) => ({
+      month: formatDrawMonth(w.date, "en"),
+      number: String(w.winningNumber || "").replace(/[^0-9]/g, ""),
+    }))
+    .filter((w) => w.month && w.number)
+    .slice(0, 3);
+  if (liveWinners.length) {
+    const arr = "[" + liveWinners.map((w) => `{month:"${w.month}",number:"${w.number}"}`).join(",") + "]";
+    js = js.replace(/\[\{month:"[A-Z][a-z]+ \d{4}",number:"\d+"\}(,\{month:"[A-Z][a-z]+ \d{4}",number:"\d+"\})*\]/g, arr);
+  }
+
   res.set("Content-Type", "application/javascript; charset=utf-8");
   res.set("Cache-Control", "no-cache, no-store, must-revalidate");
   res.send(js);
