@@ -38,4 +38,4 @@ async function syncGoogleReviews() {
   return result;
 }
 
-module.exports = { syncGoogleReviews };
+module.exports = { syncGoogleReviews, PLACE_ID };

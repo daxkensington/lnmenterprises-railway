@@ -4,7 +4,9 @@ const fs = require("fs");
 const crypto = require("crypto");
 const { readJSON, writeJSON, BLOG_CATEGORIES, formatDrawMonth } = require("./admin/data");
 const { seedAdminUsers } = require("./admin/auth");
+const { syncGoogleReviews, PLACE_ID } = require("./admin/reviews");
 const { t } = require("./translations");
+const googleMapsPlaceUrl = `https://www.google.com/maps/place/?q=place_id:${PLACE_ID}`;
 
 const app = express();
 const publicDir = path.join(__dirname, "public");
@@ -460,7 +462,7 @@ function pageTemplate({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=7" />
+    <link rel="stylesheet" href="/styles.css?v=9" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${process.env.UMAMI_WEBSITE_ID ? `
     <script defer src="${process.env.UMAMI_HOST || "https://cloud.umami.is"}/script.js" data-website-id="${escapeHtml(process.env.UMAMI_WEBSITE_ID)}"></script>` : ""}
   </head>
@@ -471,7 +473,7 @@ function pageTemplate({
 }
 
 function siteJsonLd() {
-  return {
+  const data = {
     "@context": "https://schema.org",
     "@type": "ConvenienceStore",
     "@id": `${siteUrl}/#business`,
@@ -510,6 +512,15 @@ function siteJsonLd() {
     },
     sameAs: ["https://www.facebook.com/LandMEnterprises"],
   };
+  const reviewData = loadReviews();
+  if (reviewData && reviewData.rating && reviewData.totalReviews) {
+    data.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: String(reviewData.rating),
+      reviewCount: String(reviewData.totalReviews),
+    };
+  }
+  return data;
 }
 
 function faqJsonLd() {
@@ -543,6 +554,7 @@ const icons = {
   shoppingBag: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
   user: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   calendar: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>',
+  menu: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>',
 };
 
 /* ── Blog helpers ── */
@@ -601,10 +613,15 @@ function blogListJsonLd(posts) {
 
 function layout(body, lang = "en") {
   const sc = loadSiteContent();
+  const defaultBanner = "Win $1000 in FREE GAS! Monthly contest with SAGO Gas Bar";
+  const bannerText = sc.promoBanner && sc.promoBanner !== defaultBanner
+    ? sc.promoBanner
+    : t(lang, "banner.contest");
   return `
+    <a class="skip-link" href="#main">${t(lang, "nav.skip")}</a>
     <div class="promo-banner">
       <div class="container">
-        ${icons.gift} ${escapeHtml(sc.promoBanner)}
+        ${icons.gift} ${escapeHtml(bannerText)}
       </div>
     </div>
     <header class="site-header">
@@ -613,25 +630,30 @@ function layout(body, lang = "en") {
           <span class="brand-mark">${icons.store}</span>
           <span class="brand-text">
             <strong>${escapeHtml(sc.businessName).toUpperCase()}</strong>
-            <span>Gas &amp; Convenience</span>
+            <span>${t(lang, "brand.tagline")}</span>
           </span>
         </a>
-        <nav class="nav">
-          <a href="/">${t(lang, "nav.home")}</a>
-          <a href="/#prices">${t(lang, "nav.prices")}</a>
-          <a href="/deseronto-convenience-store-gas-station">${t(lang, "nav.location")}</a>
-          <a href="/blog">${t(lang, "nav.blog")}</a>
-          <a class="nav-cta" href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-nav">${icons.phone} ${t(lang, "nav.callNow")}</a>
-          <a href="?lang=${lang === "en" ? "fr" : "en"}" class="lang-switch" title="${lang === "en" ? "Fran\u00e7ais" : "English"}">${lang === "en" ? "FR" : "EN"}</a>
-        </nav>
+        <div class="nav-wrap">
+          <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+          <label for="nav-toggle" class="nav-summary">${icons.menu}<span class="sr-only">${t(lang, "nav.menu")}</span></label>
+          <nav class="nav">
+            <a href="/">${t(lang, "nav.home")}</a>
+            <a href="/#prices">${t(lang, "nav.prices")}</a>
+            <a href="/deseronto-convenience-store-gas-station">${t(lang, "nav.location")}</a>
+            <a href="/blog">${t(lang, "nav.blog")}</a>
+            <a href="/contact-directions">${t(lang, "nav.contact")}</a>
+            <a class="nav-cta" href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-nav">${icons.phone} ${t(lang, "nav.callNow")}</a>
+            <a href="?lang=${lang === "en" ? "fr" : "en"}" class="lang-switch" title="${lang === "en" ? "Fran\u00e7ais" : "English"}">${lang === "en" ? "FR" : "EN"}</a>
+          </nav>
+        </div>
       </div>
     </header>
-    ${body}
+    <div id="main">${body}</div>
     <footer class="site-footer">
       <div class="container">
         <h3 class="footer-title">${escapeHtml(sc.businessName).toUpperCase()}</h3>
         <div class="footer-divider"></div>
-        <p class="footer-tagline">SAGO Gas Bar Partner &bull; Full-Service Gas &amp; Convenience Store</p>
+        <p class="footer-tagline">${t(lang, "footer.tagline")}</p>
         <div class="footer-contact">
           <a href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-footer">${escapeHtml(sc.phone)}</a>
           <span class="sep">&bull;</span>
@@ -639,6 +661,13 @@ function layout(body, lang = "en") {
           <span class="sep">&bull;</span>
           <span>${escapeHtml(sc.hoursNote)} ${escapeHtml(sc.hours)}</span>
         </div>
+        <p class="footer-links">
+          <a href="/contact-directions">${t(lang, "nav.contact")}</a>
+          <span class="sep">&bull;</span>
+          <a href="/blog">${t(lang, "nav.blog")}</a>
+          <span class="sep">&bull;</span>
+          <a href="/deseronto-convenience-store-gas-station">${t(lang, "nav.location")}</a>
+        </p>
         <p class="footer-subtext">${t(lang, "footer.serving")}</p>
         <a class="footer-social" href="${escapeHtml(sc.facebookUrl)}" target="_blank" rel="noopener noreferrer" data-umami-event="facebook-link">
           ${icons.facebook} <span>${t(lang, "footer.followUs")}</span>
@@ -764,43 +793,49 @@ function winnersSection(lang = "en") {
     </section>`;
 }
 
-function reviewsSection(lang = "en") {
+function starsHtml(rating) {
+  let s = "";
+  for (let i = 1; i <= 5; i++) {
+    s += i <= Math.round(rating) ? '<span style="color:#f59e0b;">&#9733;</span>' : '<span style="color:#d1d5db;">&#9734;</span>';
+  }
+  return s;
+}
+
+function reviewsSection(lang = "en", limit = 5) {
   const reviewData = loadReviews();
-
-  // Fallback testimonials if no Google reviews
-  const fallbackTestimonials = [
-    { authorName: "Local Customer", rating: 5, text: "Great prices on gas and a well-stocked convenience store. Always my first stop on Highway 49." },
-    { authorName: "Highway Traveler", rating: 5, text: "Best gas prices between Kingston and Belleville. The staff are friendly and the store has everything you need." },
-    { authorName: "Deseronto Resident", rating: 4, text: "Convenient location, good prices, and they always have what I need. A staple in the community." },
-  ];
-
-  const reviews = (reviewData && reviewData.reviews && reviewData.reviews.length > 0)
-    ? reviewData.reviews.slice(0, 5)
-    : fallbackTestimonials;
-
+  const realReviews = reviewData && Array.isArray(reviewData.reviews) ? reviewData.reviews.filter((r) => r.text) : [];
   const overallRating = reviewData && reviewData.rating ? reviewData.rating : null;
+  const googleCta = `<p style="margin-top:1.25rem;"><a class="btn btn-primary" href="${googleMapsPlaceUrl}" target="_blank" rel="noopener noreferrer">${t(lang, "reviews.googleCta")}</a></p>`;
 
-  const starsHtml = (rating) => {
-    let s = "";
-    for (let i = 1; i <= 5; i++) {
-      s += i <= Math.round(rating) ? '<span style="color:#f59e0b;">&#9733;</span>' : '<span style="color:#d1d5db;">&#9734;</span>';
-    }
-    return s;
-  };
+  if (!realReviews.length && !overallRating) {
+    return `
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2>${t(lang, "reviews.title")}</h2>
+          <div class="section-divider"></div>
+          <p>${t(lang, "reviews.seeGoogle")}</p>
+          ${googleCta}
+        </div>
+      </div>
+    </section>`;
+  }
 
-  const reviewCards = reviews
+  const reviewCards = realReviews
+    .slice(0, limit)
     .map(
       (r) => `
       <div class="card" style="text-align:left;">
         <div style="margin-bottom:0.5rem;">${starsHtml(r.rating)}</div>
         <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 200))}${(r.text || "").length > 200 ? "..." : ""}"</p>
-        <p style="font-weight:600;font-size:0.9rem;">— ${escapeHtml(r.authorName)}</p>
+        <p style="font-weight:600;font-size:0.9rem;">— ${escapeHtml(r.authorName || "")}</p>
+        ${r.relativeTimeDescription ? `<p style="font-size:0.8rem;color:var(--text-muted);margin:0.25rem 0 0;">${escapeHtml(r.relativeTimeDescription)}</p>` : ""}
       </div>`,
     )
     .join("");
 
   const ratingHeader = overallRating
-    ? `<p style="font-size:1.5rem;margin-bottom:0.5rem;">${starsHtml(overallRating)} <strong>${escapeHtml(String(overallRating))}</strong>/5${reviewData.totalReviews ? ` (${escapeHtml(String(reviewData.totalReviews))} reviews)` : ""}</p>`
+    ? `<p style="font-size:1.25rem;margin-bottom:0.5rem;">${starsHtml(overallRating)} <strong>${escapeHtml(String(overallRating))}</strong>/5${reviewData.totalReviews ? ` (${escapeHtml(String(reviewData.totalReviews))} ${t(lang, "reviews.reviews")})` : ""} ${t(lang, "reviews.onGoogle")}</p>`
     : "";
 
   return `
@@ -811,9 +846,26 @@ function reviewsSection(lang = "en") {
           <div class="section-divider"></div>
           ${ratingHeader}
         </div>
-        <div class="card-grid">${reviewCards}</div>
+        ${reviewCards ? `<div class="card-grid">${reviewCards}</div>` : ""}
+        <div style="text-align:center;">${googleCta}</div>
       </div>
     </section>`;
+}
+
+function pricesUpdatedLabel(gp, lang) {
+  const at = gp.lastUpdatedAt ? Date.parse(gp.lastUpdatedAt) : NaN;
+  const fresh = Number.isFinite(at) && Date.now() - at < 36 * 60 * 60 * 1000;
+  if (fresh) return t(lang, "prices.updatedDaily");
+  if (Number.isFinite(at)) {
+    const formatted = new Date(at).toLocaleDateString(lang === "fr" ? "fr-CA" : "en-CA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    return `${t(lang, "gasPrices.lastUpdated")} ${formatted}`;
+  }
+  if (gp.updatedLabel) return gp.updatedLabel;
+  return "";
 }
 
 function formatCents(value) {
@@ -877,7 +929,7 @@ function homePage(lang = "en") {
     <section class="price-board" id="prices">
       <div class="container">
         <div class="section-header">
-          <div class="hero-badge">${t(lang, "prices.updatedDaily")}</div>
+          ${pricesUpdatedLabel(gp, lang) ? `<div class="hero-badge">${escapeHtml(pricesUpdatedLabel(gp, lang))}</div>` : ""}
           <h2>${t(lang, "prices.today")}</h2>
           <div class="section-divider"></div>
         </div>
@@ -921,46 +973,14 @@ function homePage(lang = "en") {
     )
     .join("");
 
-  const reviewData = loadReviews();
-  const fallbackReviews = [
-    { authorName: "Sarah M.", rating: 5, text: "Best gas prices in the area! Staff is always friendly and helpful. The convenience store has everything I need for my road trips." },
-    { authorName: "Mike T.", rating: 5, text: "Great service and competitive prices. Love that it's full-service gas — makes life easier. Highly recommend!" },
-    { authorName: "Jennifer L.", rating: 5, text: "Always stop here when passing through. Clean store, good selection of products, and the staff goes above and beyond." },
-  ];
-  const reviews = (reviewData && reviewData.reviews && reviewData.reviews.length)
-    ? reviewData.reviews.slice(0, 3).map((r) => ({
-        authorName: r.authorName,
-        rating: r.rating,
-        text: r.text,
-      }))
-    : fallbackReviews;
-  const stars = (rating) => {
-    let s = "";
-    for (let i = 1; i <= 5; i++) s += i <= Math.round(rating) ? "★" : "☆";
-    return s;
-  };
-  const overall = reviewData && reviewData.rating ? reviewData.rating : 4.7;
-  const totalReviews = reviewData && reviewData.totalReviews ? reviewData.totalReviews : null;
-  const reviewCards = reviews
-    .map(
-      (r) => `
-      <article class="card" style="text-align:left;">
-        <p style="color:#f59e0b;letter-spacing:0.08em;margin-bottom:0.5rem;">${stars(r.rating)}</p>
-        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 220))}${(r.text || "").length > 220 ? "…" : ""}"</p>
-        <p style="font-weight:700;margin:0;">${escapeHtml(r.authorName)}</p>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin:0.25rem 0 0;">Google Review</p>
-      </article>`,
-    )
-    .join("");
-
   const gallery = [
-    { src: "/images/store/exterior.jpg", alt: "L&M Convenience Store exterior with SAGO Gas Bar", title: "L&M Convenience", caption: "SAGO Gas Bar • Full Service Available", wide: true },
-    { src: "/images/store/tobacco.jpg", alt: "Tobacco and nicotine product selection", title: "Wide Selection", caption: "Extensive product inventory" },
-    { src: "/images/store/aisles.jpg", alt: "Organized product displays", title: "Well Organized", caption: "Easy to find what you need" },
-    { src: "/images/store/snacks.jpg", alt: "Snack and chip display", title: "Snacks & Chips", caption: "Popular brands in stock" },
-    { src: "/images/store/vapes.jpg", alt: "Vape product display", title: "Vape Products", caption: "Latest disposable vapes & accessories", wide: true },
-    { src: "/images/store/candy.jpg", alt: "Candy and chocolate selection", title: "Candy & Treats", caption: "Sweet selection for everyone" },
-    { src: "/images/store/storefront-interior.jpg", alt: "Store interior", title: "Clean & Modern", caption: "Professional store layout", wide: true },
+    { src: "/images/store/exterior.jpg", alt: t(lang, "gallery.exterior.alt"), title: t(lang, "gallery.exterior.title"), caption: t(lang, "gallery.exterior.caption"), wide: true },
+    { src: "/images/store/tobacco.jpg", alt: t(lang, "gallery.tobacco.alt"), title: t(lang, "gallery.tobacco.title"), caption: t(lang, "gallery.tobacco.caption") },
+    { src: "/images/store/aisles.jpg", alt: t(lang, "gallery.aisles.alt"), title: t(lang, "gallery.aisles.title"), caption: t(lang, "gallery.aisles.caption") },
+    { src: "/images/store/snacks.jpg", alt: t(lang, "gallery.snacks.alt"), title: t(lang, "gallery.snacks.title"), caption: t(lang, "gallery.snacks.caption") },
+    { src: "/images/store/vapes.jpg", alt: t(lang, "gallery.vapes.alt"), title: t(lang, "gallery.vapes.title"), caption: t(lang, "gallery.vapes.caption"), wide: true },
+    { src: "/images/store/candy.jpg", alt: t(lang, "gallery.candy.alt"), title: t(lang, "gallery.candy.title"), caption: t(lang, "gallery.candy.caption") },
+    { src: "/images/store/storefront-interior.jpg", alt: t(lang, "gallery.interior.alt"), title: t(lang, "gallery.interior.title"), caption: t(lang, "gallery.interior.caption"), wide: true },
   ];
   const galleryItems = gallery
     .map(
@@ -973,7 +993,7 @@ function homePage(lang = "en") {
     .join("");
 
   const content = `
-    <section class="hero hero--photo" style="background-image:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.55)), url('/images/store/hero.jpg');">
+    <section class="hero hero--photo" style="background-image:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.55)), image-set(url('/images/store/hero.webp') type('image/webp'), url('/images/store/hero.jpg') type('image/jpeg'));">
       <div class="hero-content">
         <div class="hero-badge">${t(lang, "hero.partner")}</div>
         <h1>L&amp;M ENTERPRISES</h1>
@@ -1009,17 +1029,20 @@ function homePage(lang = "en") {
           <div>
             <p class="kicker" style="color:var(--accent);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-size:0.8rem;">${t(lang, "about.kicker")}</p>
             <h2>${t(lang, "about.title")}</h2>
-            <p>Visit L&amp;M Enterprises to get guaranteed lower gas prices and staff willing to go that extra mile. Located at <strong>43 Dundas Street</strong> in Deseronto — if you see the black bear out front, you know you've made it.</p>
-            <p>As a proud partner with <strong>SAGO Gas Bar</strong> next door at 39 Dundas St, we offer fuel, tobacco, vapes, nicotine pouches, snacks, and beverages for local drivers and Highway 49 travelers.</p>
+            <p>${t(lang, "about.p1")}</p>
+            <p>${t(lang, "about.p2")}</p>
             <div class="feature-pills">
-              <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> Full-Service Gas</div>
-              <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> Convenience Store</div>
-              <div class="feature-pill"><span class="pill-icon">${icons.leaf}</span> Tobacco &amp; Vapes</div>
-              <div class="feature-pill"><span class="pill-icon">${icons.clock}</span> Open 6am-10pm</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> ${t(lang, "pill.gas")}</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> ${t(lang, "pill.store")}</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.leaf}</span> ${t(lang, "pill.tobacco")}</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.clock}</span> ${t(lang, "pill.hours")}</div>
             </div>
           </div>
           <div>
-            <img src="/images/store/interior.jpg" alt="L&amp;M Enterprises convenience store interior" width="1600" height="1200" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
+            <picture>
+              <source srcset="/images/store/interior.webp" type="image/webp" />
+              <img src="/images/store/interior.jpg" alt="${escapeHtml(t(lang, "about.photoAlt"))}" width="1600" height="1200" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
+            </picture>
           </div>
         </div>
       </section>
@@ -1032,18 +1055,18 @@ function homePage(lang = "en") {
           <div class="card-grid">
             <article class="card">
               <div class="icon-circle">${icons.fuel}</div>
-              <h3>Full-Service Gas</h3>
-              <p>Partner with SAGO Gas Bar next door for guaranteed lower prices on regular, premium, and diesel fuel. Full-service pumping available.</p>
+              <h3>${t(lang, "offer.gas.title")}</h3>
+              <p>${t(lang, "offer.gas.body")}</p>
             </article>
             <article class="card">
               <div class="icon-circle">${icons.leaf}</div>
-              <h3>Tobacco &amp; Vapes</h3>
-              <p>Wide selection of tobacco products, vapes, and nicotine pouches. Your one-stop shop for adult in-store categories.</p>
+              <h3>${t(lang, "offer.tobacco.title")}</h3>
+              <p>${t(lang, "offer.tobacco.body")}</p>
             </article>
             <article class="card">
               <div class="icon-circle">${icons.shoppingBag}</div>
-              <h3>Convenience Store</h3>
-              <p>Snacks, beverages, and essentials for your journey. Friendly staff ready to help you find what you need.</p>
+              <h3>${t(lang, "offer.store.title")}</h3>
+              <p>${t(lang, "offer.store.body")}</p>
             </article>
           </div>
         </div>
@@ -1059,16 +1082,7 @@ function homePage(lang = "en") {
           <div class="gallery-grid">${galleryItems}</div>
         </div>
       </section>
-      <section class="section section-alt">
-        <div class="container">
-          <div class="section-header">
-            <h2>${t(lang, "reviews.title")}</h2>
-            <div class="section-divider"></div>
-            <p style="font-size:1.25rem;"><span style="color:#f59e0b;">${stars(overall)}</span> <strong>${escapeHtml(String(overall))}</strong>/5${totalReviews ? ` (${escapeHtml(String(totalReviews))} ${t(lang, "reviews.reviews")})` : ""} ${t(lang, "reviews.onGoogle")}</p>
-          </div>
-          <div class="card-grid">${reviewCards}</div>
-        </div>
-      </section>
+      ${reviewsSection(lang, 3)}
       <section class="section" id="location">
         <div class="container">
           <div class="section-header">
@@ -1090,10 +1104,7 @@ function homePage(lang = "en") {
       </section>
     </main>`;
 
-  const jsonLd = [
-    { ...siteJsonLd(), "@type": "GasStation", name: "L&M Enterprises" },
-    faqJsonLd(),
-  ];
+  const jsonLd = { ...siteJsonLd(), "@type": "GasStation", name: "L&M Enterprises" };
 
   return pageTemplate({
     title: "L&M Enterprises | Gas Station & Convenience Store in Deseronto",
@@ -1135,7 +1146,7 @@ function locationPage(lang = "en") {
           <div class="section-header">
             <h2>${t(lang, "location.title")}</h2>
             <div class="section-divider"></div>
-            <p>Everything you need to plan your visit to L&amp;M Enterprises.</p>
+            <p>${t(lang, "location.planVisit")}</p>
           </div>
           <div class="info-grid">
             <div class="info-card">
@@ -1857,6 +1868,17 @@ app.use((err, _req, res, _next) => {
   res.status(500).send("Internal server error");
 });
 
+function scheduleReviewSync() {
+  if (!process.env.GOOGLE_PLACES_API_KEY) return;
+  const run = () =>
+    syncGoogleReviews()
+      .then((r) => console.log(`Google reviews synced (${r.totalReviews || 0} total)`))
+      .catch((err) => console.error("Google reviews sync skipped:", err.message));
+  run();
+  setInterval(run, 12 * 60 * 60 * 1000).unref();
+}
+
 app.listen(port, () => {
   console.log(`L&M Enterprises Railway server listening on ${port}`);
+  scheduleReviewSync();
 });

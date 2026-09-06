@@ -35,6 +35,22 @@ body {
   overflow-x: hidden;
 }
 
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3.5rem;
+  z-index: 100;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
 a {
   color: inherit;
 }
@@ -167,6 +183,63 @@ img {
 .nav-cta svg {
   width: 1rem;
   height: 1rem;
+}
+
+.nav-wrap {
+  display: flex;
+  align-items: center;
+}
+.nav-toggle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.nav-summary {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text);
+}
+.nav-summary:hover,
+.nav-toggle:checked + .nav-summary {
+  background: var(--bg-alt);
+  color: var(--accent);
+}
+.nav-summary svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+}
+.footer-links a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.footer-links a:hover {
+  color: #f87171;
+  text-decoration: underline;
 }
 
 /* ─── Hero Section ─── */
@@ -1179,14 +1252,47 @@ img {
 
 @media (max-width: 768px) {
   .header-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 0.75rem;
   }
 
+  .nav-wrap {
+    position: relative;
+  }
+
+  .nav-summary {
+    display: inline-flex;
+  }
+
   .nav {
-    flex-wrap: wrap;
-    gap: 0.75rem 1.25rem;
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    min-width: 220px;
+    padding: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    z-index: 50;
+  }
+
+  .nav-toggle:checked ~ .nav {
+    display: flex;
+  }
+
+  .nav a {
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+  }
+
+  .nav-cta {
+    justify-content: center;
   }
 
   .hero {
