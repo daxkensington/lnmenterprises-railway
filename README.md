@@ -34,6 +34,5 @@ npm start
 
 ## Next recommended rebuilds
 
-- Replace the broken social preview image with a proper branded image
-- Remove or rebuild any `/blog` or other routes that still depend on Manus-only APIs
-- Build a new admin dashboard with Railway-friendly auth and storage
+- The public homepage is now server-rendered HTML. Admin promotions, winners, gas prices, and Google reviews all flow into `/` without rewriting the old Vite bundle.
+- Blog post thumbnails are photos under `public/images/blog/`.

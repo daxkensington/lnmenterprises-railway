@@ -22,6 +22,11 @@ html {
   scroll-behavior: smooth;
 }
 
+#prices,
+#location {
+  scroll-margin-top: 5.5rem;
+}
+
 body {
   margin: 0;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -282,15 +287,28 @@ img {
 
 .btn-pill {
   border-radius: 999px;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem 1.75rem;
+}
+
+.btn-primary.btn-pill {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary.btn-pill:hover {
+  background: var(--accent-dark);
   color: #fff;
 }
 
-.btn-pill:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: var(--accent);
+.btn-secondary.btn-pill {
+  border: 2px solid #fff;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.btn-secondary.btn-pill:hover {
+  background: #fff;
+  color: var(--text);
 }
 
 .btn svg {
@@ -937,9 +955,224 @@ img {
   box-shadow: 0 0 0 3px rgba(201, 0, 25, 0.3);
 }
 
+/* ─── Homepage photo hero ─── */
+.hero--photo {
+  min-height: 620px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.hero--photo h1 {
+  font-size: clamp(2.6rem, 9vw, 6.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+.hero--photo .lead {
+  font-size: clamp(1.15rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  max-width: 720px;
+}
+.hero--photo .hero-serving {
+  font-size: 1.05rem;
+  opacity: 0.9;
+  margin: 0 0 2rem;
+}
+
+/* ─── Price board ─── */
+.price-board {
+  background: var(--primary);
+  color: #fff;
+  padding: 4rem 0;
+}
+.price-board .section-header p,
+.price-board .section-header h2 {
+  color: #fff;
+}
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.price-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.price-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+.price-card .price {
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  color: #f87171;
+  line-height: 1.1;
+  margin: 0.25rem 0;
+}
+.price-card .unit {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  font-weight: 600;
+}
+.price-board .price-footer {
+  text-align: center;
+  margin: 1.75rem 0 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* ─── Promo band ─── */
+.promo-band {
+  background: linear-gradient(135deg, var(--accent) 0%, #8b0012 55%, var(--primary) 100%);
+  color: #fff;
+  padding: 4.5rem 0;
+}
+.promo-band .section-header h2,
+.promo-band .section-header p {
+  color: #fff;
+}
+.promo-band .section-divider {
+  background: #fff;
+}
+.promo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto 2.5rem;
+}
+.promo-card {
+  background: #fff;
+  color: var(--text);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+.promo-card h3 {
+  color: var(--accent);
+  font-size: 1.7rem;
+  margin: 0 0 0.4rem;
+}
+.promo-card .promo-kicker {
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+.promo-card p {
+  color: var(--text-muted);
+}
+.promo-card .promo-note {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(201, 0, 25, 0.08);
+  border-radius: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.winner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.winner-card {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+}
+.winner-card .winner-month {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.winner-card .winner-number {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 0.25rem 0 0;
+}
+.winners-note {
+  text-align: center;
+  margin: 1.5rem 0 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* ─── Gallery ─── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  min-height: 200px;
+  display: block;
+}
+.gallery-item--wide {
+  grid-column: span 2;
+  min-height: 260px;
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  min-height: 200px;
+}
+.gallery-item figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.25rem;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+}
+.gallery-item figcaption strong {
+  display: block;
+  font-size: 1.15rem;
+}
+.gallery-item figcaption span {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* ─── Map embed ─── */
+.map-frame {
+  width: 100%;
+  min-height: 420px;
+  border: 0;
+  border-radius: 16px;
+  display: block;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 1024px) and (min-width: 769px) {
-  .blog-grid {
+  .blog-grid,
+  .price-grid,
+  .winner-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -963,8 +1196,20 @@ img {
 
   .card-grid,
   .info-grid,
-  .blog-grid {
+  .blog-grid,
+  .price-grid,
+  .promo-grid,
+  .winner-grid,
+  .gallery-grid {
     grid-template-columns: 1fr;
+  }
+
+  .gallery-item--wide {
+    grid-column: span 1;
+  }
+
+  .hero--photo {
+    min-height: 520px;
   }
 
   .blog-post-meta {

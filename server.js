@@ -8,7 +8,6 @@ const { t } = require("./translations");
 
 const app = express();
 const publicDir = path.join(__dirname, "public");
-const indexFile = path.join(publicDir, "index.html");
 const port = process.env.PORT || 3000;
 const siteUrl = "https://www.lnmenterprises.ca";
 
@@ -223,7 +222,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "We\u2019re excited to launch our new website and bring L&M Enterprises online. Learn about what\u2019s new and what to expect from our Deseronto location.",
       content: "We\u2019re thrilled to announce the launch of our brand-new website for L&M Enterprises. After years of serving the Tyendinaga Mohawk Territory and Deseronto community, we\u2019re bringing the L&M experience online.\n\nOur new site makes it easier than ever to learn about our products, check our hours, and stay up to date on promotions. Whether you\u2019re stopping in for gas, grabbing a quick snack, or picking up your favourite tobacco and vape products, L&M Enterprises is your one-stop shop on Dundas Street.\n\nWhat\u2019s coming next? We\u2019ll be using this blog to share store news, product spotlights, fuel-saving tips, and community updates. Bookmark the page and check back often.\n\nWe want to thank every customer who has supported us over the years. Your loyalty keeps us going, and we\u2019re committed to offering competitive prices, friendly service, and a clean, well-stocked store every single day.\n\nSee you at 43 Dundas Street, Deseronto. Stop in and say hello!",
       category: "Store News",
-      featuredImage: "/images/blog/welcome-lm-enterprises.svg",
+      featuredImage: "/images/blog/welcome-lm-enterprises.jpg",
       featuredImageAlt: "L&M Enterprises store front in Deseronto, Ontario",
       author: "L&M Enterprises",
       date: "2026-03-01",
@@ -236,7 +235,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Fuel prices fluctuate, but these five practical tips will help you get more kilometres out of every fill-up at L&M Enterprises.",
       content: "Gas prices can take a big bite out of your budget, especially if you commute or drive for work. Here are five practical tips to help you save at the pump this spring.\n\n1. Keep your tires properly inflated. Under-inflated tires increase rolling resistance, which means your engine works harder and burns more fuel. Check your tire pressure at least once a month.\n\n2. Drive smoothly. Aggressive acceleration and hard braking can increase fuel consumption by up to 40 percent. Ease into speed and coast to a stop whenever it\u2019s safe to do so.\n\n3. Remove extra weight. That box of tools or bag of sports gear in your trunk adds weight your engine has to haul around. Clear out anything you don\u2019t need for today\u2019s trip.\n\n4. Plan your errands. Combining multiple stops into one loop saves fuel compared to making separate trips. A warm engine is more fuel-efficient than a cold one, so batch your errands together.\n\n5. Fill up at L&M Enterprises. We work hard to keep our fuel prices competitive. Pair that with our monthly Win $1000 in FREE GAS contest through SAGO Gas Bar, and you\u2019ll stretch every dollar further.\n\nStop by 43 Dundas Street in Deseronto and fuel up smart this season.",
       category: "Tips & Savings",
-      featuredImage: "/images/blog/save-on-gas-tips.svg",
+      featuredImage: "/images/blog/save-on-gas-tips.jpg",
       featuredImageAlt: "Fuel pump with money-saving tips",
       author: "L&M Enterprises",
       date: "2026-03-05",
@@ -249,7 +248,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "From snacks and drinks to everyday essentials, here\u2019s what you\u2019ll find inside L&M Enterprises\u2019 fully stocked convenience store.",
       content: "Need a cold drink on a hot day? Forgot milk on the way home? Looking for a quick lunch? Our convenience store has you covered.\n\nAt L&M Enterprises, we carry a wide selection of everyday items so you never have to make a special trip to a big-box store. Here\u2019s a look at what you\u2019ll find on our shelves.\n\nSnacks and drinks are our bread and butter. We stock chips, chocolate bars, jerky, gum, and candy alongside a full cooler of pop, juice, water, energy drinks, and iced tea. Perfect for road trips or a mid-afternoon pick-me-up.\n\nEveryday essentials are always in stock. We carry bread, milk, eggs, butter, canned goods, and basic toiletries. If you run out of something at home, chances are we have it.\n\nSeasonal items rotate throughout the year. In summer, you\u2019ll find ice, sunscreen, and bug spray. In winter, we keep windshield washer fluid and hand warmers near the front.\n\nLottery tickets are available at the counter. Try your luck with scratch cards or draw-based games while you\u2019re picking up your other items.\n\nWe pride ourselves on keeping our store clean, well-organized, and easy to shop. Pop in next time you need something quick \u2014 we\u2019re open 6 AM to 10 PM daily at 43 Dundas Street, Deseronto.",
       category: "Product Spotlight",
-      featuredImage: "/images/blog/convenience-store-guide.svg",
+      featuredImage: "/images/blog/convenience-store-guide.jpg",
       featuredImageAlt: "Convenience store shelves stocked with snacks and drinks",
       author: "L&M Enterprises",
       date: "2026-03-08",
@@ -262,7 +261,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "New to vaping or looking for something different? Here\u2019s what we carry and how our staff can help you choose the right product.",
       content: "Whether you\u2019re an experienced vaper or just exploring your options, L&M Enterprises carries a solid selection of vape and tobacco products to suit different preferences.\n\nOur vape selection includes disposable vapes, pod systems, and a variety of e-liquid flavours. We carry well-known brands and rotate new arrivals regularly, so there\u2019s usually something new to try on your next visit.\n\nFor traditional tobacco customers, we stock a full range of cigarettes, cigars, rolling tobacco, and accessories. Our prices are competitive, and we keep popular brands in stock so you don\u2019t have to make a second trip.\n\nNot sure what you want? Our staff are happy to answer questions and help you compare options. We can walk you through nicotine strengths, flavour profiles, and device types so you leave with something that works for you.\n\nA few things to keep in mind. All tobacco and vape products are sold to adults only. We check ID and follow all applicable regulations. If you have questions about what we carry or want to request a specific brand, just ask at the counter.\n\nVisit us at 43 Dundas Street in Deseronto and browse our selection in person. We\u2019re here from 6 AM to 10 PM every day.",
       category: "Vape & Tobacco",
-      featuredImage: "/images/blog/vape-tobacco-products.svg",
+      featuredImage: "/images/blog/vape-tobacco-products.jpg",
       featuredImageAlt: "Vape and tobacco products selection",
       author: "L&M Enterprises",
       date: "2026-03-10",
@@ -275,7 +274,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "L&M Enterprises is proud to be part of the Tyendinaga Mohawk Territory and Deseronto community. Here\u2019s how we give back and support our neighbours.",
       content: "L&M Enterprises is more than a gas station and convenience store. We\u2019re part of a community, and we take that role seriously.\n\nLocated at 43 Dundas Street in Deseronto, right in the heart of the Tyendinaga Mohawk Territory, we serve customers from across the region. From families filling up on a weekend road trip to regulars who stop in every morning for coffee, we see familiar faces every day.\n\nCommunity means showing up. We keep our prices fair because we know budgets are tight. We stay open long hours because we know people need a reliable place to grab essentials early in the morning or late at night.\n\nWe\u2019re proud to be locally owned and operated. When you shop at L&M, your money stays in the community. It supports local jobs, local families, and local growth.\n\nWe also believe in being good neighbours. Whether it\u2019s keeping our lot clean, greeting customers by name, or going the extra mile to track down a product someone needs, we try to do things the right way.\n\nLooking ahead, we\u2019re excited about continuing to improve our store, expand our selection, and find new ways to serve the community better. If you have suggestions or feedback, we\u2019d love to hear from you \u2014 drop by the store or use the contact form on our website.\n\nThank you for supporting L&M Enterprises. We\u2019re here because of you.",
       category: "Community",
-      featuredImage: "/images/blog/tyendinaga-community.svg",
+      featuredImage: "/images/blog/tyendinaga-community.jpg",
       featuredImageAlt: "Serving the Tyendinaga Mohawk Territory and Deseronto community",
       author: "L&M Enterprises",
       date: "2026-03-12",
@@ -288,7 +287,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Deseronto and the Tyendinaga Mohawk Territory consistently offer some of the lowest gas prices in Ontario. Here\u2019s why drivers from Belleville, Napanee, and the 401 corridor save big by filling up at L&M Enterprises on Highway 49.",
       content: "If you have driven through the Deseronto and Tyendinaga Mohawk Territory area on Highway 49, you have probably noticed something that catches every driver\u2019s attention: the gas prices here are consistently among the lowest in all of Ontario.\n\nThis is not a fluke. There is a reason the stretch of Highway 49 between the 401 and Deseronto has become one of the most popular fuel stops in Eastern Ontario. Let us break down why gas is cheaper here, how much you can save, and why L&M Enterprises should be your go-to stop.\n\nWhy Gas Prices Are Lower in Deseronto and Tyendinaga\n\nThe Deseronto and Tyendinaga area has one of the highest concentrations of gas stations in Ontario. Within just a few kilometres along Highway 49, there are over a dozen fuel stations competing for your business. That kind of competition keeps prices sharp.\n\nThe result is that gas prices along Highway 49 regularly come in well below what you would pay at stations in Belleville, Napanee, Kingston, or at any of the highway rest stops along the 401. GasBuddy data consistently shows Deseronto area stations among the lowest-priced in the province.\n\nHow Much Can You Actually Save?\n\nThe savings add up fast. On a typical fill-up of 50 litres, the price difference between Deseronto area stations and a Belleville or Napanee station can easily save you five to ten dollars or more. For commuters who fill up weekly, that is hundreds of dollars a year staying in your pocket.\n\nFor drivers passing through on the 401, the five-minute detour down Highway 49 to L&M Enterprises pays for itself on a single tank. Whether you are driving between Toronto and Montreal, heading to Ottawa, or commuting between Kingston and Belleville, stopping in Deseronto is the smart move.\n\nWhat Fuels Does L&M Enterprises Offer?\n\nAt L&M Enterprises, we offer regular unleaded gasoline at competitive prices every day. Our pumps are well-maintained, our lot is clean, and we are open from 6 AM to 10 PM daily so you can fill up early in the morning or on your way home in the evening.\n\nWhile you are filling up, step inside our fully stocked convenience store for snacks, drinks, tobacco products, vapes, cigars, and everyday essentials. One stop covers everything you need.\n\nHow to Find L&M Enterprises from the 401\n\nGetting here from the 401 is simple. Take the Highway 49 South exit near Marysville. Head south on Highway 49 toward Deseronto. L&M Enterprises is located at 43 Dundas Street, just a five-minute drive from the highway.\n\nThe route is straightforward with no complicated turns. You will pass several other gas stations along the way, but keep driving to L&M for the best combination of price, service, and convenience store selection.\n\nDirections from Belleville: Head east on Highway 2 or take the 401 east to Highway 49 South. About 20 minutes total.\n\nDirections from Napanee: Head west on Highway 2 or take the 401 west to Highway 49 South. About 15 minutes total.\n\nDirections from Kingston: Take the 401 west to Highway 49 South. About 45 minutes.\n\nSeasonal Price Trends\n\nGas prices in Ontario tend to rise in the summer months as demand increases with road trip season. The good news is that the competitive Deseronto market means prices here stay lower than average even during peak season.\n\nSpring and fall tend to offer the best prices. Winter can see slight increases due to supply factors, but the Deseronto area still comes out ahead compared to most Eastern Ontario communities.\n\nCheck Before You Drive\n\nWant to see current prices before you make the trip? Check GasBuddy for real-time Deseronto gas prices. You can also follow L&M Enterprises on social media for updates on pricing and promotions.\n\nThe Bottom Line\n\nWhether you live in Deseronto, commute through the Bay of Quinte area, or are passing through on the 401, filling up at L&M Enterprises on Highway 49 is one of the easiest ways to save money on fuel in Ontario. Our prices are competitive, our store is stocked, and our staff are friendly.\n\nStop by L&M Enterprises at 43 Dundas Street, Deseronto. We are open 6 AM to 10 PM daily. Your wallet will thank you.",
       category: "Gas & Fuel",
-      featuredImage: "/images/blog/gas-prices-deseronto.svg",
+      featuredImage: "/images/blog/gas-prices-deseronto.jpg",
       featuredImageAlt: "Gas pumps at L&M Enterprises in Deseronto offering competitive fuel prices near Highway 401",
       author: "L&M Enterprises",
       date: "2026-03-14",
@@ -301,7 +300,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Driving the 401 between Kingston and Belleville? The Highway 49 exit to Deseronto puts you five minutes from some of the cheapest gas in Ontario at L&M Enterprises.",
       content: "If you are driving the Highway 401 anywhere between Kingston and Belleville, here is a tip that experienced Ontario drivers already know: take the Highway 49 exit south toward Deseronto. In about five minutes, you will find gas prices that are significantly cheaper than anything along the 401 itself.\n\nL&M Enterprises at 43 Dundas Street in Deseronto is right on Highway 49, making it one of the easiest and most rewarding fuel stops for 401 travellers.\n\nThe Five-Minute Detour That Pays for Itself\n\nThe Highway 49 exit off the 401 is clearly marked. Head south and you will reach L&M Enterprises within five minutes. The road is straight, well-maintained, and easy to navigate even for larger vehicles.\n\nThe savings are real. Gas prices in the Deseronto and Tyendinaga area regularly come in significantly lower than what you will find at highway rest stops, truck stops, or gas stations in Belleville, Napanee, or along the 401 corridor. On a full tank, you can easily save enough to cover a coffee and a snack from our convenience store.\n\nAfter you fill up, getting back on the 401 is just as easy. Head north on Highway 49 and you are back on the highway in minutes, continuing your journey with a full tank and more money in your pocket.\n\nPerfect for Long-Distance Drivers\n\nThe 401 is the busiest highway in North America, carrying hundreds of thousands of vehicles every day. Whether you are making the Toronto to Montreal drive, heading from Toronto to Ottawa via the 416, driving between Kingston and Belleville for work, or on a road trip through Eastern Ontario, the Deseronto exit is your smart fuel stop.\n\nMany experienced drivers and truckers already know about the Deseronto gas price advantage. RV forums, travel groups, and GasBuddy communities regularly mention the Highway 49 corridor as one of the best fuel stops in the province.\n\nMore Than Just Gas\n\nWhen you pull into L&M Enterprises, you get more than cheap fuel. Our convenience store is fully stocked with everything you need for the road ahead.\n\nSnacks and drinks for the drive, including chips, chocolate bars, jerky, cold pop, water, juice, and energy drinks. Coffee and hot beverages to keep you alert on long drives. Tobacco products including cigarettes, rolling tobacco, and accessories. A full vape selection with disposable vapes, pod systems, and e-liquid. Cigars for every budget and occasion. Everyday essentials if you need anything on the go.\n\nOur staff are friendly and knowledgeable. If you need directions, a product recommendation, or just a quick chat to break up a long drive, we are happy to help.\n\nOpen When You Need Us\n\nL&M Enterprises is open from 6 AM to 10 PM daily. That means we are here for early-morning commuters leaving Kingston for Belleville, afternoon travellers heading to Ottawa or Montreal, and evening drivers making their way home.\n\nHow to Find Us from the 401\n\nTake the Highway 49 South exit from the 401 near Marysville. Drive south on Highway 49 for approximately five minutes. L&M Enterprises is located at 43 Dundas Street in Deseronto, right on the main road. You cannot miss us.\n\nComing from the west, this is the exit after Shannonville. Coming from the east, it is the exit before Napanee. The interchange is well-signed and easy to navigate.\n\nWhy This Stop Makes Sense\n\nLet us do the math. A typical sedan has a 50-litre tank. If Deseronto gas prices are even a few cents per litre cheaper than 401 highway stations, which they usually are by a noticeable margin, you save several dollars per fill-up.\n\nIf you drive the 401 regularly, those savings compound quickly. Weekly commuters could save hundreds of dollars a year just by making L&M Enterprises their regular fuel stop.\n\nAnd the detour costs you less than ten minutes. That is a hard deal to beat.\n\nJoin the Drivers Who Already Know\n\nThousands of drivers already take the Highway 49 exit to fill up in Deseronto. Now you know why. Cheaper gas, a great convenience store, and a quick easy detour that gets you back on the 401 in minutes.\n\nNext time you are driving between Kingston and Belleville, take the Highway 49 exit and stop at L&M Enterprises. Your tank and your wallet will both be fuller for it.\n\nL&M Enterprises is located at 43 Dundas Street, Deseronto, Ontario. Open 6 AM to 10 PM daily.",
       category: "Gas & Fuel",
-      featuredImage: "/images/blog/highway-49-401-exit.svg",
+      featuredImage: "/images/blog/highway-49-401-exit.jpg",
       featuredImageAlt: "Highway 401 exit to Deseronto for cheap gas at L&M Enterprises",
       author: "L&M Enterprises",
       date: "2026-03-14",
@@ -314,7 +313,7 @@ if (!readJSON("blog-posts.json")) writeJSON("blog-posts.json", []);
       excerpt: "Heading to Prince Edward County via the Skyway Bridge? L&M Enterprises on Highway 49 in Deseronto is your perfect last stop for cheap gas, snacks, and supplies before crossing into the County.",
       content: "If you are heading to Prince Edward County from the east on Highway 49, you are about to drive right past one of the best fuel and supply stops in the region. L&M Enterprises sits on Highway 49 in Deseronto, just minutes before you reach the Bay of Quinte Skyway Bridge that takes you into the County.\n\nWhether you are planning a weekend of wine tasting, a beach day at Sandbanks Provincial Park, or a leisurely drive through the County\u2019s rolling farmland, stopping at L&M first is a smart move. Here is why.\n\nFuel Up Before the County\n\nPrince Edward County is a beautiful destination, but gas options inside the County can be limited and prices tend to be higher in tourist areas like Picton and Wellington. By filling up at L&M Enterprises in Deseronto, you take advantage of some of the lowest gas prices in Ontario.\n\nThe Deseronto and Tyendinaga area is well known for its competitive fuel pricing. You will pay noticeably less per litre here than at stations inside Prince Edward County or along the 401. On a full tank, the savings are enough to put toward a bottle of County wine or a nice lunch.\n\nStock Up on Road Trip Essentials\n\nOur convenience store has everything you need for a day in the County. Cold drinks including pop, water, juice, and iced tea to keep you refreshed during winery visits and beach days. Snacks like chips, chocolate bars, jerky, trail mix, and candy. Ice for your cooler, because nothing ruins a beach day like warm drinks. Sunscreen and bug spray for outdoor adventures. And all the everyday essentials you might have forgotten to pack.\n\nHeading to a campground near Sandbanks or a rental cottage? We have got your last-minute supply needs covered.\n\nTobacco, Vapes, and Cigars\n\nPlanning to enjoy a cigar at sunset overlooking the County? L&M carries a selection of cigars for every occasion and budget. We also stock a full range of cigarettes, rolling tobacco, disposable vapes, pod systems, and vape accessories. Prices on tobacco and vape products in Deseronto are competitive, so stock up before you cross the bridge.\n\nYour Gateway to Prince Edward County\n\nHighway 49 is the eastern gateway to Prince Edward County. The road runs south from the 401 through Deseronto, crosses the Bay of Quinte Skyway Bridge, and enters the County near Ameliasburgh. From there, it is a scenic drive to Picton, the County\u2019s main town, and onward to Sandbanks, Wellington, Bloomfield, and all the other charming County destinations.\n\nL&M Enterprises is perfectly positioned on this route. You will pass right by us on your way to the bridge. Pull in, fill up, grab your supplies, and continue on your way. The whole stop takes just a few minutes.\n\nWhat to Do in Prince Edward County\n\nOnce you cross the Skyway Bridge, Prince Edward County offers some of the best experiences in Ontario. Over forty wineries and cideries dot the countryside, with world-class Pinot Noir and Chardonnay leading the way. Sandbanks Provincial Park features some of the best beaches in Ontario. The town of Picton has charming shops, restaurants, and the Regent Theatre. Bloomfield and Wellington offer farm-to-table dining, craft breweries, and artisan shops. The County\u2019s quiet back roads are perfect for cycling, with gentle hills and stunning lake views.\n\nWhether you are visiting for the day or spending a long weekend, having a full tank and a car stocked with snacks makes the experience that much better.\n\nHow to Find L&M Enterprises\n\nFrom the 401: Take the Highway 49 South exit near Marysville. Drive south for about five minutes. L&M Enterprises is at 43 Dundas Street in Deseronto.\n\nFrom Belleville: Take Highway 2 east or the 401 east to Highway 49 South. About 20 minutes.\n\nFrom Napanee: Take Highway 2 west or the 401 west to Highway 49 South. About 15 minutes.\n\nFrom Kingston: Take the 401 west to Highway 49 South. About 45 minutes.\n\nOnce you leave L&M, continue south on Highway 49. You will cross the Skyway Bridge in about ten minutes and arrive in Prince Edward County.\n\nMake L&M Your County Trip Tradition\n\nMany of our regular customers have made L&M Enterprises their standard stop before heading into the County. They fill up, grab a cold drink and some snacks, and cross the bridge with everything they need for the day.\n\nIt is a simple habit that saves money and time. No need to hunt for a gas station once you are in the County. No paying tourist-area prices. Just a quick, easy stop at a friendly local store with great prices and a well-stocked shop.\n\nNext time you are heading to Prince Edward County, make L&M Enterprises your first stop. We are open 6 AM to 10 PM daily at 43 Dundas Street, Deseronto, Ontario, right on Highway 49 before the Skyway Bridge. See you on your way to the County.",
       category: "Tips & Savings",
-      featuredImage: "/images/blog/prince-edward-county.svg",
+      featuredImage: "/images/blog/prince-edward-county.jpg",
       featuredImageAlt: "Bay of Quinte Skyway Bridge on Highway 49 near L&M Enterprises in Deseronto",
       author: "L&M Enterprises",
       date: "2026-03-14",
@@ -446,11 +445,14 @@ function pageTemplate({
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${canonical}" />
     <meta property="og:site_name" content="L&amp;M Enterprises" />
-    <meta property="og:image" content="${ogImage || `${siteUrl}/og-image.svg`}" />
+    <meta property="og:image" content="${ogImage || `${siteUrl}/og-image.png`}" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
-    <meta name="twitter:image" content="${ogImage || `${siteUrl}/og-image.svg`}" />
+    <meta name="twitter:image" content="${ogImage || `${siteUrl}/og-image.png`}" />
     <link rel="alternate" type="application/rss+xml" title="L&amp;M Enterprises Blog" href="${siteUrl}/blog/rss.xml" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
@@ -458,7 +460,7 @@ function pageTemplate({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=5" />
+    <link rel="stylesheet" href="/styles.css?v=7" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${process.env.UMAMI_WEBSITE_ID ? `
     <script defer src="${process.env.UMAMI_HOST || "https://cloud.umami.is"}/script.js" data-website-id="${escapeHtml(process.env.UMAMI_WEBSITE_ID)}"></script>` : ""}
   </head>
@@ -478,7 +480,7 @@ function siteJsonLd() {
       "Local gas station and convenience store in Deseronto, Ontario with tobacco, vape, cigar, and rolling tobacco categories available in-store.",
     url: siteUrl,
     telephone: "+1-613-396-2224",
-    image: `${siteUrl}/og-image.svg`,
+    image: `${siteUrl}/og-image.png`,
     address: {
       "@type": "PostalAddress",
       streetAddress: "43 Dundas Street",
@@ -573,8 +575,8 @@ function blogPostJsonLd(post) {
     datePublished: post.date,
     dateModified: post.date,
     author: { "@type": "Organization", name: post.author || "L&M Enterprises", url: siteUrl },
-    publisher: { "@type": "Organization", name: "L&M Enterprises", url: siteUrl, logo: { "@type": "ImageObject", url: `${siteUrl}/og-image.svg` } },
-    image: post.featuredImage || `${siteUrl}/og-image.svg`,
+    publisher: { "@type": "Organization", name: "L&M Enterprises", url: siteUrl, logo: { "@type": "ImageObject", url: `${siteUrl}/og-image.png` } },
+    image: post.featuredImage || `${siteUrl}/og-image.png`,
     url: `${siteUrl}/blog/${post.slug}`,
     mainEntityOfPage: `${siteUrl}/blog/${post.slug}`,
     wordCount: (post.content || "").split(/\s+/).filter(Boolean).length,
@@ -664,7 +666,7 @@ function gasPriceSection(lang = "en") {
       <div class="info-card" style="text-align:center;">
         <div class="icon-circle">${f.icon}</div>
         <h3>${escapeHtml(f.label)}</h3>
-        <p style="font-size:2rem;font-weight:800;color:var(--red);">${escapeHtml(gp[f.key])}<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted);"> &cent;/L</span></p>
+        <p style="font-size:2rem;font-weight:800;color:var(--accent);">${escapeHtml(gp[f.key])}<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted);"> &cent;/L</span></p>
       </div>`,
     )
     .join("");
@@ -727,12 +729,12 @@ function winnersSection(lang = "en") {
       (w) => {
         const headline = w.winningNumber
           ? `<div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem;">${escapeHtml(numberLabel)}</div>
-             <h3 style="font-family:ui-monospace,Menlo,monospace;font-size:2rem;color:var(--red);margin:0 0 0.5rem;">#${escapeHtml(w.winningNumber)}</h3>`
+             <h3 style="font-family:ui-monospace,Menlo,monospace;font-size:2rem;color:var(--accent);margin:0 0 0.5rem;">#${escapeHtml(w.winningNumber)}</h3>`
           : `<h3>${escapeHtml(w.name || "")}</h3>`;
         const sub = w.winningNumber && w.name
           ? `<p style="font-weight:600;">${escapeHtml(w.name)}</p>`
           : "";
-        const prize = w.prize ? `<p style="font-weight:600;color:var(--red);">${escapeHtml(w.prize)}</p>` : "";
+        const prize = w.prize ? `<p style="font-weight:600;color:var(--accent);">${escapeHtml(w.prize)}</p>` : "";
         const testimonial = w.testimonial ? `<p style="font-style:italic;font-size:0.9rem;color:var(--text-muted);">"${escapeHtml(w.testimonial)}"</p>` : "";
         const formattedDate = formatDrawMonth(w.date, lang);
         const date = formattedDate ? `<p style="font-size:0.85rem;color:var(--text-muted);">${escapeHtml(formattedDate)}</p>` : "";
@@ -812,6 +814,305 @@ function reviewsSection(lang = "en") {
         <div class="card-grid">${reviewCards}</div>
       </div>
     </section>`;
+}
+
+function formatCents(value) {
+  const n = String(value || "").replace(/[^0-9.]/g, "");
+  if (!n || n === "0.00") return "";
+  return `${n}¢`;
+}
+
+function homePromotions(lang) {
+  const adminPromos = loadPromotions().filter((p) => p.isActive);
+  if (adminPromos.length) {
+    return adminPromos.slice(0, 4).map((p) => ({
+      title: p.title,
+      kicker: p.endDate ? `Ends ${p.endDate}` : t(lang, "promo.current"),
+      body: p.description || "",
+      note: p.details || "",
+    }));
+  }
+  return [
+    {
+      title: t(lang, "promo.freeGas.title"),
+      kicker: t(lang, "promo.freeGas.subtitle"),
+      body: t(lang, "promo.freeGas.body"),
+      note: t(lang, "promo.freeGas.note"),
+    },
+    {
+      title: t(lang, "promo.sago.title"),
+      kicker: t(lang, "promo.sago.subtitle"),
+      body: t(lang, "promo.sago.body"),
+      note: "",
+      cta: { href: "https://www.facebook.com/LandMEnterprises", label: t(lang, "promo.sago.cta") },
+    },
+  ];
+}
+
+function homePage(lang = "en") {
+  const sc = loadSiteContent();
+  const gp = loadGasPrices();
+  const fuels = [
+    { key: "regular", label: t(lang, "gasPrices.regular") },
+    { key: "premium", label: t(lang, "gasPrices.premium") },
+    { key: "dyedDiesel", label: t(lang, "gasPrices.dyedDiesel") },
+    { key: "diesel", label: t(lang, "gasPrices.clearDiesel") },
+  ];
+  const priceCards = fuels
+    .map((f) => {
+      const price = formatCents(gp[f.key]);
+      if (!price) return "";
+      return `
+        <article class="price-card">
+          <div class="icon-circle">${icons.fuel}</div>
+          <h3>${escapeHtml(f.label)}</h3>
+          <p class="price">${escapeHtml(price)}</p>
+          <p class="unit">${t(lang, "prices.perLitre")}</p>
+        </article>`;
+    })
+    .join("");
+
+  const pricesBlock = priceCards
+    ? `
+    <section class="price-board" id="prices">
+      <div class="container">
+        <div class="section-header">
+          <div class="hero-badge">${t(lang, "prices.updatedDaily")}</div>
+          <h2>${t(lang, "prices.today")}</h2>
+          <div class="section-divider"></div>
+        </div>
+        <div class="price-grid">${priceCards}</div>
+        <p class="price-footer">${t(lang, "prices.footer")}</p>
+      </div>
+    </section>`
+    : "";
+
+  const promoCards = homePromotions(lang)
+    .map(
+      (p) => `
+      <article class="promo-card">
+        <div class="icon-circle">${icons.gift}</div>
+        <h3>${escapeHtml(p.title)}</h3>
+        <p class="promo-kicker">${escapeHtml(p.kicker)}</p>
+        <p>${escapeHtml(p.body)}</p>
+        ${p.note ? `<p class="promo-note">${escapeHtml(p.note)}</p>` : ""}
+        ${p.cta ? `<p style="margin-top:1rem;"><a class="btn btn-primary" href="${escapeHtml(p.cta.href)}" target="_blank" rel="noopener noreferrer">${icons.facebook} ${escapeHtml(p.cta.label)}</a></p>` : ""}
+      </article>`,
+    )
+    .join("");
+
+  const winners = (loadWinners() || [])
+    .map((w) => ({
+      month: formatDrawMonth(w.date, lang),
+      number: String(w.winningNumber || "").replace(/[^0-9]/g, ""),
+      name: w.name || "",
+    }))
+    .filter((w) => w.month && w.number)
+    .slice(0, 3);
+  const winnerCards = winners
+    .map(
+      (w) => `
+      <article class="winner-card">
+        <p class="winner-month">${escapeHtml(w.month)}</p>
+        <p>${t(lang, "winners.winnerNumber")}</p>
+        <p class="winner-number">#${escapeHtml(w.number)}</p>
+        ${w.name ? `<p>${escapeHtml(w.name)}</p>` : ""}
+      </article>`,
+    )
+    .join("");
+
+  const reviewData = loadReviews();
+  const fallbackReviews = [
+    { authorName: "Sarah M.", rating: 5, text: "Best gas prices in the area! Staff is always friendly and helpful. The convenience store has everything I need for my road trips." },
+    { authorName: "Mike T.", rating: 5, text: "Great service and competitive prices. Love that it's full-service gas — makes life easier. Highly recommend!" },
+    { authorName: "Jennifer L.", rating: 5, text: "Always stop here when passing through. Clean store, good selection of products, and the staff goes above and beyond." },
+  ];
+  const reviews = (reviewData && reviewData.reviews && reviewData.reviews.length)
+    ? reviewData.reviews.slice(0, 3).map((r) => ({
+        authorName: r.authorName,
+        rating: r.rating,
+        text: r.text,
+      }))
+    : fallbackReviews;
+  const stars = (rating) => {
+    let s = "";
+    for (let i = 1; i <= 5; i++) s += i <= Math.round(rating) ? "★" : "☆";
+    return s;
+  };
+  const overall = reviewData && reviewData.rating ? reviewData.rating : 4.7;
+  const totalReviews = reviewData && reviewData.totalReviews ? reviewData.totalReviews : null;
+  const reviewCards = reviews
+    .map(
+      (r) => `
+      <article class="card" style="text-align:left;">
+        <p style="color:#f59e0b;letter-spacing:0.08em;margin-bottom:0.5rem;">${stars(r.rating)}</p>
+        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 220))}${(r.text || "").length > 220 ? "…" : ""}"</p>
+        <p style="font-weight:700;margin:0;">${escapeHtml(r.authorName)}</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin:0.25rem 0 0;">Google Review</p>
+      </article>`,
+    )
+    .join("");
+
+  const gallery = [
+    { src: "/images/store/exterior.jpg", alt: "L&M Convenience Store exterior with SAGO Gas Bar", title: "L&M Convenience", caption: "SAGO Gas Bar • Full Service Available", wide: true },
+    { src: "/images/store/tobacco.jpg", alt: "Tobacco and nicotine product selection", title: "Wide Selection", caption: "Extensive product inventory" },
+    { src: "/images/store/aisles.jpg", alt: "Organized product displays", title: "Well Organized", caption: "Easy to find what you need" },
+    { src: "/images/store/snacks.jpg", alt: "Snack and chip display", title: "Snacks & Chips", caption: "Popular brands in stock" },
+    { src: "/images/store/vapes.jpg", alt: "Vape product display", title: "Vape Products", caption: "Latest disposable vapes & accessories", wide: true },
+    { src: "/images/store/candy.jpg", alt: "Candy and chocolate selection", title: "Candy & Treats", caption: "Sweet selection for everyone" },
+    { src: "/images/store/storefront-interior.jpg", alt: "Store interior", title: "Clean & Modern", caption: "Professional store layout", wide: true },
+  ];
+  const galleryItems = gallery
+    .map(
+      (g) => `
+      <figure class="gallery-item${g.wide ? " gallery-item--wide" : ""}">
+        <img src="${g.src}" alt="${escapeHtml(g.alt)}" loading="lazy" width="1400" height="900" />
+        <figcaption><strong>${escapeHtml(g.title)}</strong><span>${escapeHtml(g.caption)}</span></figcaption>
+      </figure>`,
+    )
+    .join("");
+
+  const content = `
+    <section class="hero hero--photo" style="background-image:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.55)), url('/images/store/hero.jpg');">
+      <div class="hero-content">
+        <div class="hero-badge">${t(lang, "hero.partner")}</div>
+        <h1>L&amp;M ENTERPRISES</h1>
+        <p class="lead">${t(lang, "hero.homeSubtitle")}</p>
+        <p class="hero-serving">${t(lang, "hero.serving")}</p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary btn-pill" href="#location">${icons.mapPin} ${t(lang, "hero.findUs")}</a>
+          <a class="btn btn-secondary btn-pill" href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-hero">${icons.phone} ${t(lang, "nav.callNow")}</a>
+        </div>
+      </div>
+    </section>
+    <main>
+      ${pricesBlock}
+      <section class="promo-band">
+        <div class="container">
+          <div class="section-header">
+            <div class="hero-badge">${t(lang, "promo.current")}</div>
+            <h2>${t(lang, "promo.exciting")}</h2>
+            <div class="section-divider"></div>
+          </div>
+          <div class="promo-grid">${promoCards}</div>
+          ${winnerCards ? `
+          <div class="section-header" style="margin-top:1rem;margin-bottom:1.5rem;">
+            <div class="hero-badge">${t(lang, "winners.recent")}</div>
+            <h2>${t(lang, "winners.monthly")}</h2>
+          </div>
+          <div class="winner-grid">${winnerCards}</div>
+          <p class="winners-note">${t(lang, "winners.congrats")}</p>` : ""}
+        </div>
+      </section>
+      <section class="section">
+        <div class="container two-col">
+          <div>
+            <p class="kicker" style="color:var(--accent);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-size:0.8rem;">${t(lang, "about.kicker")}</p>
+            <h2>${t(lang, "about.title")}</h2>
+            <p>Visit L&amp;M Enterprises to get guaranteed lower gas prices and staff willing to go that extra mile. Located at <strong>43 Dundas Street</strong> in Deseronto — if you see the black bear out front, you know you've made it.</p>
+            <p>As a proud partner with <strong>SAGO Gas Bar</strong> next door at 39 Dundas St, we offer fuel, tobacco, vapes, nicotine pouches, snacks, and beverages for local drivers and Highway 49 travelers.</p>
+            <div class="feature-pills">
+              <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> Full-Service Gas</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> Convenience Store</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.leaf}</span> Tobacco &amp; Vapes</div>
+              <div class="feature-pill"><span class="pill-icon">${icons.clock}</span> Open 6am-10pm</div>
+            </div>
+          </div>
+          <div>
+            <img src="/images/store/interior.jpg" alt="L&amp;M Enterprises convenience store interior" width="1600" height="1200" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
+          </div>
+        </div>
+      </section>
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>${t(lang, "category.whatWeOffer")}</h2>
+            <div class="section-divider"></div>
+          </div>
+          <div class="card-grid">
+            <article class="card">
+              <div class="icon-circle">${icons.fuel}</div>
+              <h3>Full-Service Gas</h3>
+              <p>Partner with SAGO Gas Bar next door for guaranteed lower prices on regular, premium, and diesel fuel. Full-service pumping available.</p>
+            </article>
+            <article class="card">
+              <div class="icon-circle">${icons.leaf}</div>
+              <h3>Tobacco &amp; Vapes</h3>
+              <p>Wide selection of tobacco products, vapes, and nicotine pouches. Your one-stop shop for adult in-store categories.</p>
+            </article>
+            <article class="card">
+              <div class="icon-circle">${icons.shoppingBag}</div>
+              <h3>Convenience Store</h3>
+              <p>Snacks, beverages, and essentials for your journey. Friendly staff ready to help you find what you need.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="kicker" style="color:var(--accent);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-size:0.8rem;">${t(lang, "gallery.kicker")}</p>
+            <h2>${t(lang, "gallery.title")}</h2>
+            <div class="section-divider"></div>
+            <p>${t(lang, "gallery.subtitle")}</p>
+          </div>
+          <div class="gallery-grid">${galleryItems}</div>
+        </div>
+      </section>
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>${t(lang, "reviews.title")}</h2>
+            <div class="section-divider"></div>
+            <p style="font-size:1.25rem;"><span style="color:#f59e0b;">${stars(overall)}</span> <strong>${escapeHtml(String(overall))}</strong>/5${totalReviews ? ` (${escapeHtml(String(totalReviews))} ${t(lang, "reviews.reviews")})` : ""} ${t(lang, "reviews.onGoogle")}</p>
+          </div>
+          <div class="card-grid">${reviewCards}</div>
+        </div>
+      </section>
+      <section class="section" id="location">
+        <div class="container">
+          <div class="section-header">
+            <h2>${t(lang, "location.findUs")}</h2>
+            <div class="section-divider"></div>
+            <p>${t(lang, "location.bear")}</p>
+          </div>
+          <div class="two-col">
+            <div class="info-card">
+              <h3>${t(lang, "location.visitUs")}</h3>
+              <p><strong>43 Dundas Street</strong><br>Tyendinaga Mohawk Territory<br>Deseronto, ON K0K 1X0</p>
+              <p style="margin-top:0.75rem;"><a href="tel:${escapeHtml(sc.phone)}">${escapeHtml(sc.phone)}</a></p>
+              <p>${escapeHtml(sc.hoursNote)} ${escapeHtml(sc.hours)}</p>
+              <p style="margin-top:1rem;"><a class="btn btn-primary" href="https://www.google.com/maps/search/?api=1&query=43+Dundas+St+Deseronto+ON+K0K+1X0" target="_blank" rel="noopener noreferrer">${t(lang, "location.directions")}</a></p>
+            </div>
+            <iframe class="map-frame" title="L&amp;M Enterprises Location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2863.5!2d-77.0637543!3d44.1965351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d7d6d0ddf501eb%3A0x5caa9044ebef975!2sL%20%26%20M%20Enterprises!5e0!3m2!1sen!2sca" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+    </main>`;
+
+  const jsonLd = [
+    { ...siteJsonLd(), "@type": "GasStation", name: "L&M Enterprises" },
+    faqJsonLd(),
+  ];
+
+  return pageTemplate({
+    title: "L&M Enterprises | Gas Station & Convenience Store in Deseronto",
+    description:
+      "L&M Enterprises offers guaranteed lower gas prices, full-service convenience, and quality tobacco products in Deseronto, Ontario. Partner with SAGO Gas Bar. Open 6am-10pm daily.",
+    canonicalPath: "/",
+    keywords: [
+      "gas station Deseronto",
+      "convenience store Deseronto",
+      "SAGO gas",
+      "cheap gas Deseronto",
+      "tobacco Deseronto",
+      "vapes Deseronto",
+      "Tyendinaga Mohawk Territory",
+    ],
+    jsonLd,
+    lang,
+    content: layout(content, lang),
+  });
 }
 
 function locationPage(lang = "en") {
@@ -894,7 +1195,7 @@ function locationPage(lang = "en") {
             </div>
           </div>
           <div>
-            <img src="/og-image.svg" alt="L&amp;M Enterprises" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
+            <img src="/images/store/hero.jpg" alt="L&amp;M Enterprises storefront in Deseronto" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
           </div>
         </div>
       </section>
@@ -1413,43 +1714,15 @@ app.get("/files", (_req, res) => {
   res.redirect(301, "/");
 });
 
-app.get(["/", "/index.html"], (_req, res) => {
+app.get("/", (req, res) => {
   res.set("Cache-Control", "no-cache, no-store, must-revalidate");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
-  res.sendFile(indexFile);
+  res.send(homePage(req.lang));
 });
 
-// Intercept the React JS bundle to replace hardcoded gas prices with live values
-app.get("/assets/index-*.js", (req, res, next) => {
-  const filePath = path.join(publicDir, req.path);
-  if (!fs.existsSync(filePath)) return next();
-  const gp = loadGasPrices();
-  let js = fs.readFileSync(filePath, "utf8");
-  // Sanitize gas prices to digits and dots only to prevent injection
-  const sanitize = (v) => String(v || "0.00").replace(/[^0-9.]/g, "");
-  // Replace hardcoded prices in the bundle with live API values
-  js = js.replace(/type:"Regular",price:"[^"]*"/g,      `type:"Regular",price:"${sanitize(gp.regular)}¢"`);
-  js = js.replace(/type:"Premium",price:"[^"]*"/g,      `type:"Premium",price:"${sanitize(gp.premium)}¢"`);
-  js = js.replace(/type:"Dyed Diesel",price:"[^"]*"/g,  `type:"Dyed Diesel",price:"${sanitize(gp.dyedDiesel)}¢"`);
-  js = js.replace(/type:"Clear Diesel",price:"[^"]*"/g, `type:"Clear Diesel",price:"${sanitize(gp.diesel)}¢"`);
-
-  // Replace the bundle's hardcoded monthly winners array with live winners.json
-  const liveWinners = (loadWinners() || [])
-    .map((w) => ({
-      month: formatDrawMonth(w.date, "en"),
-      number: String(w.winningNumber || "").replace(/[^0-9]/g, ""),
-    }))
-    .filter((w) => w.month && w.number)
-    .slice(0, 3);
-  if (liveWinners.length) {
-    const arr = "[" + liveWinners.map((w) => `{month:"${w.month}",number:"${w.number}"}`).join(",") + "]";
-    js = js.replace(/\[\{month:"[A-Z][a-z]+ \d{4}",number:"\d+"\}(,\{month:"[A-Z][a-z]+ \d{4}",number:"\d+"\})*\]/g, arr);
-  }
-
-  res.set("Content-Type", "application/javascript; charset=utf-8");
-  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.send(js);
+app.get("/index.html", (_req, res) => {
+  res.redirect(301, "/");
 });
 
 app.get("/blog", (req, res) => {
