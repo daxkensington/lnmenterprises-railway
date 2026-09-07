@@ -660,6 +660,7 @@ function layout(body, lang = "en") {
             <a href="/">${t(lang, "nav.home")}</a>
             <a href="/#prices">${t(lang, "nav.prices")}</a>
             <a href="/deseronto-convenience-store-gas-station">${t(lang, "nav.location")}</a>
+            <a href="/reviews">${t(lang, "nav.reviews")}</a>
             <a href="/blog">${t(lang, "nav.blog")}</a>
             <a href="/contact-directions">${t(lang, "nav.contact")}</a>
             <a class="nav-cta" href="tel:${escapeHtml(sc.phone)}" data-umami-event="phone-call-nav">${icons.phone} ${t(lang, "nav.callNow")}</a>
@@ -683,6 +684,8 @@ function layout(body, lang = "en") {
         </div>
         <p class="footer-links">
           <a href="/contact-directions">${t(lang, "nav.contact")}</a>
+          <span class="sep">&bull;</span>
+          <a href="/reviews">${t(lang, "nav.reviews")}</a>
           <span class="sep">&bull;</span>
           <a href="/blog">${t(lang, "nav.blog")}</a>
           <span class="sep">&bull;</span>
@@ -823,7 +826,9 @@ function starsHtml(rating) {
   return s;
 }
 
-function reviewsSection(lang = "en", limit = 5) {
+function reviewsSection(lang = "en", limit = 5, opts = {}) {
+  const excerpt = opts.excerpt == null ? 220 : opts.excerpt;
+  const allLink = opts.allLink !== false;
   const reviewData = loadReviews();
   const realReviews = reviewData && Array.isArray(reviewData.reviews) ? reviewData.reviews.filter((r) => r.text) : [];
   const overallRating = reviewData && reviewData.rating ? reviewData.rating : null;
@@ -845,20 +850,27 @@ function reviewsSection(lang = "en", limit = 5) {
 
   const reviewCards = realReviews
     .slice(0, limit)
-    .map(
-      (r) => `
+    .map((r) => {
+      const body = r.text || "";
+      const clipped = excerpt && body.length > excerpt ? `${body.slice(0, excerpt)}...` : body;
+      return `
       <div class="card" style="text-align:left;">
         ${starsHtml(r.rating) ? `<div style="margin-bottom:0.5rem;">${starsHtml(r.rating)}</div>` : ""}
-        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 220))}${(r.text || "").length > 220 ? "..." : ""}"</p>
+        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml(clipped)}"</p>
         <p style="font-weight:600;font-size:0.9rem;">${escapeHtml(r.authorName || t(lang, "reviews.googleReviewer"))}</p>
         ${r.relativeTimeDescription ? `<p style="font-size:0.8rem;color:var(--text-muted);margin:0.25rem 0 0;">${escapeHtml(r.relativeTimeDescription)}</p>` : ""}
-      </div>`,
-    )
+      </div>`;
+    })
     .join("");
 
   const ratingHeader = overallRating
     ? `<p style="font-size:1.25rem;margin-bottom:0.5rem;">${starsHtml(overallRating)} <strong>${escapeHtml(String(overallRating))}</strong>/5${reviewData.totalReviews ? ` (${escapeHtml(String(reviewData.totalReviews))} ${t(lang, "reviews.reviews")})` : ""} ${t(lang, "reviews.onGoogle")}</p>`
     : "";
+
+  const moreCta =
+    allLink && realReviews.length > limit
+      ? `<p style="margin-top:1rem;"><a class="btn btn-secondary" href="/reviews">${t(lang, "reviews.seeAll")}</a></p>`
+      : "";
 
   return `
     <section class="section section-alt">
@@ -869,7 +881,7 @@ function reviewsSection(lang = "en", limit = 5) {
           ${ratingHeader}
         </div>
         ${reviewCards ? `<div class="card-grid">${reviewCards}</div>` : ""}
-        <div style="text-align:center;">${googleCta}</div>
+        <div style="text-align:center;">${moreCta}${googleCta}</div>
       </div>
     </section>`;
 }
@@ -1104,7 +1116,7 @@ function homePage(lang = "en") {
           <div class="gallery-grid">${galleryItems}</div>
         </div>
       </section>
-      ${reviewsSection(lang, 3)}
+      ${reviewsSection(lang, 9)}
       <section class="section" id="location">
         <div class="container">
           <div class="section-header">
@@ -1234,7 +1246,7 @@ function locationPage(lang = "en") {
       </section>
       ${promotionsSection(lang)}
       ${winnersSection(lang)}
-      ${reviewsSection(lang)}
+      ${reviewsSection(lang, 9)}
     </main>`;
 
   return pageTemplate({
@@ -1256,6 +1268,38 @@ function locationPage(lang = "en") {
         url: `${siteUrl}/deseronto-convenience-store-gas-station`,
       },
     ],
+    lang,
+    content: layout(content, lang),
+  });
+}
+
+function reviewsPage(lang = "en") {
+  const reviewData = loadReviews();
+  const quoted =
+    reviewData && Array.isArray(reviewData.reviews) ? reviewData.reviews.filter((r) => r.text).length : 0;
+  const total = (reviewData && reviewData.totalReviews) || quoted;
+  const content = `
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">${t(lang, "nav.reviews")}</div>
+        <h1>${t(lang, "reviews.pageTitle")}</h1>
+        <p class="lead">${t(lang, "reviews.pageSubtitle")}</p>
+      </div>
+    </section>
+    <main>
+      ${reviewsSection(lang, 100, { excerpt: 800, allLink: false })}
+    </main>`;
+
+  return pageTemplate({
+    title: "L&M Enterprises | Google Reviews in Deseronto",
+    description: `Read ${total} Google reviews for L&M Enterprises, the gas station and convenience store at 43 Dundas Street in Deseronto.`,
+    canonicalPath: "/reviews",
+    keywords: [
+      "L&M Enterprises reviews",
+      "Deseronto gas station reviews",
+      "Google reviews Deseronto",
+    ],
+    jsonLd: siteJsonLd(),
     lang,
     content: layout(content, lang),
   });
@@ -1819,6 +1863,10 @@ app.get("/contact-directions", (req, res) => {
   res.send(contactPage(req.lang));
 });
 
+app.get("/reviews", (req, res) => {
+  res.send(reviewsPage(req.lang));
+});
+
 const categorySlugs = new Set(defaultCategories.map((c) => c.slug));
 for (const slug of categorySlugs) {
   app.get(`/${slug}`, (req, res) => {
@@ -1838,6 +1886,7 @@ app.get("/sitemap.xml", (_req, res) => {
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/deseronto-convenience-store-gas-station", priority: "0.9", changefreq: "weekly" },
     { loc: "/contact-directions", priority: "0.8", changefreq: "monthly" },
+    { loc: "/reviews", priority: "0.8", changefreq: "weekly" },
     { loc: "/blog", priority: "0.8", changefreq: "daily" },
   ];
 
@@ -1891,7 +1940,7 @@ app.use((err, _req, res, _next) => {
 });
 
 function scheduleReviewSync() {
-  if (!process.env.GOOGLE_PLACES_API_KEY) return;
+  if (!process.env.GOOGLE_PLACES_API_KEY && !(process.env.DATAFORSEO_LOGIN && process.env.DATAFORSEO_PASSWORD)) return;
   const run = () =>
     syncGoogleReviews()
       .then((r) => console.log(`Google reviews synced (${r.totalReviews || 0} total)`))

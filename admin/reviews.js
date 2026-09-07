@@ -1,41 +1,167 @@
 const { readJSON, writeJSON } = require("./data");
 
 const PLACE_ID = "ChIJ6wH13dDW14kRdfm-TgSpygU";
+const CID = "417331751451294069";
 
-async function syncGoogleReviews() {
+function reviewKey(r) {
+  const author = String(r.authorName || "")
+    .trim()
+    .toLowerCase();
+  const text = String(r.text || "")
+    .trim()
+    .toLowerCase()
+    .slice(0, 80);
+  if (author || text) return `at:${author}|${text}`;
+  if (r.reviewId) return `id:${r.reviewId}`;
+  return `misc:${String(r.time || "")}`;
+}
+
+function mergeReviewLists(existing, incoming) {
+  const map = new Map();
+  for (const r of existing || []) {
+    if (!r) continue;
+    map.set(reviewKey(r), r);
+  }
+  for (const r of incoming || []) {
+    if (!r) continue;
+    const key = reviewKey(r);
+    const prev = map.get(key) || {};
+    map.set(key, {
+      ...prev,
+      ...r,
+      reviewId: r.reviewId || prev.reviewId || null,
+      authorName: r.authorName || prev.authorName || "",
+      text: r.text || prev.text || "",
+    });
+  }
+  return Array.from(map.values());
+}
+
+function saveReviews({ reviews, rating, totalReviews, source }) {
+  const existing = readJSON("google-reviews.json", null) || {};
+  const merged = source === "dataforseo" ? reviews : mergeReviewLists(existing.reviews, reviews);
+  const result = {
+    placeId: PLACE_ID,
+    cid: existing.cid || CID,
+    lastSyncedAt: new Date().toISOString(),
+    source,
+    rating: rating != null ? rating : existing.rating || null,
+    totalReviews: totalReviews || existing.totalReviews || merged.length,
+    reviews: merged,
+  };
+  writeJSON("google-reviews.json", result);
+  return result;
+}
+
+async function fetchJson(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchPlacesReviews() {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) throw new Error("GOOGLE_PLACES_API_KEY not configured");
 
   const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${apiKey}`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  let res;
-  try {
-    res = await fetch(url, { signal: controller.signal });
-  } finally {
-    clearTimeout(timeout);
-  }
-  const data = await res.json();
-
+  const { data } = await fetchJson(url);
   if (data.status !== "OK") throw new Error(`Google API: ${data.status}`);
   if (!data.result) throw new Error("Google API returned no result data");
 
-  const result = {
-    placeId: PLACE_ID,
-    lastSyncedAt: new Date().toISOString(),
+  return {
     rating: data.result.rating || null,
     totalReviews: data.result.user_ratings_total || 0,
     reviews: (data.result.reviews || []).map((r) => ({
-      authorName: r.author_name || "Anonymous",
+      authorName: r.author_name || "",
       rating: r.rating,
       text: r.text || "",
       relativeTimeDescription: r.relative_time_description || "",
       time: r.time,
+      reviewId: null,
     })),
   };
+}
 
-  writeJSON("google-reviews.json", result);
-  return result;
+async function fetchDataForSeoReviews() {
+  const login = process.env.DATAFORSEO_LOGIN;
+  const password = process.env.DATAFORSEO_PASSWORD;
+  if (!login || !password) return null;
+
+  const auth = Buffer.from(`${login}:${password}`).toString("base64");
+  const headers = {
+    Authorization: `Basic ${auth}`,
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+
+  const { data: posted } = await fetchJson(
+    "https://api.dataforseo.com/v3/business_data/google/reviews/task_post",
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify([
+        {
+          place_id: PLACE_ID,
+          location_coordinate: "44.196220,-77.064132,200",
+          language_code: "en",
+          depth: 40,
+          sort_by: "newest",
+        },
+      ]),
+    },
+    30000,
+  );
+
+  const task = (posted.tasks || [])[0] || {};
+  const taskId = task.id;
+  if (!taskId) throw new Error(`DataForSEO task_post: ${posted.status_message || "no task id"}`);
+
+  const deadline = Date.now() + 90000;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+    const { data: got } = await fetchJson(
+      `https://api.dataforseo.com/v3/business_data/google/reviews/task_get/${taskId}`,
+      { headers: { Authorization: `Basic ${auth}`, Accept: "application/json" } },
+      30000,
+    );
+    const t0 = (got.tasks || [])[0] || {};
+    if (t0.status_code === 20000 && t0.result && t0.result[0]) {
+      const result = t0.result[0];
+      return {
+        rating: (result.rating && result.rating.value) || null,
+        totalReviews: result.reviews_count || 0,
+        reviews: (result.items || []).map((r) => ({
+          authorName: r.profile_name || "",
+          rating: (r.rating && r.rating.value) || null,
+          text: (r.review_text || "").trim(),
+          relativeTimeDescription: r.time_ago || "",
+          time: r.timestamp,
+          reviewId: r.review_id || null,
+        })),
+      };
+    }
+    if (t0.status_code && ![20000, 20100, 40601, 40602].includes(t0.status_code)) {
+      throw new Error(`DataForSEO task_get: ${t0.status_message || t0.status_code}`);
+    }
+  }
+  throw new Error("DataForSEO reviews timed out");
+}
+
+async function syncGoogleReviews() {
+  try {
+    const full = await fetchDataForSeoReviews();
+    if (full) return saveReviews({ ...full, source: "dataforseo" });
+  } catch (err) {
+    console.error("DataForSEO reviews failed, falling back to Places:", err.message);
+  }
+  const places = await fetchPlacesReviews();
+  return saveReviews({ ...places, source: "places" });
 }
 
 module.exports = { syncGoogleReviews, PLACE_ID };

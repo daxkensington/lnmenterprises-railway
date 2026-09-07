@@ -1,31 +1,266 @@
 {
   "placeId": "ChIJ6wH13dDW14kRdfm-TgSpygU",
   "cid": "417331751451294069",
-  "lastSyncedAt": "2026-09-06T23:55:00.000Z",
-  "source": "google_maps",
+  "lastSyncedAt": "2026-09-07T08:53:01Z",
+  "source": "dataforseo",
   "rating": 4.8,
   "totalReviews": 32,
   "reviews": [
     {
-      "authorName": "",
-      "rating": null,
-      "text": "Daryl and the Chad's are great, lovely place to get gas and shop.",
-      "relativeTimeDescription": "",
-      "time": null
+      "authorName": "Ron Ireland",
+      "rating": 5,
+      "text": "Great place with good prices and friendly staff.",
+      "relativeTimeDescription": "5 days ago",
+      "time": "2026-09-01 20:27:24 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21oQlJVUkdRVmcyV0ZodmIwUjNlRmxDTWtweVZWRRAB"
     },
     {
-      "authorName": "",
-      "rating": null,
-      "text": "Great selection and variety on many drinks, snacks and gas contests!",
-      "relativeTimeDescription": "",
-      "time": null
+      "authorName": "Aodin Macdonell",
+      "rating": 5,
+      "text": "Great service.",
+      "relativeTimeDescription": "a month ago",
+      "time": "2026-07-29 00:40:12 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21SUExVaDVaSFIyU0ZWb1VEQjVOa2cyYVZacWJFRRAB"
     },
     {
-      "authorName": "",
-      "rating": null,
+      "authorName": "Mike Kozicky",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "3 months ago",
+      "time": "2026-05-20 20:43:21 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21KMVZGaEVRMTlRU0Znd1p6VjZSVWM0Um1weFdtYxAB"
+    },
+    {
+      "authorName": "Darrell Patrick",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "5 months ago",
+      "time": "2026-03-26 00:36:17 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2kxVmMxTjZOMHBhV1hoalZFcHBiRFpsVlRsMWVtYxAB"
+    },
+    {
+      "authorName": "Cristina P",
+      "rating": 5,
+      "text": "Great customer service here as well",
+      "relativeTimeDescription": "5 months ago",
+      "time": "2026-03-25 20:24:59 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2tFNGFHSlZXR2htU1ZCSE1UUkVjbE5LZDA1NU1tYxAB"
+    },
+    {
+      "authorName": "Bronson Ware",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "6 months ago",
+      "time": "2026-03-01 19:44:30 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT25KWlJuSnFUM1Y1VTNsSldsaHJVM1pGVEROWWMzYxAB"
+    },
+    {
+      "authorName": "Ashton Matwick",
+      "rating": 5,
+      "text": "Friendly staff, great service",
+      "relativeTimeDescription": "8 months ago",
+      "time": "2025-12-12 01:19:47 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT25kNFZHUkJNVzU2VGtKMFpYY3pXVzlHYVVRNWFuYxAB"
+    },
+    {
+      "authorName": "Fatima Baasher",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "10 months ago",
+      "time": "2025-10-19 18:24:52 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT205Wk1WVXlYMGsyWXpsRVdsSjJjMkUzVWsweVkyYxAB"
+    },
+    {
+      "authorName": "Alexandra Sorbie",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "10 months ago",
+      "time": "2025-10-09 17:06:19 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2t0dlNWOXNhWEZZTm5aVWVtRk9VRFpOY1U5aWRIYxAB"
+    },
+    {
+      "authorName": "Chad Swart",
+      "rating": 5,
+      "text": "Amazing spot. Best employees ive ever met! Vic and joe wendy mark and dave awesome!!",
+      "relativeTimeDescription": "Edited 11 months ago",
+      "time": "2025-09-21 17:27:24 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2xoMVpsZ3djV1pKT0ZoRVZIbHNNREZyZFdGMWNFRRAB"
+    },
+    {
+      "authorName": "Tara Boschma",
+      "rating": 5,
+      "text": "Casey(kacy)(kc) and Victoria were friendly and inviting. We love coming to this store",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-27 20:07:23 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2tkeFVrZHBURVV3UjJ0bWJHUkZiMTg1UmpsMVpVRRAB"
+    },
+    {
+      "authorName": "Pauline Whitaker",
+      "rating": 5,
+      "text": "Always fast and friendly service. They pump the fuel and even offered to fill up my windshield washer fluid when I purchased it when I was low. Thank you !",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-26 20:13:58 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21weFJYWlhOSEZXT1daaU4wOTRVV0pUTVZZNWRsRRAB"
+    },
+    {
+      "authorName": "Skye Henderson",
+      "rating": 5,
+      "text": "Great experience everytime always friendly, thank you Victoria and gabby!",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-24 16:18:40 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21FeFVFaERhelZuTmxBemNtTXllRGxMWkdoQmVYYxAB"
+    },
+    {
+      "authorName": "Lisa H",
+      "rating": 5,
+      "text": "Excellent service at all times!",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-22 14:48:56 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21odGVuUTBaV2g0ZDBSUVUzQjBVRzlpYkZsak9YYxAB"
+    },
+    {
+      "authorName": "Suzanna Robitaille",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-22 01:52:05 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2s1a05ETXRkbDlWZVhOWGJFaEVVa2x0WkhoWlUyYxAB"
+    },
+    {
+      "authorName": "Nicolina",
+      "rating": 5,
+      "text": "Daryl and the Chad's are great, lovely place to get gas and shop. Thank you 😊",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-21 20:16:56 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2xoU1JFWm9VbFpZTmxwNWVVTktNRGRYTjNkU1UzYxAB"
+    },
+    {
+      "authorName": "Robert Schriner",
+      "rating": 5,
+      "text": "Great service young Chad and Daryl are quick and friendly. Highly recommend and you get a chance every month to win 1000$ free gas",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-21 19:53:11 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT20xbWNrTk9ZVFpzZUVKV2MzQk9hbmx3V1ZrelpVRRAB"
+    },
+    {
+      "authorName": "Taylor Walters",
+      "rating": 5,
+      "text": "Awesome staff always pleasant! Bald Chad da bomb.com",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-21 19:13:22 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT25KMWRVZFpUVjlpWkRKaVEzQmhXakppWkRWcmNFRRAB"
+    },
+    {
+      "authorName": "Debbie Swart",
+      "rating": 5,
+      "text": "Best service I've had, the 2 Chad's there are awesome. Also I get more km for a full tank. Keep up the great work.",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-21 19:03:09 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2xWbVN6bFNiVTFuTUVoaWJUZFVieTFJUzBsTWVFRRAB"
+    },
+    {
+      "authorName": "Adam Spencer",
+      "rating": 5,
+      "text": "Great service",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-20 00:07:13 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT25Fd01qbGxhVWhEVjFZeU0yc3hWMnRUY1RWaGFtYxAB"
+    },
+    {
+      "authorName": "Ross Maracle",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-19 23:26:43 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2xoQ1lVMTVhSHAzTVVack1rOXdTbTFWUTBoUFQxRRAB"
+    },
+    {
+      "authorName": "NicChantel Blunt",
+      "rating": 5,
+      "text": "Awesome staff! They treat my kid amazing!",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-19 11:58:44 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT21wS2VtWjNaMGhSU1RKelpWbG9WMGxJVEdRdGNtYxAB"
+    },
+    {
+      "authorName": "Jake Donovan",
+      "rating": 5,
+      "text": "Always friendly, always fast! Great selection and variety on many drinks, snacks and gas contests!",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-08-18 16:37:48 +00:00",
+      "reviewId": "Ci9DQUlRQUNvZENodHljRjlvT2xCeU1tMDJWVk42T0RSNFpVUm5XbWQyVEdKRFEyYxAB"
+    },
+    {
+      "authorName": "Cyborg Maracle",
+      "rating": 5,
+      "text": "Great gas station and friendly staff only place I'll go for my gas and cigarettes",
+      "relativeTimeDescription": "a year ago",
+      "time": "2025-05-29 12:48:20 +00:00",
+      "reviewId": "ChdDSUhNMG9nS0VOM3ZuN3lsdHRqMjlBRRAB"
+    },
+    {
+      "authorName": "J Adam Babula",
+      "rating": 5,
+      "text": "Great friendly people great prices  always shop there and get gas",
+      "relativeTimeDescription": "2 years ago",
+      "time": "2023-12-05 13:35:53 +00:00",
+      "reviewId": "ChdDSUhNMG9nS0VJQ0FnSUNWeEpmVTV3RRAB"
+    },
+    {
+      "authorName": "Sue Palmateer",
+      "rating": 3,
+      "text": "This is a friendly little gas bar, but perhaps they should put the correct open hours on Google. Very inconvenient after coming off 401 and finding it closed!!!!",
+      "relativeTimeDescription": "3 years ago",
+      "time": "2023-03-15 00:32:44 +00:00",
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSURoclpLSUh3EAE"
+    },
+    {
+      "authorName": "Tom Houston",
+      "rating": 4,
       "text": "You can also buy gas and diesel here at a reasonable price.",
-      "relativeTimeDescription": "",
-      "time": null
+      "relativeTimeDescription": "3 years ago",
+      "time": "2022-10-17 19:42:35 +00:00",
+      "reviewId": "ChdDSUhNMG9nS0VJQ0FnSURlX2JXdmhBRRAB"
+    },
+    {
+      "authorName": "Marrik A",
+      "rating": 1,
+      "text": "Inappropriate conversations happening on work hours between certain staff members in front of customers. The place get cleaned maybe once a month judging from the amount of dust and dirt around",
+      "relativeTimeDescription": "5 years ago",
+      "time": "2021-01-09 01:05:32 +00:00",
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSURTaV95UE1REAE"
+    },
+    {
+      "authorName": "Dunning Kruger",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "6 years ago",
+      "time": "2020-05-19 01:23:38 +00:00",
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSURjeVA3cWJnEAE"
+    },
+    {
+      "authorName": "Winter Rose",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "6 years ago",
+      "time": "2020-02-13 17:19:17 +00:00",
+      "reviewId": "ChdDSUhNMG9nS0VJQ0FnSUNzczlMc3lnRRAB"
+    },
+    {
+      "authorName": "Karonhi:io Mohawk",
+      "rating": 4,
+      "text": "A Handy store for Convenience items",
+      "relativeTimeDescription": "7 years ago",
+      "time": "2019-02-04 20:24:15 +00:00",
+      "reviewId": "ChdDSUhNMG9nS0VJQ0FnSUNvLU9MUjNRRRAB"
+    },
+    {
+      "authorName": "Cecilia Poff",
+      "rating": 5,
+      "text": "",
+      "relativeTimeDescription": "8 years ago",
+      "time": "2018-04-13 00:16:59 +00:00",
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSURncHZTV0p3EAE"
     }
   ]
 }
