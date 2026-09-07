@@ -377,6 +377,26 @@ function loadReviews() {
   return readJSON("google-reviews.json", null);
 }
 
+function ensureReviewsSeed() {
+  const seedPath = path.join(__dirname, "seed", "google-reviews.json");
+  if (!fs.existsSync(seedPath)) return;
+  let seed;
+  try {
+    seed = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+  } catch {
+    return;
+  }
+  const current = readJSON("google-reviews.json", null);
+  const curQuotes = current && Array.isArray(current.reviews) ? current.reviews.filter((r) => r.text).length : 0;
+  const seedQuotes = Array.isArray(seed.reviews) ? seed.reviews.filter((r) => r.text).length : 0;
+  const curTotal = (current && current.totalReviews) || 0;
+  const seedTotal = seed.totalReviews || 0;
+  if (!current || (curQuotes < seedQuotes && curTotal <= seedTotal)) {
+    writeJSON("google-reviews.json", seed);
+    console.log(`Seeded Google reviews (${seedQuotes} quotes, ${seedTotal} total)`);
+  }
+}
+
 app.disable("x-powered-by");
 app.use(require("compression")());
 app.use((req, res, next) => {
@@ -794,9 +814,11 @@ function winnersSection(lang = "en") {
 }
 
 function starsHtml(rating) {
+  const n = Number(rating);
+  if (!Number.isFinite(n) || n <= 0) return "";
   let s = "";
   for (let i = 1; i <= 5; i++) {
-    s += i <= Math.round(rating) ? '<span style="color:#f59e0b;">&#9733;</span>' : '<span style="color:#d1d5db;">&#9734;</span>';
+    s += i <= Math.round(n) ? '<span style="color:#f59e0b;">&#9733;</span>' : '<span style="color:#d1d5db;">&#9734;</span>';
   }
   return s;
 }
@@ -826,9 +848,9 @@ function reviewsSection(lang = "en", limit = 5) {
     .map(
       (r) => `
       <div class="card" style="text-align:left;">
-        <div style="margin-bottom:0.5rem;">${starsHtml(r.rating)}</div>
-        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 200))}${(r.text || "").length > 200 ? "..." : ""}"</p>
-        <p style="font-weight:600;font-size:0.9rem;">— ${escapeHtml(r.authorName || "")}</p>
+        ${starsHtml(r.rating) ? `<div style="margin-bottom:0.5rem;">${starsHtml(r.rating)}</div>` : ""}
+        <p style="font-style:italic;margin-bottom:0.75rem;">"${escapeHtml((r.text || "").slice(0, 220))}${(r.text || "").length > 220 ? "..." : ""}"</p>
+        <p style="font-weight:600;font-size:0.9rem;">${escapeHtml(r.authorName || t(lang, "reviews.googleReviewer"))}</p>
         ${r.relativeTimeDescription ? `<p style="font-size:0.8rem;color:var(--text-muted);margin:0.25rem 0 0;">${escapeHtml(r.relativeTimeDescription)}</p>` : ""}
       </div>`,
     )
@@ -1878,6 +1900,7 @@ function scheduleReviewSync() {
   setInterval(run, 12 * 60 * 60 * 1000).unref();
 }
 
+ensureReviewsSeed();
 app.listen(port, () => {
   console.log(`L&M Enterprises Railway server listening on ${port}`);
   scheduleReviewSync();
