@@ -308,6 +308,11 @@ const defaultFaqs = [
     answer:
       "Yes, in store only, to adult customers with ID. We also carry cigar and rolling tobacco categories. We do not sell those items online.",
   },
+  {
+    question: "Are Mohawk Medibles and The Stoned Chef part of the same stop?",
+    answer:
+      "Yes. They are sister businesses at 45 Dundas Street, next to L&M Enterprises at 43 Dundas and SAGO Gas Bar at 39 Dundas. Each has its own hours and Google listing.",
+  },
 ];
 
 module.exports = { defaultCategories, defaultFaqs };

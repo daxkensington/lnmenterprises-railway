@@ -7,6 +7,7 @@ const { seedAdminUsers } = require("./admin/auth");
 const { syncGoogleReviews, PLACE_ID, SAGO_PLACE_ID } = require("./admin/reviews");
 const { t } = require("./translations");
 const { defaultCategories, defaultFaqs } = require("./category-data");
+const { complexBusinesses } = require("./complex-data");
 const googleMapsPlaceUrl = `https://www.google.com/maps/place/?q=place_id:${PLACE_ID}`;
 const sagoMapsPlaceUrl = `https://www.google.com/maps/place/?q=place_id:${SAGO_PLACE_ID}`;
 
@@ -194,10 +195,12 @@ function ensureCategoryCopy() {
 
 function ensureFaqCopy() {
   const stored = readJSON("faqs.json", null);
+  const hasComplex = stored && stored.some((f) => /Mohawk Medibles/i.test(f.question || ""));
   const stale =
     !stored ||
     !stored.length ||
-    stored.some((f) => /separate category pages/i.test(f.question || ""));
+    stored.some((f) => /separate category pages/i.test(f.question || "")) ||
+    !hasComplex;
   if (stale) writeJSON("faqs.json", defaultFaqs);
 }
 function loadFaqs() { return readJSON("faqs.json", defaultFaqs); }
@@ -337,7 +340,7 @@ function pageTemplate({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=12" />
+    <link rel="stylesheet" href="/styles.css?v=13" />
     <meta property="og:locale" content="${lang === "fr" ? "fr_CA" : "en_CA"}" />
     <script type="application/ld+json">${JSON.stringify(Array.isArray(jsonLd) ? jsonLd.filter(Boolean) : jsonLd)}</script>${process.env.UMAMI_WEBSITE_ID ? `
     <script defer src="${process.env.UMAMI_HOST || "https://cloud.umami.is"}/script.js" data-website-id="${escapeHtml(process.env.UMAMI_WEBSITE_ID)}"></script>` : ""}
@@ -379,6 +382,18 @@ function siteJsonLd() {
       { "@type": "City", name: "Deseronto" },
       { "@type": "AdministrativeArea", name: "Tyendinaga Mohawk Territory" },
     ],
+    containedInPlace: {
+      "@type": "Place",
+      name: "Dundas Street businesses, Deseronto",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "39-45 Dundas Street",
+        addressLocality: "Deseronto",
+        addressRegion: "ON",
+        postalCode: "K0K 1X0",
+        addressCountry: "CA",
+      },
+    },
     openingHoursSpecification: {
       "@type": "OpeningHoursSpecification",
       dayOfWeek: [
@@ -532,6 +547,70 @@ function faqSection(lang, faqs) {
     </section>`;
 }
 
+function complexJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Dundas Street businesses in Deseronto",
+    description:
+      "Four locally owned businesses at 39–45 Dundas Street in Deseronto / Tyendinaga Mohawk Territory: SAGO Gas Bar, L&M Enterprises, Mohawk Medibles, and The Stoned Chef.",
+    numberOfItems: complexBusinesses.length,
+    itemListElement: complexBusinesses.map((b, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": b.schemaType,
+        name: b.name,
+        url: b.href.startsWith("http") ? b.href : `${siteUrl}${b.href === "/" ? "/" : b.href}`,
+        telephone: b.telephone,
+        hasMap: b.mapsUrl,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: b.address,
+          addressLocality: "Deseronto",
+          addressRegion: "ON",
+          postalCode: "K0K 1X0",
+          addressCountry: "CA",
+        },
+      },
+    })),
+  };
+}
+
+function complexSection(lang = "en") {
+  const iconFor = {
+    sago: icons.fuel,
+    lnm: icons.shoppingBag,
+    medibles: icons.leaf,
+    stonedchef: icons.store,
+  };
+  const cards = complexBusinesses
+    .map((b) => {
+      const blurb = lang === "fr" ? b.blurbFr : b.blurbEn;
+      const extra = b.external ? ' target="_blank" rel="noopener noreferrer"' : "";
+      return `
+      <a class="card card-link" href="${escapeHtml(b.href)}"${extra}>
+        <div class="icon-circle">${iconFor[b.id] || icons.store}</div>
+        <h3>${escapeHtml(b.name)}</h3>
+        <p>${escapeHtml(b.address)}</p>
+        <p>${escapeHtml(blurb)}</p>
+      </a>`;
+    })
+    .join("");
+  return `
+    <section class="section section-alt" id="complex">
+      <div class="container">
+        <div class="section-header">
+          <p class="kicker" style="color:var(--accent);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-size:0.8rem;">${t(lang, "complex.kicker")}</p>
+          <h2>${t(lang, "complex.title")}</h2>
+          <div class="section-divider"></div>
+          <p>${t(lang, "complex.body")}</p>
+        </div>
+        <div class="complex-grid">${cards}</div>
+      </div>
+    </section>`;
+}
+
 function categoryOfferCards() {
   const iconFor = {
     "gas-station-deseronto": icons.fuel,
@@ -680,6 +759,14 @@ function layout(body, lang = "en") {
         <p class="footer-links">
           ${loadCategories()
             .map((c) => `<a href="/${escapeHtml(c.slug)}">${escapeHtml(c.nav)}</a>`)
+            .join('<span class="sep">&bull;</span>')}
+        </p>
+        <p class="footer-links">
+          ${complexBusinesses
+            .map((b) => {
+              const extra = b.external ? ' target="_blank" rel="noopener noreferrer"' : "";
+              return `<a href="${escapeHtml(b.href)}"${extra}>${escapeHtml(b.name)}</a>`;
+            })
             .join('<span class="sep">&bull;</span>')}
         </p>
         <p class="footer-links">
@@ -1102,6 +1189,7 @@ function homePage(lang = "en") {
       </section>
       ${reviewsSection(lang, 9)}
       ${faqSection(lang, loadFaqs())}
+      ${complexSection(lang)}
       <section class="section" id="location">
         <div class="container">
           <div class="section-header">
@@ -1123,7 +1211,7 @@ function homePage(lang = "en") {
       </section>
     </main>`;
 
-  const jsonLd = [{ ...siteJsonLd(), name: "L&M Enterprises" }, faqJsonLd()];
+  const jsonLd = [{ ...siteJsonLd(), name: "L&M Enterprises" }, faqJsonLd(), complexJsonLd()];
 
   return pageTemplate({
     title: t(lang, "meta.homeTitle"),
@@ -1214,8 +1302,8 @@ function locationPage(lang = "en") {
         <div class="container two-col">
           <div>
             <h2>Why Customers Choose L&amp;M</h2>
-            <p>L&amp;M Enterprises is a gas station and convenience store at 43 Dundas Street in Deseronto, next to SAGO Gas Bar. Tyendinaga drivers stop in daily; Highway 49 travelers use us as a fill-up before Napanee, Belleville, or the 401.</p>
-            <p>Look for the black bear out front. We are open 6am to 10pm every day, with full-service pumps and a stocked convenience store.</p>
+            <p>L&amp;M Enterprises is the convenience store at 43 Dundas Street in Deseronto, in the same complex as SAGO Gas Bar (39 Dundas), Mohawk Medibles, and The Stoned Chef (45 Dundas). Park once for fuel, snacks, cannabis, and food.</p>
+            <p>Look for the black bear out front. We are open 6am to 10pm every day, with full-service pumps next door and a stocked store inside.</p>
             <div class="feature-pills">
               <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> Full-Service Gas</div>
               <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> Convenience Store</div>
@@ -1228,6 +1316,7 @@ function locationPage(lang = "en") {
           </div>
         </div>
       </section>
+      ${complexSection(lang)}
       ${promotionsSection(lang)}
       ${winnersSection(lang)}
       ${reviewsSection(lang, 9)}
@@ -1254,6 +1343,7 @@ function locationPage(lang = "en") {
         { name: "Home", path: "/" },
         { name: "Location", path: "/deseronto-convenience-store-gas-station" },
       ]),
+      complexJsonLd(),
     ],
     lang,
     content: layout(content, lang),

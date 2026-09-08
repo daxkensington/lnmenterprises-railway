@@ -510,6 +510,24 @@ a.card-link {
   color: var(--text-muted);
 }
 
+.complex-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .complex-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .complex-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .icon-circle {
   display: inline-flex;
   align-items: center;
