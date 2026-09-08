@@ -4,10 +4,11 @@ const fs = require("fs");
 const crypto = require("crypto");
 const { readJSON, writeJSON, BLOG_CATEGORIES, formatDrawMonth } = require("./admin/data");
 const { seedAdminUsers } = require("./admin/auth");
-const { syncGoogleReviews, PLACE_ID } = require("./admin/reviews");
+const { syncGoogleReviews, PLACE_ID, SAGO_PLACE_ID } = require("./admin/reviews");
 const { t } = require("./translations");
 const { defaultCategories, defaultFaqs } = require("./category-data");
 const googleMapsPlaceUrl = `https://www.google.com/maps/place/?q=place_id:${PLACE_ID}`;
+const sagoMapsPlaceUrl = `https://www.google.com/maps/place/?q=place_id:${SAGO_PLACE_ID}`;
 
 const app = express();
 const publicDir = path.join(__dirname, "public");
@@ -222,9 +223,12 @@ function loadWinners() {
 function loadReviews() {
   return readJSON("google-reviews.json", null);
 }
+function loadSagoReviews() {
+  return readJSON("sago-reviews.json", null);
+}
 
-function ensureReviewsSeed() {
-  const seedPath = path.join(__dirname, "seed", "google-reviews.json");
+function ensureJsonSeed(filename) {
+  const seedPath = path.join(__dirname, "seed", filename);
   if (!fs.existsSync(seedPath)) return;
   let seed;
   try {
@@ -232,15 +236,20 @@ function ensureReviewsSeed() {
   } catch {
     return;
   }
-  const current = readJSON("google-reviews.json", null);
+  const current = readJSON(filename, null);
   const curQuotes = current && Array.isArray(current.reviews) ? current.reviews.filter((r) => r.text).length : 0;
   const seedQuotes = Array.isArray(seed.reviews) ? seed.reviews.filter((r) => r.text).length : 0;
   const curTotal = (current && current.totalReviews) || 0;
   const seedTotal = seed.totalReviews || 0;
   if (!current || (curQuotes < seedQuotes && curTotal <= seedTotal)) {
-    writeJSON("google-reviews.json", seed);
-    console.log(`Seeded Google reviews (${seedQuotes} quotes, ${seedTotal} total)`);
+    writeJSON(filename, seed);
+    console.log(`Seeded ${filename} (${seedQuotes} quotes, ${seedTotal} total)`);
   }
+}
+
+function ensureReviewsSeed() {
+  ensureJsonSeed("google-reviews.json");
+  ensureJsonSeed("sago-reviews.json");
 }
 
 app.disable("x-powered-by");
@@ -342,12 +351,12 @@ function pageTemplate({
 function siteJsonLd() {
   const data = {
     "@context": "https://schema.org",
-    "@type": ["GasStation", "ConvenienceStore"],
+    "@type": "ConvenienceStore",
     "@id": `${siteUrl}/#business`,
     name: "L&M Enterprises",
     alternateName: "L & M Enterprises",
     description:
-      "Gas station and convenience store in Deseronto, Ontario with full-service fuel next door at SAGO Gas Bar, plus tobacco, vape, and everyday essentials in-store.",
+      "Convenience store in Deseronto, Ontario next door to SAGO Gas Bar, with tobacco, vape, and everyday essentials in-store and full-service fuel at the pumps.",
     url: siteUrl,
     telephone: "+1-613-396-2224",
     image: [`${siteUrl}/og-image.png`, `${siteUrl}/images/store/exterior.jpg`],
@@ -398,8 +407,40 @@ function siteJsonLd() {
         position: i + 1,
       })),
     },
+    department: [
+      {
+        "@type": "GasStation",
+        "@id": `${siteUrl}/gas-station-deseronto#sago`,
+        name: "SAGO Gas Bar",
+        url: `${siteUrl}/gas-station-deseronto`,
+        telephone: "+1-613-396-2224",
+        hasMap: sagoMapsPlaceUrl,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "39 Dundas Street",
+          addressLocality: "Deseronto",
+          addressRegion: "ON",
+          postalCode: "K0K 1X0",
+          addressCountry: "CA",
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: "44.1964764",
+          longitude: "-77.0640774",
+        },
+        sameAs: ["https://maps.google.com/?cid=16154812107228605329"],
+      },
+    ],
   };
   const reviewData = loadReviews();
+  const sago = loadSagoReviews();
+  if (sago && sago.rating && sago.totalReviews && data.department && data.department[0]) {
+    data.department[0].aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: String(sago.rating),
+      reviewCount: String(sago.totalReviews),
+    };
+  }
   if (reviewData && reviewData.rating && reviewData.totalReviews) {
     data.aggregateRating = {
       "@type": "AggregateRating",
@@ -788,17 +829,19 @@ function starsHtml(rating) {
 function reviewsSection(lang = "en", limit = 5, opts = {}) {
   const excerpt = opts.excerpt == null ? 220 : opts.excerpt;
   const allLink = opts.allLink !== false;
-  const reviewData = loadReviews();
+  const reviewData = opts.reviewData || loadReviews();
+  const mapsUrl = opts.mapsUrl || googleMapsPlaceUrl;
+  const heading = opts.title || t(lang, "reviews.title");
   const realReviews = reviewData && Array.isArray(reviewData.reviews) ? reviewData.reviews.filter((r) => r.text) : [];
   const overallRating = reviewData && reviewData.rating ? reviewData.rating : null;
-  const googleCta = `<p style="margin-top:1.25rem;"><a class="btn btn-primary" href="${googleMapsPlaceUrl}" target="_blank" rel="noopener noreferrer">${t(lang, "reviews.googleCta")}</a></p>`;
+  const googleCta = `<p style="margin-top:1.25rem;"><a class="btn btn-primary" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${t(lang, "reviews.googleCta")}</a></p>`;
 
   if (!realReviews.length && !overallRating) {
     return `
     <section class="section section-alt">
       <div class="container">
         <div class="section-header">
-          <h2>${t(lang, "reviews.title")}</h2>
+          <h2>${heading}</h2>
           <div class="section-divider"></div>
           <p>${t(lang, "reviews.seeGoogle")}</p>
           ${googleCta}
@@ -835,7 +878,7 @@ function reviewsSection(lang = "en", limit = 5, opts = {}) {
     <section class="section section-alt">
       <div class="container">
         <div class="section-header">
-          <h2>${t(lang, "reviews.title")}</h2>
+          <h2>${heading}</h2>
           <div class="section-divider"></div>
           ${ratingHeader}
         </div>
@@ -1399,11 +1442,15 @@ function categoryPage(category, lang = "en") {
         'loading="lazy" width="1400" height="900" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);"',
       )
     : "";
-  const prices = category.slug === "gas-station-deseronto" ? gasPriceSection(lang) : "";
-  const cheapGasLink =
-    category.slug === "gas-station-deseronto"
-      ? `<p><a href="/blog/cheapest-gas-prices-deseronto-tyendinaga-near-401">${t(lang, "category.cheapGasGuide")}</a></p>`
-      : "";
+  const isGas = category.slug === "gas-station-deseronto";
+  const prices = isGas ? gasPriceSection(lang) : "";
+  const cheapGasLink = isGas
+    ? `<p><a href="/blog/cheapest-gas-prices-deseronto-tyendinaga-near-401">${t(lang, "category.cheapGasGuide")}</a></p>`
+    : "";
+  const mapsUrl = isGas ? sagoMapsPlaceUrl : googleMapsPlaceUrl;
+  const reviewOpts = isGas
+    ? { reviewData: loadSagoReviews(), mapsUrl: sagoMapsPlaceUrl, title: t(lang, "reviews.sagoTitle"), allLink: false }
+    : {};
 
   const content = `
     <section class="hero">
@@ -1443,7 +1490,7 @@ function categoryPage(category, lang = "en") {
         </div>
       </section>
       ${faqSection(lang, category.faqs || [])}
-      ${reviewsSection(lang, 3)}
+      ${reviewsSection(lang, isGas ? 6 : 3, reviewOpts)}
       <section class="section">
         <div class="container two-col">
           <div>
@@ -1452,10 +1499,10 @@ function categoryPage(category, lang = "en") {
           </div>
           <div class="info-card">
             <h2>${t(lang, "location.visitUs")}</h2>
-            <p><strong>43 Dundas Street</strong><br>Deseronto, ON K0K 1X0</p>
+            <p><strong>${isGas ? "39 Dundas Street (SAGO pumps)" : "43 Dundas Street"}</strong><br>Deseronto, ON K0K 1X0</p>
             <p>Open daily 6:00 AM &ndash; 10:00 PM</p>
             <p><a href="tel:+16133962224">613-396-2224</a></p>
-            <p style="margin-top:1rem;"><a class="btn btn-primary" href="${googleMapsPlaceUrl}" target="_blank" rel="noopener noreferrer">${icons.mapPin} ${t(lang, "location.directions")}</a></p>
+            <p style="margin-top:1rem;"><a class="btn btn-primary" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${icons.mapPin} ${t(lang, "location.directions")}</a></p>
           </div>
         </div>
       </section>
@@ -1470,9 +1517,22 @@ function categoryPage(category, lang = "en") {
       {
         ...siteJsonLd(),
         "@type": categorySchemaType(category.slug),
-        name: `L&M Enterprises - ${category.title}`,
+        name: isGas ? "SAGO Gas Bar" : `L&M Enterprises - ${category.title}`,
         description: category.description,
         url: `${siteUrl}/${category.slug}`,
+        hasMap: mapsUrl,
+        ...(isGas
+          ? {
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "39 Dundas Street",
+                addressLocality: "Deseronto",
+                addressRegion: "ON",
+                postalCode: "K0K 1X0",
+                addressCountry: "CA",
+              },
+            }
+          : {}),
       },
       breadcrumbJsonLd([
         { name: "Home", path: "/" },

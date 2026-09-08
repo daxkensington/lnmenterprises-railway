@@ -2,6 +2,8 @@ const { readJSON, writeJSON } = require("./data");
 
 const PLACE_ID = "ChIJ6wH13dDW14kRdfm-TgSpygU";
 const CID = "417331751451294069";
+const SAGO_PLACE_ID = "ChIJh8jI5dDW14kRkWuKCAVsMeA";
+const SAGO_CID = "16154812107228605329";
 
 function reviewKey(r) {
   const author = String(r.authorName || "")
@@ -37,19 +39,20 @@ function mergeReviewLists(existing, incoming) {
   return Array.from(map.values());
 }
 
-function saveReviews({ reviews, rating, totalReviews, source }) {
-  const existing = readJSON("google-reviews.json", null) || {};
+function saveReviews(filename, { placeId, cid, name, reviews, rating, totalReviews, source }) {
+  const existing = readJSON(filename, null) || {};
   const merged = source === "dataforseo" ? reviews : mergeReviewLists(existing.reviews, reviews);
   const result = {
-    placeId: PLACE_ID,
-    cid: existing.cid || CID,
+    placeId,
+    cid: existing.cid || cid,
+    name: name || existing.name || null,
     lastSyncedAt: new Date().toISOString(),
     source,
     rating: rating != null ? rating : existing.rating || null,
     totalReviews: totalReviews || existing.totalReviews || merged.length,
     reviews: merged,
   };
-  writeJSON("google-reviews.json", result);
+  writeJSON(filename, result);
   return result;
 }
 
@@ -65,11 +68,11 @@ async function fetchJson(url, options = {}, timeoutMs = 15000) {
   }
 }
 
-async function fetchPlacesReviews() {
+async function fetchPlacesReviews(placeId) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) throw new Error("GOOGLE_PLACES_API_KEY not configured");
 
-  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${apiKey}`;
+  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total&key=${apiKey}`;
   const { data } = await fetchJson(url);
   if (data.status !== "OK") throw new Error(`Google API: ${data.status}`);
   if (!data.result) throw new Error("Google API returned no result data");
@@ -88,7 +91,7 @@ async function fetchPlacesReviews() {
   };
 }
 
-async function fetchDataForSeoReviews() {
+async function fetchDataForSeoReviews(placeId) {
   const login = process.env.DATAFORSEO_LOGIN;
   const password = process.env.DATAFORSEO_PASSWORD;
   if (!login || !password) return null;
@@ -107,7 +110,7 @@ async function fetchDataForSeoReviews() {
       headers,
       body: JSON.stringify([
         {
-          place_id: PLACE_ID,
+          place_id: placeId,
           location_coordinate: "44.196220,-77.064132,200",
           language_code: "en",
           depth: 40,
@@ -153,15 +156,26 @@ async function fetchDataForSeoReviews() {
   throw new Error("DataForSEO reviews timed out");
 }
 
-async function syncGoogleReviews() {
+async function syncListing(filename, placeId, cid, name) {
   try {
-    const full = await fetchDataForSeoReviews();
-    if (full) return saveReviews({ ...full, source: "dataforseo" });
+    const full = await fetchDataForSeoReviews(placeId);
+    if (full) return saveReviews(filename, { ...full, placeId, cid, name, source: "dataforseo" });
   } catch (err) {
-    console.error("DataForSEO reviews failed, falling back to Places:", err.message);
+    console.error(`DataForSEO reviews failed for ${name}, falling back to Places:`, err.message);
   }
-  const places = await fetchPlacesReviews();
-  return saveReviews({ ...places, source: "places" });
+  const places = await fetchPlacesReviews(placeId);
+  return saveReviews(filename, { ...places, placeId, cid, name, source: "places" });
 }
 
-module.exports = { syncGoogleReviews, PLACE_ID };
+async function syncGoogleReviews() {
+  const [lnm] = await Promise.all([
+    syncListing("google-reviews.json", PLACE_ID, CID, "L & M Enterprises"),
+    syncListing("sago-reviews.json", SAGO_PLACE_ID, SAGO_CID, "Sago Gas Bar").catch((err) => {
+      console.error("SAGO reviews skipped:", err.message);
+      return null;
+    }),
+  ]);
+  return lnm;
+}
+
+module.exports = { syncGoogleReviews, PLACE_ID, SAGO_PLACE_ID, SAGO_CID };
