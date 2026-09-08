@@ -467,6 +467,29 @@ img {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
+a.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+  opacity: 0.9;
+}
+
+.breadcrumbs a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .icon-circle {
   display: inline-flex;
   align-items: center;
@@ -1036,7 +1059,7 @@ img {
   background-repeat: no-repeat;
 }
 .hero--photo h1 {
-  font-size: clamp(2.6rem, 9vw, 6.5rem);
+  font-size: clamp(2.2rem, 7vw, 4.5rem);
   font-weight: 900;
   letter-spacing: -0.04em;
   text-transform: uppercase;

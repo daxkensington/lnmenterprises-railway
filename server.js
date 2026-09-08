@@ -21,19 +21,19 @@ const defaultCategories = [
     nav: "Gas Station",
     searchTitle: "Gas Station in Deseronto, ON",
     description:
-      "Visit L&M Enterprises for fuel in Deseronto with full-service convenience, easy access, and a reliable stop for local drivers and travelers.",
+      "Full-service gas station in Deseronto at 43 Dundas Street. Regular, premium, and diesel next door at SAGO Gas Bar, plus a convenience store for Highway 49 and Tyendinaga drivers.",
     intro:
-      "L&M Enterprises is a local stop for drivers looking for fuel, fast service, and a convenient location near Tyendinaga and Deseronto.",
+      "L&M Enterprises is the gas station and convenience stop at 43 Dundas Street in Deseronto, beside SAGO Gas Bar. Pull in for fuel, snacks, and a full-service pump.",
     localAngle:
-      "This page is designed for people searching for a gas station in Deseronto or a nearby fuel stop before heading through Tyendinaga, Napanee, or Belleville routes.",
+      "We sit on Dundas Street / Highway 49 in Deseronto — a practical fill-up before Napanee, Belleville, or the 401, and a daily stop for Tyendinaga drivers.",
     details: [
-      "Convenient fuel stop for local traffic and through-travelers",
-      "Full-service convenience inside the store",
-      "Easy location for quick stops before work, school, or road trips",
+      "Regular, premium, and diesel next door at SAGO Gas Bar",
+      "Full-service pumping — staff will fill the tank",
+      "Convenience store, tobacco, and vapes in the same stop",
     ],
-    extraHeading: "Useful for local drivers and passing traffic",
+    extraHeading: "A Deseronto gas station on Highway 49",
     extraCopy:
-      "A lot of local searches are not looking for a national chain. They are looking for the nearest practical stop. This page helps L&M Enterprises show up for that kind of nearby fuel and convenience intent.",
+      "L&M Enterprises and SAGO Gas Bar share the Dundas Street strip in Deseronto. Come for guaranteed lower fuel prices, stay for snacks, drinks, and a friendly full-service pump. Look for the black bear out front.",
     keywords: [
       "gas station Deseronto",
       "gas station near Tyendinaga",
@@ -47,19 +47,19 @@ const defaultCategories = [
     nav: "Convenience Store",
     searchTitle: "Convenience Store in Deseronto, ON",
     description:
-      "L&M Enterprises is a convenience store in Deseronto offering snacks, drinks, everyday essentials, and a quick in-and-out local stop.",
+      "Convenience store in Deseronto at 43 Dundas Street. Snacks, drinks, tobacco, vapes, and a gas station next door at SAGO Gas Bar. Open daily 6am–10pm.",
     intro:
-      "Our store is designed for everyday convenience, whether you are grabbing a drink, a snack, or essentials while passing through town.",
+      "Grab snacks, drinks, and everyday essentials at L&M Enterprises in Deseronto — the convenience store beside SAGO Gas Bar on Dundas Street.",
     localAngle:
-      "This page supports searches from people looking for a convenience store in Deseronto, near Tyendinaga, or along their normal local route.",
+      "A quick in-and-out stop for Tyendinaga, Deseronto, and Highway 49 traffic, with fuel pumps next door.",
     details: [
-      "Everyday convenience items for local customers",
-      "Quick-stop shopping with easy access",
-      "A practical stop for snacks, drinks, and essentials",
+      "Snacks, drinks, and everyday convenience items",
+      "Tobacco, vape, and cigar categories in-store",
+      "Full-service gas next door at SAGO Gas Bar",
     ],
-    extraHeading: "Built around quick local stops",
+    extraHeading: "Convenience store next to the pumps",
     extraCopy:
-      "Customers searching for a convenience store nearby are usually looking for speed and simplicity. This page helps surface L&M Enterprises for those everyday local searches.",
+      "Park once. Fill up at SAGO, then walk into L&M for snacks, drinks, and adult in-store categories. We are open daily from 6am to 10pm at 43 Dundas Street.",
     keywords: [
       "convenience store Deseronto",
       "store near Tyendinaga",
@@ -77,7 +77,7 @@ const defaultCategories = [
     intro:
       "We help local customers find the tobacco categories they are looking for in-store, with a focus on convenience and availability.",
     localAngle:
-      "This page is aimed at local adult customers searching for tobacco-related categories in Deseronto and nearby communities without listing individual product inventory online.",
+      "Tobacco categories are sold in-store only at 43 Dundas Street in Deseronto, for adult customers from Tyendinaga and nearby communities.",
     details: [
       "Cigarette, cigar, and rolling tobacco categories",
       "In-store availability information for adult customers",
@@ -85,7 +85,7 @@ const defaultCategories = [
     ],
     extraHeading: "Category-focused instead of product-by-product",
     extraCopy:
-      "Because the site is not operating as ecommerce, this page focuses on category discovery and store intent instead of individual product listings or online checkout.",
+      "Adult customers in Deseronto and Tyendinaga can find cigarette, cigar, and rolling tobacco categories in-store. We do not sell tobacco online — visit 43 Dundas Street.",
     keywords: [
       "tobacco Deseronto",
       "tobacco shop near Tyendinaga",
@@ -103,7 +103,7 @@ const defaultCategories = [
     intro:
       "If you are looking for vape categories from a local convenience-focused shop, L&M Enterprises serves customers in Deseronto and nearby communities.",
     localAngle:
-      "This page is tailored to adult local-intent searches around vape categories in Deseronto and nearby areas where customers want an in-person option.",
+      "Vape categories are available in person at L&M Enterprises in Deseronto for adult customers who want a local shop instead of a longer drive.",
     details: [
       "Vape category availability for adult customers",
       "Convenient local stop instead of a longer drive",
@@ -111,7 +111,7 @@ const defaultCategories = [
     ],
     extraHeading: "Local visibility without ecommerce",
     extraCopy:
-      "The purpose of this page is to let nearby customers discover that the store carries this category without turning the site into an online product catalog.",
+      "Adult customers can shop vape categories in person at L&M Enterprises in Deseronto. Stock changes, so call or stop in at 43 Dundas Street.",
     keywords: [
       "vapes Deseronto",
       "vape shop near Tyendinaga",
@@ -129,7 +129,7 @@ const defaultCategories = [
     intro:
       "Our store includes cigar-related categories for customers who want a nearby in-person option in the Deseronto area.",
     localAngle:
-      "This page supports local searches from adult customers trying to find cigar-related categories in Deseronto or near Tyendinaga.",
+      "Adult customers looking for cigar categories in Deseronto or near Tyendinaga can shop in person at L&M Enterprises.",
     details: [
       "Local cigar category availability",
       "Convenient access for nearby customers",
@@ -137,7 +137,7 @@ const defaultCategories = [
     ],
     extraHeading: "A nearby in-person option",
     extraCopy:
-      "Many local searches are simply trying to confirm whether a nearby store is worth visiting. This page helps answer that intent with place-based, category-based content.",
+      "Cigar categories are available in-store for adult customers at L&M Enterprises, 43 Dundas Street in Deseronto.",
     keywords: [
       "cigars Deseronto",
       "cigar categories Deseronto",
@@ -155,7 +155,7 @@ const defaultCategories = [
     intro:
       "Customers in Deseronto and the surrounding area can visit us for rolling tobacco categories and other convenience-store needs.",
     localAngle:
-      "This page is meant to capture local searches for rolling tobacco in Deseronto and nearby communities while keeping the site informational rather than transactional.",
+      "Rolling tobacco is an in-store category at L&M Enterprises in Deseronto — not sold online.",
     details: [
       "Rolling tobacco category availability",
       "Easy local access for repeat customers",
@@ -163,7 +163,7 @@ const defaultCategories = [
     ],
     extraHeading: "Store-visit intent matters here",
     extraCopy:
-      "This page is built for people who are searching locally and want a nearby place to visit, not a mail-order or ecommerce experience.",
+      "Rolling tobacco is sold in-store only at L&M Enterprises in Deseronto. Visit 43 Dundas Street, open daily 6am–10pm.",
     keywords: [
       "rolling tobacco Deseronto",
       "tobacco near Tyendinaga",
@@ -353,6 +353,27 @@ if (!readJSON("promotions.json")) writeJSON("promotions.json", []);
 if (!readJSON("winners.json")) writeJSON("winners.json", []);
 
 function loadCategories() { return readJSON("categories.json", defaultCategories); }
+
+function ensureCategoryCopy() {
+  const stored = readJSON("categories.json", null);
+  if (!stored) {
+    writeJSON("categories.json", defaultCategories);
+    return;
+  }
+  const freshBySlug = Object.fromEntries(defaultCategories.map((c) => [c.slug, c]));
+  const staleRe =
+    /this page (is designed|supports searches|helps l&m|is aimed|is tailored|is meant|is built for people)/i;
+  let changed = false;
+  const next = stored.map((c) => {
+    const fresh = freshBySlug[c.slug];
+    if (!fresh) return c;
+    const blob = `${c.localAngle || ""} ${c.extraCopy || ""} ${c.description || ""}`;
+    if (!staleRe.test(blob)) return c;
+    changed = true;
+    return { ...c, ...fresh, slug: c.slug };
+  });
+  if (changed) writeJSON("categories.json", next);
+}
 function loadFaqs() { return readJSON("faqs.json", defaultFaqs); }
 function loadSiteContent() {
   return readJSON("site-content.json", {
@@ -482,7 +503,8 @@ function pageTemplate({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=9" />
+    <link rel="stylesheet" href="/styles.css?v=11" />
+    <meta property="og:locale" content="${lang === "fr" ? "fr_CA" : "en_CA"}" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${process.env.UMAMI_WEBSITE_ID ? `
     <script defer src="${process.env.UMAMI_HOST || "https://cloud.umami.is"}/script.js" data-website-id="${escapeHtml(process.env.UMAMI_WEBSITE_ID)}"></script>` : ""}
   </head>
@@ -495,14 +517,17 @@ function pageTemplate({
 function siteJsonLd() {
   const data = {
     "@context": "https://schema.org",
-    "@type": "ConvenienceStore",
+    "@type": ["GasStation", "ConvenienceStore"],
     "@id": `${siteUrl}/#business`,
     name: "L&M Enterprises",
+    alternateName: "L & M Enterprises",
     description:
-      "Local gas station and convenience store in Deseronto, Ontario with tobacco, vape, cigar, and rolling tobacco categories available in-store.",
+      "Gas station and convenience store in Deseronto, Ontario with full-service fuel next door at SAGO Gas Bar, plus tobacco, vape, and everyday essentials in-store.",
     url: siteUrl,
     telephone: "+1-613-396-2224",
-    image: `${siteUrl}/og-image.png`,
+    image: [`${siteUrl}/og-image.png`, `${siteUrl}/images/store/exterior.jpg`],
+    hasMap: googleMapsPlaceUrl,
+    priceRange: "$$",
     address: {
       "@type": "PostalAddress",
       streetAddress: "43 Dundas Street",
@@ -516,6 +541,10 @@ function siteJsonLd() {
       latitude: "44.196220",
       longitude: "-77.064132",
     },
+    areaServed: [
+      { "@type": "City", name: "Deseronto" },
+      { "@type": "AdministrativeArea", name: "Tyendinaga Mohawk Territory" },
+    ],
     openingHoursSpecification: {
       "@type": "OpeningHoursSpecification",
       dayOfWeek: [
@@ -530,7 +559,10 @@ function siteJsonLd() {
       opens: "06:00",
       closes: "22:00",
     },
-    sameAs: ["https://www.facebook.com/LandMEnterprises"],
+    sameAs: [
+      "https://www.facebook.com/LandMEnterprises",
+      "https://maps.google.com/?cid=417331751451294069",
+    ],
   };
   const reviewData = loadReviews();
   if (reviewData && reviewData.rating && reviewData.totalReviews) {
@@ -541,6 +573,40 @@ function siteJsonLd() {
     };
   }
   return data;
+}
+
+function storePicture(basename, alt, extra = "") {
+  return `<picture>
+    <source srcset="/images/store/${basename}.webp" type="image/webp" />
+    <img src="/images/store/${basename}.jpg" alt="${escapeHtml(alt)}" ${extra} />
+  </picture>`;
+}
+
+function breadcrumbJsonLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: `${siteUrl}${it.path}`,
+    })),
+  };
+}
+
+function categorySchemaType(slug) {
+  if (slug === "gas-station-deseronto") return "GasStation";
+  if (slug === "convenience-store-deseronto") return "ConvenienceStore";
+  return "Store";
+}
+
+function breadcrumbsNav(lang, current) {
+  return `<nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/">${t(lang, "nav.home")}</a>
+    <span aria-hidden="true">/</span>
+    <span>${escapeHtml(current)}</span>
+  </nav>`;
 }
 
 function faqJsonLd() {
@@ -1020,7 +1086,7 @@ function homePage(lang = "en") {
     .map(
       (g) => `
       <figure class="gallery-item${g.wide ? " gallery-item--wide" : ""}">
-        <img src="${g.src}" alt="${escapeHtml(g.alt)}" loading="lazy" width="1400" height="900" />
+        ${storePicture(g.src.replace("/images/store/", "").replace(".jpg", ""), g.alt, 'loading="lazy" width="1400" height="900"')}
         <figcaption><strong>${escapeHtml(g.title)}</strong><span>${escapeHtml(g.caption)}</span></figcaption>
       </figure>`,
     )
@@ -1030,7 +1096,7 @@ function homePage(lang = "en") {
     <section class="hero hero--photo" style="background-image:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.55)), image-set(url('/images/store/hero.webp') type('image/webp'), url('/images/store/hero.jpg') type('image/jpeg'));">
       <div class="hero-content">
         <div class="hero-badge">${t(lang, "hero.partner")}</div>
-        <h1>L&amp;M ENTERPRISES</h1>
+        <h1>${t(lang, "hero.h1")}</h1>
         <p class="lead">${t(lang, "hero.homeSubtitle")}</p>
         <p class="hero-serving">${t(lang, "hero.serving")}</p>
         <div class="hero-buttons">
@@ -1065,6 +1131,7 @@ function homePage(lang = "en") {
             <h2>${t(lang, "about.title")}</h2>
             <p>${t(lang, "about.p1")}</p>
             <p>${t(lang, "about.p2")}</p>
+            <p>${t(lang, "about.p3")}</p>
             <div class="feature-pills">
               <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> ${t(lang, "pill.gas")}</div>
               <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> ${t(lang, "pill.store")}</div>
@@ -1073,10 +1140,7 @@ function homePage(lang = "en") {
             </div>
           </div>
           <div>
-            <picture>
-              <source srcset="/images/store/interior.webp" type="image/webp" />
-              <img src="/images/store/interior.jpg" alt="${escapeHtml(t(lang, "about.photoAlt"))}" width="1600" height="1200" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
-            </picture>
+            ${storePicture("interior", t(lang, "about.photoAlt"), 'width="1600" height="1200" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);"')}
           </div>
         </div>
       </section>
@@ -1087,21 +1151,21 @@ function homePage(lang = "en") {
             <div class="section-divider"></div>
           </div>
           <div class="card-grid">
-            <article class="card">
+            <a class="card card-link" href="/gas-station-deseronto">
               <div class="icon-circle">${icons.fuel}</div>
               <h3>${t(lang, "offer.gas.title")}</h3>
               <p>${t(lang, "offer.gas.body")}</p>
-            </article>
-            <article class="card">
-              <div class="icon-circle">${icons.leaf}</div>
-              <h3>${t(lang, "offer.tobacco.title")}</h3>
-              <p>${t(lang, "offer.tobacco.body")}</p>
-            </article>
-            <article class="card">
+            </a>
+            <a class="card card-link" href="/convenience-store-deseronto">
               <div class="icon-circle">${icons.shoppingBag}</div>
               <h3>${t(lang, "offer.store.title")}</h3>
               <p>${t(lang, "offer.store.body")}</p>
-            </article>
+            </a>
+            <a class="card card-link" href="/tobacco-deseronto">
+              <div class="icon-circle">${icons.leaf}</div>
+              <h3>${t(lang, "offer.tobacco.title")}</h3>
+              <p>${t(lang, "offer.tobacco.body")}</p>
+            </a>
           </div>
         </div>
       </section>
@@ -1130,7 +1194,7 @@ function homePage(lang = "en") {
               <p><strong>43 Dundas Street</strong><br>Tyendinaga Mohawk Territory<br>Deseronto, ON K0K 1X0</p>
               <p style="margin-top:0.75rem;"><a href="tel:${escapeHtml(sc.phone)}">${escapeHtml(sc.phone)}</a></p>
               <p>${escapeHtml(sc.hoursNote)} ${escapeHtml(sc.hours)}</p>
-              <p style="margin-top:1rem;"><a class="btn btn-primary" href="https://www.google.com/maps/search/?api=1&query=43+Dundas+St+Deseronto+ON+K0K+1X0" target="_blank" rel="noopener noreferrer">${t(lang, "location.directions")}</a></p>
+              <p style="margin-top:1rem;"><a class="btn btn-primary" href="${googleMapsPlaceUrl}" target="_blank" rel="noopener noreferrer">${t(lang, "location.directions")}</a></p>
             </div>
             <iframe class="map-frame" title="L&amp;M Enterprises Location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2863.5!2d-77.0637543!3d44.1965351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d7d6d0ddf501eb%3A0x5caa9044ebef975!2sL%20%26%20M%20Enterprises!5e0!3m2!1sen!2sca" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
           </div>
@@ -1138,12 +1202,11 @@ function homePage(lang = "en") {
       </section>
     </main>`;
 
-  const jsonLd = { ...siteJsonLd(), "@type": "GasStation", name: "L&M Enterprises" };
+  const jsonLd = { ...siteJsonLd(), name: "L&M Enterprises" };
 
   return pageTemplate({
-    title: "L&M Enterprises | Gas Station & Convenience Store in Deseronto",
-    description:
-      "L&M Enterprises offers guaranteed lower gas prices, full-service convenience, and quality tobacco products in Deseronto, Ontario. Partner with SAGO Gas Bar. Open 6am-10pm daily.",
+    title: t(lang, "meta.homeTitle"),
+    description: t(lang, "meta.homeDescription"),
     canonicalPath: "/",
     keywords: [
       "gas station Deseronto",
@@ -1208,21 +1271,21 @@ function locationPage(lang = "en") {
             <div class="section-divider"></div>
           </div>
           <div class="card-grid">
-            <article class="card">
+            <a class="card card-link" href="/gas-station-deseronto">
               <div class="icon-circle">${icons.fuel}</div>
               <h3>Full-Service Gas</h3>
               <p>Partner with SAGO Gas Bar next door for guaranteed lower prices on regular, premium, and diesel fuel.</p>
-            </article>
-            <article class="card">
+            </a>
+            <a class="card card-link" href="/convenience-store-deseronto">
               <div class="icon-circle">${icons.shoppingBag}</div>
               <h3>Convenience Store</h3>
               <p>Snacks, beverages, and everyday essentials for your journey. Friendly staff ready to help.</p>
-            </article>
-            <article class="card">
+            </a>
+            <a class="card card-link" href="/tobacco-deseronto">
               <div class="icon-circle">${icons.tag}</div>
               <h3>Product Categories</h3>
               <p>Tobacco, vape, cigar, and rolling tobacco categories available in-store for adult customers.</p>
-            </article>
+            </a>
           </div>
         </div>
       </section>
@@ -1230,8 +1293,8 @@ function locationPage(lang = "en") {
         <div class="container two-col">
           <div>
             <h2>Why Customers Choose L&amp;M</h2>
-            <p>Many customers search for a place first and a category second. L&amp;M Enterprises serves people looking for a gas station in Deseronto, a convenience store near Tyendinaga, or a nearby in-person stop.</p>
-            <p>Instead of acting like ecommerce, we focus on helping nearby customers understand where the store is, what we carry, and why we are a practical stop in the area.</p>
+            <p>L&amp;M Enterprises is a gas station and convenience store at 43 Dundas Street in Deseronto, next to SAGO Gas Bar. Tyendinaga drivers stop in daily; Highway 49 travelers use us as a fill-up before Napanee, Belleville, or the 401.</p>
+            <p>Look for the black bear out front. We are open 6am to 10pm every day, with full-service pumps and a stocked convenience store.</p>
             <div class="feature-pills">
               <div class="feature-pill"><span class="pill-icon">${icons.fuel}</span> Full-Service Gas</div>
               <div class="feature-pill"><span class="pill-icon">${icons.shoppingBag}</span> Convenience Store</div>
@@ -1240,7 +1303,7 @@ function locationPage(lang = "en") {
             </div>
           </div>
           <div>
-            <img src="/images/store/hero.jpg" alt="L&amp;M Enterprises storefront in Deseronto" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);" />
+            ${storePicture("hero", "L&M Enterprises storefront in Deseronto", 'width="1920" height="1080" style="width:100%;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);"')}
           </div>
         </div>
       </section>
@@ -1263,10 +1326,13 @@ function locationPage(lang = "en") {
     jsonLd: [
       {
         ...siteJsonLd(),
-        "@type": "ConvenienceStore",
         name: "L&M Enterprises Deseronto",
         url: `${siteUrl}/deseronto-convenience-store-gas-station`,
       },
+      breadcrumbJsonLd([
+        { name: "Home", path: "/" },
+        { name: "Location", path: "/deseronto-convenience-store-gas-station" },
+      ]),
     ],
     lang,
     content: layout(content, lang),
@@ -1281,6 +1347,7 @@ function reviewsPage(lang = "en") {
   const content = `
     <section class="hero">
       <div class="hero-content">
+        ${breadcrumbsNav(lang, t(lang, "nav.reviews"))}
         <div class="hero-badge">${t(lang, "nav.reviews")}</div>
         <h1>${t(lang, "reviews.pageTitle")}</h1>
         <p class="lead">${t(lang, "reviews.pageSubtitle")}</p>
@@ -1299,7 +1366,13 @@ function reviewsPage(lang = "en") {
       "Deseronto gas station reviews",
       "Google reviews Deseronto",
     ],
-    jsonLd: siteJsonLd(),
+    jsonLd: [
+      siteJsonLd(),
+      breadcrumbJsonLd([
+        { name: "Home", path: "/" },
+        { name: t(lang, "nav.reviews"), path: "/reviews" },
+      ]),
+    ],
     lang,
     content: layout(content, lang),
   });
@@ -1309,12 +1382,13 @@ function contactPage(lang = "en") {
   const content = `
     <section class="hero">
       <div class="hero-content">
+        ${breadcrumbsNav(lang, t(lang, "nav.contact"))}
         <div class="hero-badge">${t(lang, "contact.title")}</div>
         <h1>Visit, Call, or Get Directions</h1>
         <p class="lead">Find L&amp;M Enterprises at 43 Dundas Street in Deseronto. We are open daily from 6am to 10pm.</p>
         <div class="hero-buttons">
           <a class="btn btn-primary" href="tel:+16133962224">${icons.phone} Call The Store</a>
-          <a class="btn btn-secondary" href="https://maps.google.com/?q=43+Dundas+Street+Deseronto+ON+K0K+1X0" rel="noreferrer">${icons.mapPin} Open In Maps</a>
+          <a class="btn btn-secondary" href="${googleMapsPlaceUrl}" rel="noreferrer">${icons.mapPin} Open In Maps</a>
         </div>
       </div>
     </section>
@@ -1407,6 +1481,10 @@ function contactPage(lang = "en") {
         "@type": "ContactPage",
         url: `${siteUrl}/contact-directions`,
       },
+      breadcrumbJsonLd([
+        { name: "Home", path: "/" },
+        { name: t(lang, "nav.contact"), path: "/contact-directions" },
+      ]),
     ],
     lang,
     content: layout(content, lang),
@@ -1437,6 +1515,7 @@ function categoryPage(category, lang = "en") {
   const content = `
     <section class="hero">
       <div class="hero-content">
+        ${breadcrumbsNav(lang, category.nav)}
         <div class="hero-badge">${escapeHtml(category.nav)}</div>
         <h1>${escapeHtml(category.searchTitle)}</h1>
         <p class="lead">${escapeHtml(category.intro)}</p>
@@ -1450,7 +1529,7 @@ function categoryPage(category, lang = "en") {
       <section class="section">
         <div class="container">
           <div class="section-header">
-            <h2>About This Category</h2>
+            <h2>${escapeHtml(category.title)}</h2>
             <div class="section-divider"></div>
             <p>${escapeHtml(category.description)}</p>
           </div>
@@ -1489,13 +1568,19 @@ function categoryPage(category, lang = "en") {
     description: category.description,
     canonicalPath: `/${category.slug}`,
     keywords: category.keywords,
-    jsonLd: [{
-      ...siteJsonLd(),
-      "@type": "Store",
-      name: `L&M Enterprises - ${category.title}`,
-      description: category.description,
-      url: `${siteUrl}/${category.slug}`,
-    }],
+    jsonLd: [
+      {
+        ...siteJsonLd(),
+        "@type": categorySchemaType(category.slug),
+        name: `L&M Enterprises - ${category.title}`,
+        description: category.description,
+        url: `${siteUrl}/${category.slug}`,
+      },
+      breadcrumbJsonLd([
+        { name: "Home", path: "/" },
+        { name: category.nav, path: `/${category.slug}` },
+      ]),
+    ],
     lang,
     content: layout(content, lang),
   });
@@ -1882,20 +1967,26 @@ app.get("/sitemap.xml", (_req, res) => {
   const cats = loadCategories();
   const posts = readJSON("blog-posts.json", []).filter((p) => p.published);
 
+  const today = new Date().toISOString().slice(0, 10);
   const urls = [
-    { loc: "/", priority: "1.0", changefreq: "weekly" },
-    { loc: "/deseronto-convenience-store-gas-station", priority: "0.9", changefreq: "weekly" },
-    { loc: "/contact-directions", priority: "0.8", changefreq: "monthly" },
-    { loc: "/reviews", priority: "0.8", changefreq: "weekly" },
-    { loc: "/blog", priority: "0.8", changefreq: "daily" },
+    { loc: "/", priority: "1.0", changefreq: "weekly", lastmod: today },
+    { loc: "/deseronto-convenience-store-gas-station", priority: "0.9", changefreq: "weekly", lastmod: today },
+    { loc: "/contact-directions", priority: "0.8", changefreq: "monthly", lastmod: today },
+    { loc: "/reviews", priority: "0.8", changefreq: "weekly", lastmod: today },
+    { loc: "/blog", priority: "0.8", changefreq: "daily", lastmod: today },
   ];
 
   for (const cat of cats) {
-    urls.push({ loc: `/${cat.slug}`, priority: "0.7", changefreq: "monthly" });
+    urls.push({ loc: `/${cat.slug}`, priority: "0.7", changefreq: "monthly", lastmod: today });
   }
 
   for (const post of posts) {
-    urls.push({ loc: `/blog/${post.slug}`, priority: "0.6", changefreq: "monthly" });
+    urls.push({
+      loc: `/blog/${post.slug}`,
+      priority: "0.6",
+      changefreq: "monthly",
+      lastmod: post.date || today,
+    });
   }
 
   const urlEntries = urls
@@ -1903,6 +1994,7 @@ app.get("/sitemap.xml", (_req, res) => {
       (u) => `
   <url>
     <loc>${escapeXml(siteUrl + u.loc)}</loc>
+    <lastmod>${escapeXml(u.lastmod)}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
   </url>`,
@@ -1950,6 +2042,7 @@ function scheduleReviewSync() {
 }
 
 ensureReviewsSeed();
+ensureCategoryCopy();
 app.listen(port, () => {
   console.log(`L&M Enterprises Railway server listening on ${port}`);
   scheduleReviewSync();

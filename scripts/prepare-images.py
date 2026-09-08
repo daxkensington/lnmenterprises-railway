@@ -24,7 +24,12 @@ def compress_jpegs():
                 ratio = max_w / im.width
                 im = im.resize((max_w, int(im.height * ratio)), Image.Resampling.LANCZOS)
             im.save(path, "JPEG", quality=JPEG_QUALITY, optimize=True, progressive=True)
-            print(f"compressed {path.name}: {path.stat().st_size // 1024} KB ({im.size[0]}x{im.size[1]})")
+            webp = path.with_suffix(".webp")
+            im.save(webp, "WEBP", quality=78, method=6)
+            print(
+                f"compressed {path.name}: {path.stat().st_size // 1024} KB "
+                f"/ {webp.name} {webp.stat().st_size // 1024} KB ({im.size[0]}x{im.size[1]})"
+            )
 
 
 def font(size, bold=True):
